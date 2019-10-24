@@ -1,0 +1,13 @@
+{
+  "onboardingConfig": {
+    "deviceOnboardingId": "STDK",
+    "mnId": "fIJ3",
+    "setupId": "001",
+    "vid": "STDK_SWITCH_0001",
+    "deviceTypeId": "Switch",
+    "ownershipValidationTypes": [
+      "JUSTWORKS"
+    ],
+    "identityType": "ED25519"
+  }
+}
