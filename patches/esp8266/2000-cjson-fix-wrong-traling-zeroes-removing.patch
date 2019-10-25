@@ -1,0 +1,42 @@
+From 6eef516b0f3b2d2c21a0e783ab4dd950ed98b2ad Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Thu, 24 Oct 2019 18:58:59 +0900
+Subject: [PATCH] cjson: fix wrong traling zeroes removing
+
+When esp8266 set the CONFIG_NEWLIB_LIBRARY_LEVEL_NANO,
+libc doesn't support double and long long type.
+For this reason, following is implemented for double type.
+e5df03c2 feat(cjson): Add function to encode json number when "sprintf" not support float
+
+However decimal point is not removed when value can be expressed as integers.
+
+Following is error case,
+7.00000000000000088817 ->
+7.00000000000000 ->
+7.
+'7.' is wrong '7' is right.
+
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ components/cjson/cJSON/cJSON.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/components/cjson/cJSON/cJSON.c b/components/cjson/cJSON/cJSON.c
+index 5f167bf1..46e0ae8e 100644
+--- a/components/cjson/cJSON/cJSON.c
++++ b/components/cjson/cJSON/cJSON.c
+@@ -555,6 +555,11 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
+                 length--;
+             }
+ 
++            if (*pbuf == '.') {
++                pbuf--;
++                length--;
++            }
++
+             *++pbuf = 0;
+         }
+ #endif
+-- 
+2.17.1
+

@@ -1,0 +1,34 @@
+From b513c32ddc65d4f95fb1905bc0396dc598f55b65 Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Fri, 23 Aug 2019 18:06:13 +0900
+Subject: [PATCH] mbedtls: esp: enable PKCS7 padding for cipher
+
+- MBEDTLS_CIPHER_PADDING_PKCS7
+
+The size of payload data for Easy Setup is not aligned to cipher block
+size then this feature is needed to add pad.
+
+Binary size increase by 176 bytes.
+
+Change-Id: I14b5595bd7bbe4ee93d1a861fc0aa624bba7cb32
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ .../ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+index 1e30128d..db365476 100644
+--- a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
++++ b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+@@ -536,7 +536,7 @@
+  *
+  * Enable padding modes in the cipher layer.
+  */
+-//#define MBEDTLS_CIPHER_PADDING_PKCS7
++#define MBEDTLS_CIPHER_PADDING_PKCS7
+ //#define MBEDTLS_CIPHER_PADDING_ONE_AND_ZEROS
+ //#define MBEDTLS_CIPHER_PADDING_ZEROS_AND_LEN
+ //#define MBEDTLS_CIPHER_PADDING_ZEROS
+-- 
+2.17.1
+

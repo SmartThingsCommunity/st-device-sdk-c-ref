@@ -1,0 +1,60 @@
+From 7dc4382f2f4d82abd2f22d34d79360e7de44a54a Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Thu, 17 Oct 2019 20:12:18 +0800
+Subject: [PATCH] Config sntp for sdk
+
+Change-Id: I508e8bf4234e7bb864adde1a379fbf3b0bc907fc
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ component/common/network/sntp/sntp.c | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/component/common/network/sntp/sntp.c b/component/common/network/sntp/sntp.c
+index 9dab697..490e3f8 100644
+--- a/component/common/network/sntp/sntp.c
++++ b/component/common/network/sntp/sntp.c
+@@ -54,6 +54,7 @@
+ 
+ #include <string.h>
+ #include <time.h>
++#include <sys/time.h>
+ 
+ #if LWIP_UDP
+ 
+@@ -76,9 +77,14 @@
+ 
+ /** Set this to 1 to support more than one server */
+ #ifndef SNTP_SUPPORT_MULTIPLE_SERVERS
+-#define SNTP_SUPPORT_MULTIPLE_SERVERS 0
++#define SNTP_SUPPORT_MULTIPLE_SERVERS 1
+ #endif
+ 
++#define SNTP_SERVER_ADDRESS	"pool.ntp.org", "1.kr.pool.ntp.org", \
++							"1.asia.pool.ntp.org", "us.pool.ntp.org", \
++							"1.cn.pool.ntp.org", "1.hk.pool.ntp.org", \
++							"europe.pool.ntp.org", "time1.google.com"
++
+ /** \def SNTP_SERVER_ADDRESS
+  * \brief SNTP server address:
+  * - as IPv4 address in "u32_t" format
+@@ -144,11 +150,12 @@ static unsigned int sntp_update_tick = 0;
+ static time_t sntp_update_sec = 0;
+ static time_t sntp_update_usec = 0;
+ 
+-#define SNTP_SET_SYSTEM_TIME_US(sec, usec) do { \
+-                                                sntp_update_tick = xTaskGetTickCount(); \
+-                                                sntp_update_sec = sec; \
+-                                                sntp_update_usec = usec; \
+-                                           } while(0)
++#define SNTP_SET_SYSTEM_TIME_US(sec, us)  \
++    do { \
++        struct timeval tv = { .tv_sec = sec, .tv_usec = us }; \
++        settimeofday(&tv, NULL); \
++    } while (0);
++
+ 
+ void sntp_get_lasttime(long *sec, long *usec, unsigned int *tick)
+ {
+-- 
+2.7.4
+

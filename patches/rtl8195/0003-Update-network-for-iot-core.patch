@@ -1,0 +1,89 @@
+From 1afa1fb4885f8c94ec90411a9f63e4e72bfbfe25 Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Tue, 15 Oct 2019 15:54:24 +0800
+Subject: [PATCH 3/7] Update network for iot core
+
+Change-Id: Ibc5eb61100e30a317847c000e5b2192d12aa27d7
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ .../api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c      | 2 +-
+ component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c           | 1 +
+ component/common/network/lwip/lwip_v1.4.1/src/include/lwip/sockets.h  | 2 +-
+ component/common/network/websocket/wsclient_tls.c                     | 4 ++--
+ component/common/utilities/uart_socket.c                              | 2 ++
+ 5 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c b/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c
+index ec898e6..f90e857 100644
+--- a/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c
++++ b/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c
+@@ -460,7 +460,7 @@ int eap_cert_setup(ssl_context *ssl)
+ #include <mbedtls/ssl.h>
+ #include <mbedtls/ssl_internal.h>
+ 
+-int max_buf_bio_size = MBEDTLS_SSL_BUFFER_LEN;
++int max_buf_bio_size = MBEDTLS_TLS_EXT_ADV_CONTENT_LEN;
+ 
+ struct eap_tls{
+ 	void *ssl;
+diff --git a/component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c b/component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c
+index addfcc5..0fcb940 100644
+--- a/component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c
++++ b/component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c
+@@ -60,6 +60,7 @@
+ #endif
+ 
+ #include <string.h>
++#include <sys/time.h>
+ 
+ #define NUM_SOCKETS MEMP_NUM_NETCONN
+ 
+diff --git a/component/common/network/lwip/lwip_v1.4.1/src/include/lwip/sockets.h b/component/common/network/lwip/lwip_v1.4.1/src/include/lwip/sockets.h
+index 6a10304..ebaa97a 100644
+--- a/component/common/network/lwip/lwip_v1.4.1/src/include/lwip/sockets.h
++++ b/component/common/network/lwip/lwip_v1.4.1/src/include/lwip/sockets.h
+@@ -307,7 +307,7 @@ typedef struct ip_mreq {
+ /** LWIP_TIMEVAL_PRIVATE: if you want to use the struct timeval provided
+  * by your system, set this to 0 and include <sys/time.h> in cc.h */ 
+ #ifndef LWIP_TIMEVAL_PRIVATE
+-#define LWIP_TIMEVAL_PRIVATE 1
++#define LWIP_TIMEVAL_PRIVATE 0
+ #endif
+ 
+ #if LWIP_TIMEVAL_PRIVATE
+diff --git a/component/common/network/websocket/wsclient_tls.c b/component/common/network/websocket/wsclient_tls.c
+index a1dd5d5..3c28ffd 100644
+--- a/component/common/network/websocket/wsclient_tls.c
++++ b/component/common/network/websocket/wsclient_tls.c
+@@ -11,7 +11,7 @@ struct wss_tls{
+ };
+ 
+ #elif (WSCLIENT_USE_TLS == WSCLIENT_TLS_MBEDTLS)
+-#include "mbedTLS/ssl.h"
++#include "mbedtls/ssl.h"
+ #include "mbedtls/net_sockets.h"
+ 
+ struct wss_tls{
+@@ -242,4 +242,4 @@ int wss_tls_read(void *tls_in, char *buffer, int buf_len){
+ 		ret =0;
+ #endif /* WSCLIENT_USE_TLS */
+ 	return ret;
+-}
+\ No newline at end of file
++}
+diff --git a/component/common/utilities/uart_socket.c b/component/common/utilities/uart_socket.c
+index ee93b6e..9ac525a 100644
+--- a/component/common/utilities/uart_socket.c
++++ b/component/common/utilities/uart_socket.c
+@@ -3,6 +3,8 @@
+ #include "sockets.h"
+ #include "uart_socket.h"
+ #include "autoconf.h"
++#include <sys/time.h>
++
+ #define UART_SOCKET_USE_DMA_TX 1
+ /***********************************************************************
+  *                                Macros                               *
+-- 
+2.7.4
+

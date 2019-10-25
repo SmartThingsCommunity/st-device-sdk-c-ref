@@ -1,0 +1,12 @@
+[submodule "bsp/esp8266"]
+	path = bsp/esp8266
+	url = https://github.com/espressif/ESP8266_RTOS_SDK.git
+[submodule "bsp/esp32"]
+	path = bsp/esp32
+	url = https://github.com/espressif/esp-idf.git
+[submodule "iot-core"]
+	path = iot-core
+	url = https://github.com/SmartThingsCommunity/st-device-sdk-c.git
+[submodule "bsp/rtl8195"]
+	path = bsp/rtl8195
+	url = https://github.com/ambiot/amb1_sdk.git

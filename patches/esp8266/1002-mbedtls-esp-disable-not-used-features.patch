@@ -1,0 +1,72 @@
+From 24f18f7399dbb2f0cc7e7a0128703a817ef8432b Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Thu, 5 Sep 2019 12:25:51 +0900
+Subject: [PATCH] mbedtls: esp: disable not used features
+
+For binary size optimization.
+
+MBEDTLS_PK_PARSE_EC_EXTENDED : 896 bytes
+MBEDTLS_GENPRIME             : 1760 bytes
+MBEDTLS_PKCS1_V21            : 2720 bytes
+MBEDTLS_MD5_C                : 4656 bytes
+MBEDTLS_SHA1_C               : 5760 bytes
+
+Total                        : 15792 bytes
+
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ .../mbedtls/port/esp8266/include/mbedtls/esp_config.h  | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+index db365476..44875313 100644
+--- a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
++++ b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+@@ -953,7 +953,7 @@
+  *
+  * Disable if you only need to support RFC 5915 + 5480 key formats.
+  */
+-#define MBEDTLS_PK_PARSE_EC_EXTENDED
++//#define MBEDTLS_PK_PARSE_EC_EXTENDED
+ 
+ /**
+  * \def MBEDTLS_ERROR_STRERROR_DUMMY
+@@ -977,7 +977,7 @@
+  *
+  * Requires: MBEDTLS_BIGNUM_C
+  */
+-#define MBEDTLS_GENPRIME
++//#define MBEDTLS_GENPRIME
+ 
+ /**
+  * \def MBEDTLS_FS_IO
+@@ -1108,7 +1108,7 @@
+  *
+  * This enables support for RSAES-OAEP and RSASSA-PSS operations.
+  */
+-#define MBEDTLS_PKCS1_V21
++//#define MBEDTLS_PKCS1_V21
+ 
+ /**
+  * \def MBEDTLS_RSA_NO_CRT
+@@ -2253,7 +2253,7 @@
+  *            it, and considering stronger message digests instead.
+  *
+  */
+-#define MBEDTLS_MD5_C
++//#define MBEDTLS_MD5_C
+ 
+ /**
+  * \def MBEDTLS_MEMORY_BUFFER_ALLOC_C
+@@ -2526,7 +2526,7 @@
+  *            on it, and considering stronger message digests instead.
+  *
+  */
+-#define MBEDTLS_SHA1_C
++//#define MBEDTLS_SHA1_C
+ 
+ /**
+  * \def MBEDTLS_SHA256_C
+-- 
+2.17.1
+

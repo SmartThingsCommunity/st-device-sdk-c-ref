@@ -1,0 +1,241 @@
+From c1e29704ade685009aceac25cd16efd276d8dc2e Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Tue, 15 Oct 2019 15:58:26 +0800
+Subject: [PATCH] Update platform config
+
+Change-Id: I1940133ef3f4240c96b5bdc630400aea60421a24
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ component/common/api/platform/platform_stdlib.h    |  36 +++++--
+ .../Source/portable/MemMang/heap_5.c               | 113 +++++++++++++++++++++
+ 2 files changed, 141 insertions(+), 8 deletions(-)
+
+diff --git a/component/common/api/platform/platform_stdlib.h b/component/common/api/platform/platform_stdlib.h
+index 659c21a..c1b1eca 100644
+--- a/component/common/api/platform/platform_stdlib.h
++++ b/component/common/api/platform/platform_stdlib.h
+@@ -63,6 +63,8 @@
+ 	#undef strncat
+ 	#undef strstr
+   #endif
++	#undef strdup
++	#undef strtod
+ 
+   #if USE_RTL_ROM_CLIB
+ #if BUFFERED_PRINTF
+@@ -123,7 +125,7 @@
+ 	#define strsep(str, delim)      	_strsep(str, delim)
+   #endif
+ 
+-	#define atoi(str)               	prvAtoi(str)	
++	#define atoi(str)               	prvAtoi(str)
+ 	#define strpbrk(cs, ct)				_strpbrk(cs, ct)		// for B-cut ROM
+ 
+   #if USE_CLIB_PATCH
+@@ -144,8 +146,17 @@
+ //
+ extern void *pvPortMalloc( size_t xWantedSize );
+ extern void vPortFree( void *pv );
++extern void *pvPortCalloc( size_t nmemb, size_t size );
++extern void *pvPortRealloc( void *pv,  size_t xWantedSize );
++extern void *pvPortsStrdup(char *src);
++extern double pvPortsStrtod(const char* s, char** endptr);
+ #define malloc                  pvPortMalloc
+ #define free                    vPortFree
++#define calloc		pvPortCalloc
++#define realloc			pvPortRealloc
++#define strdup			pvPortsStrdup
++#define strtod			pvPortsStrtod
++
+ #elif defined (CONFIG_PLATFORM_8711B)
+ 
+ #if defined (__IARSTDLIB__)
+@@ -193,7 +204,8 @@ extern void vPortFree( void *pv );
+ 	#undef atol
+ 	#undef atoi
+ 	#undef strpbrk
+-	
++	#undef strdup
++	#undef strtod
+ #if USE_RTL_ROM_CLIB
+ #if BUFFERED_PRINTF
+         extern int buffered_printf(const char* fmt, ...);
+@@ -215,7 +227,7 @@ extern void vPortFree( void *pv );
+ 	#define memcpy(dst, src, sz)		_memcpy(dst, src, sz)
+ 	#define memmove						__rtl_memmove_v1_00
+ 	#define memset(dst, val, sz)		_memset(dst, val, sz)
+-	
++
+ 	#define strchr(s, c)				_strchr(s, c)			// for B-cut ROM
+ 	#define strcmp(str1, str2)			prvStrCmp((const unsigned char *) str1, (const unsigned char *) str2)
+ 	#define strcpy(dest, src)			_strcpy(dest, src)
+@@ -224,13 +236,13 @@ extern void vPortFree( void *pv );
+ 	#define strstr(str1, str2)			prvStrStr(str1, str2)	// NULL function
+ 	#define strtok(str, delim)			prvStrtok(str, delim)//_strsep(str, delim)
+ 	#define strcat					__rtl_strcat_v1_00
+-	
++
+ 	#define strncmp(str1, str2, cnt)	_strncmp(str1, str2, cnt)
+ 	#define strncpy(dest, src, count)	_strncpy(dest, src, count)
+ 	#define strncat					__rtl_strncat_v1_00
+-	
++
+ 	#define atol(str)					strtol(str,NULL,10)
+-	#define atoi(str)					prvAtoi(str)	
++	#define atoi(str)					prvAtoi(str)
+ 	#define strpbrk(cs, ct)			_strpbrk(cs, ct)		// for B-cut ROM
+ #if defined (__GNUC__)
+ 	#undef sscanf
+@@ -239,7 +251,7 @@ extern void vPortFree( void *pv );
+ #endif
+ 	//extern int _sscanf_patch(const char *buf, const char *fmt, ...);
+ 	//#define sscanf					_sscanf_patch
+-	
++
+ 
+ #endif	// defined (__IARSTDLIB__)
+ 
+@@ -247,10 +259,18 @@ extern void vPortFree( void *pv );
+ // memory management
+ //
+ extern void *pvPortMalloc( size_t xWantedSize );
++extern void *pvPortCalloc( size_t nmemb, size_t size );
++extern void *pvPortRealloc( void *pv,  size_t xWantedSize );
+ extern void vPortFree( void *pv );
++extern void *pvPortsStrdup(char *src);
++extern double pvPortsStrtod(const char* s, char** endptr);
+ #define malloc                  pvPortMalloc
+ #define free                    vPortFree
+-#elif defined(USE_STM322xG_EVAL) || defined(USE_STM324xG_EVAL)  || defined(STM32F10X_XL) 
++#define calloc		pvPortCalloc
++#define realloc			pvPortRealloc
++#define strdup			pvPortsStrdup
++#define strtod			pvPortsStrtod
++#elif defined(USE_STM322xG_EVAL) || defined(USE_STM324xG_EVAL)  || defined(STM32F10X_XL)
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include <string.h>
+diff --git a/component/os/freertos/freertos_v8.1.2/Source/portable/MemMang/heap_5.c b/component/os/freertos/freertos_v8.1.2/Source/portable/MemMang/heap_5.c
+index 6e59488..6f27506 100644
+--- a/component/os/freertos/freertos_v8.1.2/Source/portable/MemMang/heap_5.c
++++ b/component/os/freertos/freertos_v8.1.2/Source/portable/MemMang/heap_5.c
+@@ -655,3 +655,116 @@ void* pvPortReAlloc( void *pv,  size_t xWantedSize )
+ 	return NULL;
+ }
+ 
++void *pvPortCalloc( size_t nmemb, size_t size )
++{
++	void *pvReturn = pvPortMalloc(nmemb*size );
++	if (pvReturn) {
++		memset(pvReturn, 0, nmemb*size);
++	}
++
++	return pvReturn;
++}
++
++
++
++
++void *pvPortRealloc( void *pv,  size_t xWantedSize )
++{
++	return (void *)pvPortReAlloc(pv, xWantedSize);
++}
++
++void *pvPortsStrdup(char *src)
++{
++	int len = strlen(src);
++	void * dst = pvPortCalloc(1, len + 1);
++	if(dst) {
++		memcpy(dst, src, len);
++	}
++	return dst;
++}
++
++double pvPortsStrtod(const char* s, char** endptr)
++{
++	const char* p = s;
++	long double value = 0.L;
++
++	int sign = 0;
++
++	long double factor;
++
++	unsigned int expo;
++
++
++	while (isspace(*p) )
++		p++;
++
++	if(*p == '-' || *p == '+')
++		sign = *p++;
++
++
++	while ( (unsigned int)(*p - '0') < 10u )
++		value = value*10 + (*p++ - '0');
++
++	if ( *p == '.' )
++	{
++		factor = 1.;
++
++		p++;
++
++		while ( (unsigned int)(*p - '0') < 10u )
++		{
++			factor *= 0.1;
++			value += (*p++ - '0') * factor;
++		}
++	}
++
++	if ( (*p | 32) == 'e' )
++	{
++		expo = 0;
++		factor = 10.L;
++
++		switch (*++p)
++		{
++			case '-':
++				factor = 0.1;
++			case '+':
++				p++;
++				break;
++			case '0':
++			case '1':
++			case '2':
++			case '3':
++			case '4':
++			case '5':
++			case '6':
++			case '7':
++			case '8':
++			case '9':
++				break;
++			default:
++				value = 0.L;
++				p = s;
++				goto done;
++		}
++
++		while ( (unsigned int)(*p - '0') < 10u )
++			 expo = 10 * expo + (*p++ - '0');
++
++		while ( 1 )
++		{
++			if ( expo & 1 )
++				value *= factor;
++
++			if ( (expo >>= 1) == 0 )
++				break;
++
++			factor *= factor;
++		}
++	}
++
++done:
++	if ( endptr != 0 )
++		*endptr = (char*)p;
++
++	return (sign == '-' ? -value : value);
++}
+-- 
+2.7.4
+
