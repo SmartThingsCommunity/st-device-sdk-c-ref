@@ -1,0 +1,13 @@
+{
+  "onboardingConfig": {
+    "deviceOnboardingId": "NAME",
+    "mnId": "MNID",
+    "setupId": "999",
+    "vid": "VID",
+    "deviceTypeId": "TYPE",
+    "ownershipValidationTypes": [
+      "BUTTON"
+    ],
+    "identityType": "ED25519"
+  }
+}

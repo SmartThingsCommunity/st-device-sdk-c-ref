@@ -1,0 +1,6 @@
+[submodule "bsp/esp8266"]
+	path = bsp/esp8266
+	url = https://github.com/espressif/ESP8266_RTOS_SDK.git
+[submodule "bsp/esp32"]
+	path = bsp/esp32
+	url = https://github.com/espressif/esp-idf

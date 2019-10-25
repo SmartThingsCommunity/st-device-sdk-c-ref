@@ -1,0 +1,44 @@
+From b46c1aaa062e177b2ad054f26ece9bc8e21962e9 Mon Sep 17 00:00:00 2001
+From: Sangin Lee <sangin78.lee@samsung.com>
+Date: Fri, 2 Aug 2019 10:28:59 +0900
+Subject: [PATCH] st_iot_core: Add SS_VER display routine to check test version
+
+[Model]
+[BinType] BL
+[Customer] OPEN
+
+[Issue#]
+[Request]
+[Occurrence Version]
+
+[Problem]
+[Cause & Measure]
+[Checking Method]
+
+[Team] BSP
+[Developer] Sangin Lee
+[Solution company] Samsung
+[Change Type]
+
+Change-Id: I71fe7217f2a30d2627dacbbe851df7846780243a
+Signed-off-by: Sangin Lee <sangin78.lee@samsung.com>
+---
+ make/project.mk                                                 | 7 ++++++-
+ 1 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/make/project.mk b/make/project.mk
+index 3ce3b45..ffbd31c 100644
+--- a/make/project.mk
++++ b/make/project.mk
+@@ -296,7 +301,7 @@ LDFLAGS ?= -nostdlib \
+ # If any flags are defined in application Makefile, add them at the end.
+ CPPFLAGS ?=
+ EXTRA_CPPFLAGS ?=
+-CPPFLAGS := -DESP_PLATFORM -D IDF_VER=\"$(IDF_VER)\" -MMD -MP $(CPPFLAGS) $(EXTRA_CPPFLAGS)
++CPPFLAGS := -DESP_PLATFORM -D IDF_VER=\"$(IDF_VER)\" -MMD -MP $(CPPFLAGS) $(EXTRA_CPPFLAGS) -D SS_VER=\"$(SS_VER)\"
+ 
+ # Warnings-related flags relevant both for C and C++
+ COMMON_WARNING_FLAGS = -Wall -Werror=all \
+-- 
+2.7.4
+

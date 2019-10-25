@@ -1,0 +1,48 @@
+From daec33e03146139fbacecc8798d1daf2de953d48 Mon Sep 17 00:00:00 2001
+From: Jaehoon You <jaehoon.you@samsung.com>
+Date: Fri, 6 Sep 2019 15:35:57 +0900
+Subject: [PATCH 1/2] st_iot_core: add debug option to FreeRTOSConfig.h
+
+[Model] STDK
+[BinType]
+[Customer]
+
+[Issue#]
+[Request]
+[Occurrence Version]
+
+[Problem]
+[Cause & Measure]
+[Checking Method]
+
+[Team]
+[Developer] Jaehoon You
+[Solution company] Samsung
+[Change Type] N/A
+
+Change-Id: I1a1cbb57d23a912c51c5fa6371f0257642a26d5e
+Signed-off-by: Jaehoon You <jaehoon.you@samsung.com>
+---
+ components/freertos/include/freertos/FreeRTOSConfig.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/components/freertos/include/freertos/FreeRTOSConfig.h b/components/freertos/include/freertos/FreeRTOSConfig.h
+index 80185f9..c41076d 100644
+--- a/components/freertos/include/freertos/FreeRTOSConfig.h
++++ b/components/freertos/include/freertos/FreeRTOSConfig.h
+@@ -72,6 +72,12 @@
+ 
+ #include "sdkconfig.h"
+ 
++#define configUSE_TRACE_FACILITY 1
++#define configUSE_STATS_FORMATTING_FUNCTIONS 1
++
++#ifdef CONFIG_SAMSUNG_RUN_TIME_STATS
++#define configGENERATE_RUN_TIME_STATS 1
++#endif
+ 
+ /* ESP31 and ESP32 are dualcore processors. */
+ #ifndef CONFIG_FREERTOS_UNICORE
+-- 
+2.7.4
+

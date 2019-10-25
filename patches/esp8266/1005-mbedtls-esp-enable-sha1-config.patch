@@ -1,0 +1,42 @@
+From b761fafdf932d255254283c3f4fb031a8edbfeed Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Tue, 24 Sep 2019 18:51:59 +0900
+Subject: [PATCH] mbedtls: esp: enable sha1 config
+
+Signature type of Prod server is sha1 like as below,
+
+$ openssl x509 -in DigiCertGlobalRootCA.pem -text
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            08:3b:e0:56:90:42:46:b1:a1:75:6a:c9:59:91:c7:4a
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, O=DigiCert Inc, OU=www.digicert.com, CN=DigiCert Global Root CA
+        Validity
+            Not Before: Nov 10 00:00:00 2006 GMT
+            Not After : Nov 10 00:00:00 2031 GMT
+
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+
+Change-Id: I70cf58a04b7b03251425aae9d606ab049d0fd7a0
+---
+ .../ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+index e10a69b1..4bc2d3b4 100644
+--- a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
++++ b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
+@@ -2526,7 +2526,7 @@
+  *            on it, and considering stronger message digests instead.
+  *
+  */
+-//#define MBEDTLS_SHA1_C
++#define MBEDTLS_SHA1_C
+ 
+ /**
+  * \def MBEDTLS_SHA256_C
+-- 
+2.17.1
+

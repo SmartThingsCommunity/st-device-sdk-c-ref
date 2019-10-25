@@ -1,0 +1,46 @@
+From 65dd3ea0be431cc2178c51136e82aa611a04a53d Mon Sep 17 00:00:00 2001
+From: Hyundo Lee <hyun-do.lee@samsung.com>
+Date: Fri, 23 Aug 2019 13:33:44 +0900
+Subject: [PATCH] st_iot_core: esp8266: add debug option to FreeRTOSConfig.h
+
+Signed-off-by: Hyundo Lee <hyun-do.lee@samsung.com>
+---
+ .../port/esp8266/include/freertos/FreeRTOSConfig.h       | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/components/freertos/port/esp8266/include/freertos/FreeRTOSConfig.h b/components/freertos/port/esp8266/include/freertos/FreeRTOSConfig.h
+index a971d28..154c157 100644
+--- a/components/freertos/port/esp8266/include/freertos/FreeRTOSConfig.h
++++ b/components/freertos/port/esp8266/include/freertos/FreeRTOSConfig.h
+@@ -66,12 +66,28 @@
+ //#define configTOTAL_HEAP_SIZE		( ( size_t ) ( 17 * 1024 ) )
+ #define configMAX_TASK_NAME_LEN		( 16 )
+ 
++#ifdef CONFIG_SAMSUNG_BUILD_ENG
++#define configUSE_TRACE_FACILITY	1
++#define configUSE_STATS_FORMATTING_FUNCTIONS 1
++#endif
++
+ #define configUSE_16_BIT_TICKS		0
+ #define configIDLE_SHOULD_YIELD		1
+ 
+ #define INCLUDE_xTaskGetIdleTaskHandle 1
+ #define INCLUDE_xTimerGetTimerDaemonTaskHandle 1
+ 
++
++#ifdef CONFIG_SAMSUNG_RUN_TIME_STATS
++#ifndef __ASSEMBLER__
++extern uint32_t get_TimerTicks(void);
++extern void config_TimerTicks(void);
++#endif
++#define configGENERATE_RUN_TIME_STATS 1
++#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() (config_TimerTicks())
++#define portGET_RUN_TIME_COUNTER_VALUE() (get_TimerTicks())
++#endif
++
+ #define configCHECK_FOR_STACK_OVERFLOW  2
+ #define configUSE_MUTEXES  1
+ #define configUSE_RECURSIVE_MUTEXES  1
+-- 
+2.7.4
+
