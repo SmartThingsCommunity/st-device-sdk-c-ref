@@ -1,4 +1,4 @@
-From ebd0dcc5b3aa0092bc58e4dd272d6fa3e1e96551 Mon Sep 17 00:00:00 2001
+From 593decea49d1e89cf5b4df02e424c593c0799d77 Mon Sep 17 00:00:00 2001
 From: Kai Lv <kai.lv@samsung.com>
 Date: Thu, 24 Oct 2019 11:40:53 +0800
 Subject: [PATCH 3/6] Update cJson for iot-core

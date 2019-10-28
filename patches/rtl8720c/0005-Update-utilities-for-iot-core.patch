@@ -1,4 +1,4 @@
-From 91495555b2f57c8a96d6ca2dbc4400fb73e19538 Mon Sep 17 00:00:00 2001
+From 8ce36e8ca00157ee15f3723b71182be823e01544 Mon Sep 17 00:00:00 2001
 From: Kai Lv <kai.lv@samsung.com>
 Date: Thu, 24 Oct 2019 11:46:32 +0800
 Subject: [PATCH 5/6] Update utilities for iot-core
@@ -10,10 +10,10 @@ Signed-off-by: Kai Lv <kai.lv@samsung.com>
  1 file changed, 10 insertions(+)
 
 diff --git a/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c b/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
-index 1036b73..093e64b 100644
+index 712c717..94d4089 100644
 --- a/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
 +++ b/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
-@@ -194,6 +194,16 @@ void *__wrap_memset(void *dst0, int val, size_t length)
+@@ -195,6 +195,16 @@ void *__wrap_memset(void *dst0, int val, size_t length)
  // define in AmebaPro utilites/include/strporc.h
  // replace by linking command
  #include "strproc.h"

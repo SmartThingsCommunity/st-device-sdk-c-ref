@@ -1,4 +1,4 @@
-From eecc83736bff2bd12daa7e065a6b71149b75e5b1 Mon Sep 17 00:00:00 2001
+From fe15325e9b117dcfaea3566412007c9f050c7021 Mon Sep 17 00:00:00 2001
 From: Kai Lv <kai.lv@samsung.com>
 Date: Thu, 24 Oct 2019 11:39:44 +0800
 Subject: [PATCH 2/6] Add libsodium for iot-core
