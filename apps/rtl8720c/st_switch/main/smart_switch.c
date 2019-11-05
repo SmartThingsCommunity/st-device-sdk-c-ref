@@ -35,16 +35,19 @@ enum smartswitch_switch_onoff_state {
 };
 
 enum button_gpio_state {
-    BUTTON_GPIO_RELEASED = 0,
-    BUTTON_GPIO_PRESSED = 1,
+    BUTTON_GPIO_RELEASED = 1,
+    BUTTON_GPIO_PRESSED = 0,
 };
 
 static int smartswitch_switch_state = SMARTSWITCH_SWITCH_ON;
 #define BUTTON_DEBOUNCE_TIME_MS 20
+#define BUTTON_LONG_THRESHOLD_MS 5000
+#define BUTTON_DELAY_MS 300
 
 #define GPIO_OUTPUT_NOTIFICATION_LED PA_23
 #define GPIO_INPUT_BUTTON PA_4
-#define  BUTTON_SHORT_PRESS	1
+#define BUTTON_LONG_PRESS	0
+#define BUTTON_SHORT_PRESS	1
 
 gpio_t gpio_ctrl_noti;
 gpio_t gpio_ctrl_button;
@@ -93,6 +96,16 @@ void led_switch(int on)
 	}
 }
 
+static void led_blink(int gpio, int delay, int count)
+{
+	for (int i = 0; i < count; i++) {
+		led_state_switch(SMARTSWITCH_SWITCH_ON);
+		vTaskDelay(delay / portTICK_PERIOD_MS);
+		led_state_switch(SMARTSWITCH_SWITCH_OFF);
+		vTaskDelay(delay / portTICK_PERIOD_MS);
+	}
+}
+
 static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 {
 	if (type == BUTTON_SHORT_PRESS) {
@@ -111,6 +124,11 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 			default:
 				break;
 		}
+	} else if (type == BUTTON_LONG_PRESS) {
+		printf("Button long press, count: %d\r\n", count);
+		led_blink(GPIO_OUTPUT_NOTIFICATION_LED, 100, 3);
+		/* clean-up provisioning & registered data with reboot option*/
+		st_conn_cleanup(ctx, true);
 	}
 }
 
@@ -134,32 +152,47 @@ static void iot_status_cb(iot_status_t status,
 	}
 }
 
-void button_isr_handler(void *arg)
+int get_button_event(int* button_event_type, int* button_event_count)
 {
-	static uint32_t last_time_ms = 0;
-	uint32_t now_ms = xTaskGetTickCountFromISR() * portTICK_PERIOD_MS;
+	static uint32_t button_count = 0;
+	static uint32_t button_last_state = BUTTON_GPIO_RELEASED;
+	static TimeOut_t button_timeout;
+	static TickType_t long_press_tick = pdMS_TO_TICKS(BUTTON_LONG_THRESHOLD_MS);
+	static TickType_t button_delay_tick = pdMS_TO_TICKS(BUTTON_DELAY_MS);
 
-	/* check debounce time to ignore small ripple of currunt */
-	if (now_ms - last_time_ms > BUTTON_DEBOUNCE_TIME_MS) {
-		last_time_ms = now_ms;
-		xQueueSendFromISR(button_event_queue, &now_ms, NULL);
-	}
-}
+	uint32_t gpio_level = 0;
 
-bool get_button_event(int* button_event_type, int* button_event_count)
-{
-	uint32_t button_time_ms = 0;
-	uint32_t gpio_value = 0;
-
-	if (xQueueReceive(button_event_queue, &button_time_ms, 0)) {
-		vTaskDelay(BUTTON_DEBOUNCE_TIME_MS / portTICK_PERIOD_MS);
-		gpio_value = gpio_read(&gpio_ctrl_button);
-		if (gpio_value == BUTTON_GPIO_PRESSED){
-			*button_event_type = BUTTON_SHORT_PRESS;
+	gpio_level = gpio_read(&gpio_ctrl_button);
+	if (button_last_state != gpio_level) {
+		/* wait debounce time to ignore small ripple of currunt */
+		vTaskDelay( pdMS_TO_TICKS(BUTTON_DEBOUNCE_TIME_MS) );
+		gpio_level = gpio_read(&gpio_ctrl_button);
+		if (button_last_state != gpio_level) {
+			printf("Button event, val: %d, tick: %u\r\n", gpio_level, (uint32_t)xTaskGetTickCount());
+			button_last_state = gpio_level;
+			if (gpio_level == BUTTON_GPIO_PRESSED) {
+				button_count++;
+			}
+			vTaskSetTimeOutState(&button_timeout);
+			button_delay_tick = pdMS_TO_TICKS(BUTTON_DELAY_MS);
+			long_press_tick = pdMS_TO_TICKS(BUTTON_LONG_THRESHOLD_MS);
+		}
+	} else if (button_count > 0) {
+		if ((gpio_level == BUTTON_GPIO_PRESSED)
+				&& (xTaskCheckForTimeOut(&button_timeout, &long_press_tick ) != pdFALSE)) {
+			*button_event_type = BUTTON_LONG_PRESS;
 			*button_event_count = 1;
+			button_count = 0;
+			return true;
+		} else if ((gpio_level == BUTTON_GPIO_RELEASED)
+				&& (xTaskCheckForTimeOut(&button_timeout, &button_delay_tick ) != pdFALSE)) {
+			*button_event_type = BUTTON_SHORT_PRESS;
+			*button_event_count = button_count;
+			button_count = 0;
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -172,12 +205,9 @@ void led_button_init(void)
 	gpio_write(&gpio_ctrl_noti, 1);
 
 	//button init
-	button_event_queue = xQueueCreate(10, sizeof(uint32_t));
-	gpio_irq_init(&gpio_ctrl_button, GPIO_INPUT_BUTTON, button_isr_handler, (uint32_t)(&gpio_ctrl_button));
+	gpio_init(&gpio_ctrl_button, GPIO_INPUT_BUTTON);
 	gpio_mode(&gpio_ctrl_button, PullUp);
-	gpio_irq_set(&gpio_ctrl_button, IRQ_LOW, 1);   // LOW Trigger
-	gpio_irq_enable(&gpio_ctrl_button);
-
+	gpio_dir(&gpio_ctrl_button, PIN_INPUT);
 }
 
 void cap_switch_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
