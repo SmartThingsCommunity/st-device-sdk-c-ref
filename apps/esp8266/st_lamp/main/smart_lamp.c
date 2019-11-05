@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "device_control.h"
@@ -53,6 +54,7 @@ static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
 
 IOT_CTX* ctx = NULL;
 
+//#define SET_PIN_NUMBER_CONFRIM
 
 /* Send integer type capability to SmartThings Sever */
 static void send_capability_integer(IOT_CAP_HANDLE *handle, char* attribute_name, int value)
@@ -366,6 +368,16 @@ static void smartlamp_task(void *arg)
 	}
 }
 
+#if defined(SET_PIN_NUMBER_CONFRIM)
+void* pin_num_memcpy(void *dest, const void *src, unsigned int count)
+{
+	unsigned int i;
+	for (i = 0; i < count; i++)
+		*((char*)dest + i) = *((char*)src + i);
+	return dest;
+}
+#endif
+
 void app_main(void)
 {
 	/**
@@ -449,7 +461,23 @@ void app_main(void)
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartlamp_task, "smartlamp_task", 2048, (void *)switch_handle, 10, NULL);
 
+#if defined(SET_PIN_NUMBER_CONFRIM)
+	iot_pin_t *pin_num;
+
+	pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
+	if(!pin_num)
+		printf("failed to malloc for iot_pin_t\n");
+
+	// 5. to decide the pin confirmation number(ex. "12345678"). It will use for easysetup.
+	//    pin confirmation number must be 8 digit number.
+	pin_num_memcpy(pin_num, "12345678", sizeof(iot_pin_t));
+
+	// 6. process on-boarding procedure. There is nothing more to do on the app side than call the API.
+	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
+
+	free(pin_num);
+#else
 	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
-
+#endif
 }
