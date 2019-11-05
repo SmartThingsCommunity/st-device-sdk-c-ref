@@ -272,7 +272,7 @@ static void smartswitch_task(void *arg)
 void app_main(void)
 {
 	/**
-	  SmartThings Device Kit(STDK) aims to make it easier to develop IoT devices by providing
+	  SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
 	  additional st_iot_core layer to the existing chip vendor SW Architecture.
 
 	  That is, you can simply develop a basic application by just calling the APIs provided by st_iot_core layer
