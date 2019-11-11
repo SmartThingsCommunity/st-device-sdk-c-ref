@@ -34,8 +34,8 @@ enum smartswitch_switch_onoff_state {
 };
 
 enum button_gpio_state {
-    BUTTON_GPIO_RELEASED = 0,
-    BUTTON_GPIO_PRESSED = 1,
+    BUTTON_GPIO_RELEASED = 1,
+    BUTTON_GPIO_PRESSED = 0,
 };
 
 static int smartswitch_switch_state = SMARTSWITCH_SWITCH_ON;

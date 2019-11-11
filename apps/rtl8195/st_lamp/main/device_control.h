@@ -38,8 +38,8 @@ enum led_animation_mode_list {
 };
 
 enum button_gpio_state {
-	BUTTON_GPIO_RELEASED = 0,
-	BUTTON_GPIO_PRESSED = 1,
+	BUTTON_GPIO_RELEASED = 1,
+	BUTTON_GPIO_PRESSED = 0,
 };
 
 #define BUTTON_DEBOUNCE_TIME_MS 20
