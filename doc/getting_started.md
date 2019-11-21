@@ -62,23 +62,26 @@ Open a terminal window and run the following `stdk-keygen` command to create a D
 
 ```sh
 $ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/linux
-i$ ./stdk-keygen -h
+
+$ ./stdk-keygen -h
 usage: stdk-keygen -m MNID [-f firmware_version]
-$
+
 $ ./stdk-keygen -m **** -f V201910       # replace '****' with your MNID
-For Device Identity of Developer Workspace,
+Go Device Identity of Developer Workspace.
 
 Serial Number:
-STDK************
+┌──────────┬──────────┐
+│ STDK**** │ ce**2**3 │
+└──────────┴──────────┘
 
 Public Key:
-********************************************
-$
+1D********a21F********8WwP********yU/n8vFvM=
+
 $ tree
 .
 ├── ed25519.pubkey
 ├── ed25519.seckey
-└── output_STDK************
+└── output_STDK****ce**2**3
     └── device_info.json
 ```
 
@@ -241,16 +244,16 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
      .
      ├── ed25519.pubkey
      ├── ed25519.seckey
-     └── output_STDK************
+     └── output_STDK****ce**2**3
          └── device_info.json
 
-     $ cat output_STDK************/device_info.json
+     $ cat output_STDK****ce**2**3/device_info.json
      {
        "deviceInfo": {
          "firmwareVersion": "V201910",
-         "privateKey": "********************************************",
-         "publicKey": "********************************************",
-         "serialNumber": "STDK************"
+         "privateKey": "3d********AOyY********ezJQ********TMKLGxzbQ=",
+         "publicKey": "1D********a21F********8WwP********yU/n8vFvM=",
+         "serialNumber": "STDK****ce**2**3"
        }
      }
      ```
