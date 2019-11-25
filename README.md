@@ -26,6 +26,19 @@ Basically, this release builds on the environments of chipset SDKs .
 
 - Install the toolchain defined in the chipset SDK used.
 
+  - Example for ESP32
+    - Get the ESP toolchain for Linux, available on the Expressif website:
+      - [64-bit Linux](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html#get-started-get-prerequisites)
+      Steps (Ubuntu, Debian)
+      1. sudo apt-get install git wget flex bison gperf python python-pip python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools cmake ninja-build ccache libncurses-dev
+      2. mkdir ~/esp; cd esp; git clone --recursive https://github.com/espressif/esp-idf.git; cd esp-idf
+      3. pip install --user -r ./requirements.txt
+      4. git checkout --track remotes/origin/release/v3.3
+      5. ./install.sh esp32
+      6. . ./export.sh
+      7. Proceed to [build step](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/README.md#Build).
+      
+
   - Example for ESP8266
 
     - Get the ESP8266 toolchain for Linux, available on the Expressif website:
