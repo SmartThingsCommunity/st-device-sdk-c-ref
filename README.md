@@ -26,7 +26,7 @@ Basically, this release builds on the environments of chipset SDKs .
 
 - Install the toolchain defined in the chipset SDK used.
 
-  - Example for ESP32
+  - Example for ESP32 (Ubuntu/Debian quickstart)
     - Get the ESP toolchain for Linux, available on the Expressif website:
       - [64-bit Linux](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html#get-started-get-prerequisites)
       Steps (Ubuntu, Debian)
