@@ -35,13 +35,13 @@ enum notification_led_gpio_state {
 #else //default
 
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
-#define GPIO_INPUT_BUTTON 18
+#define GPIO_INPUT_BUTTON 0
 
-#define GPIO_OUTPUT_MAINLED 14
-#define GPIO_OUTPUT_MAINLED_0 17 /* use as ground */
+#define GPIO_OUTPUT_MAINLED 12
+#define GPIO_OUTPUT_MAINLED_0 26 /* use as ground */
 
-#define GPIO_OUTPUT_NOUSE1 27
-#define GPIO_OUTPUT_NOUSE2 16
+#define GPIO_OUTPUT_NOUSE1 14
+#define GPIO_OUTPUT_NOUSE2 27
 
 enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 1,
