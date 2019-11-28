@@ -31,7 +31,7 @@ generate_output() {
 		BUILD_ID_STDK=`git log --pretty=format:'%h' -n 1`
 		popd > /dev/null
 	else
-		BUILD_ID_STDK=`date +%H:%M`
+		BUILD_ID_STDK=`date +%H%M`
 	fi
 
 	if [ -e ${COMPONENT_PATH}/.git ]; then
@@ -39,7 +39,7 @@ generate_output() {
 		BUILD_ID_CORE=`git log --pretty=format:'%h' -n 1`
 		popd > /dev/null
 	else
-		BUILD_ID_CORE=`date +%H:%M`
+		BUILD_ID_CORE=`date +%H%M`
 	fi
 
 	BUILD_ID=${BUILD_ID_STDK}_${BUILD_ID_CORE}
