@@ -426,9 +426,9 @@ void app_main(void)
 	 */
 
 	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
-	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start - 1;
+	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
 	unsigned char *device_info = (unsigned char *) device_info_start;
-	unsigned int device_info_len = device_info_end - device_info_start - 1;
+	unsigned int device_info_len = device_info_end - device_info_start;
 
 	int iot_err;
 

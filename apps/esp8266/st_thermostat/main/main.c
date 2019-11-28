@@ -904,9 +904,9 @@ static void thermostat_task(void *arg)
 void app_main(void)
 {
 	unsigned char *onboarding_cfg = (unsigned char *)onboarding_cfg_start;
-	unsigned int onboarding_cfg_len = onboarding_cfg_end - onboarding_cfg_start - 1;
+	unsigned int onboarding_cfg_len = onboarding_cfg_end - onboarding_cfg_start;
 	unsigned char *device_info = (unsigned char *)device_info_start;
-	unsigned int device_info_len = device_info_end - device_info_start - 1;
+	unsigned int device_info_len = device_info_end - device_info_start;
 	int st_err;
 
 	ctx = st_conn_init(onboarding_cfg, onboarding_cfg_len, device_info, device_info_len);
