@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHIP_NAME=${1}
-PROJECT="${PWD}/bsp/${CHIP_NAME}/project/realtek_ameba1_va0_example"
+PROJECT="${PWD}/bsp/${CHIP_NAME}/project/realtek_amebaz2_v0_example"
 PROJECT_TITLE=${2}
 STDK_PATH="${PWD}"
 IOT_APPS_PATH="${PWD}/apps/${CHIP_NAME}"
@@ -11,10 +11,10 @@ export COMPONENT_PATH="${PWD}/iot-core/src"
 export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 
 print_usage () {
-	echo "    Usage: ./build.sh rtl8195 APP_NAME"
+	echo "    Usage: ./build.sh rtl8720c APP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
-	echo "    ex) ./build.sh rtl8195 st_switch"
-	echo "    ex) ./build.sh rtl8195 st_lamp"
+	echo "    ex) ./build.sh rtl8720c smart_switch"
+	echo "    ex) ./build.sh rtl8720c st_switch"
 	echo
 }
 
@@ -57,14 +57,12 @@ generate_output() {
 		rm -rf ${OUTPUT_PATH}/*
 	fi
 
-	BINARY_PATH=${PROJECT}/GCC-RELEASE/application/Debug/bin
-	cp -f ${BINARY_PATH}/sdram.bin ${OUTPUT_PATH}/
-	cp -f ${BINARY_PATH}/ram_all.bin ${OUTPUT_PATH}/
-	cp -f ${BINARY_PATH}/ram_2.bin ${OUTPUT_PATH}/
-	cp -f ${BINARY_PATH}/ota.bin ${OUTPUT_PATH}/
+	BINARY_PATH=${PROJECT}/GCC-RELEASE/application_is/Debug/bin
+	cp -f ${BINARY_PATH}/flash_is.bin ${OUTPUT_PATH}/
+	cp -f ${BINARY_PATH}/firmware_is.bin ${OUTPUT_PATH}/
 
 	mkdir ${OUTPUT_PATH}/debug
-	cp -f ${BINARY_PATH}/application.map ${OUTPUT_PATH}/debug/
+	cp -f ${BINARY_PATH}/application_is.map ${OUTPUT_PATH}/debug/
 	echo "-------------------------------------------------"
 	echo "binary path: ${OUTPUT_PATH}"
 	echo "-------------------------------------------------"
@@ -83,11 +81,19 @@ fi
 
 
 pushd ${PROJECT}/GCC-RELEASE/ > /dev/null
-make clean
+# make clean
 #ignore APP_NAME
 shift 2
 
 make IMAGE_NAME=dnakit-st $* 2>&1 | tee build.log
+
+if [ -e application/Debug/bin/application.map ] && [ -e application/Debug/bin/application.nmap ]; then
+    # show remaining heap size
+    msp_ram=$(grep MSP_RAM application/Debug/bin/application.map | awk '{ print $2 }')
+    end=$(grep " end$" application/Debug/bin/application.nmap | awk '{ printf $1}')
+    echo -n "Remaining heap is "
+    awk "BEGIN { print $msp_ram - 0x$end }"
+fi
 
 popd > /dev/null
 if [ ${OUTPUT_BUILD} = y ]; then

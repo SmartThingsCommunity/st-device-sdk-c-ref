@@ -29,6 +29,7 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "task.h"
+#include <stdlib.h>
 
 #define PWM_LEVEL 10
 // onboarding_config_start is null-terminated string
@@ -66,6 +67,8 @@ extern gpio_t gpio_ctrl_g;
 extern gpio_t gpio_ctrl_b;
 extern gpio_t gpio_ctrl_button;
 extern gtimer_t level_timer;
+
+//#define SET_PIN_NUMBER_CONFRIM
 
 /* Send integer type capability to SmartThings Sever */
 static void send_capability_integer(IOT_CAP_HANDLE *handle, char* attribute_name, int value)
@@ -374,10 +377,20 @@ static void smartlamp_task(void *arg)
 	}
 }
 
+#if defined(SET_PIN_NUMBER_CONFRIM)
+void* pin_num_memcpy(void *dest, const void *src, unsigned int count)
+{
+	unsigned int i;
+	for (i = 0; i < count; i++)
+		*((char*)dest + i) = *((char*)src + i);
+	return dest;
+}
+#endif
+
 void app_main(void)
 {
 	/**
-	  SmartThings Device Kit(STDK) aims to make it easier to develop IoT devices by providing
+	  SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
 	  additional st_iot_core layer to the existing chip vendor SW Architecture.
 
 	  That is, you can simply develop a basic application by just calling the APIs provided by st_iot_core layer
@@ -401,9 +414,9 @@ void app_main(void)
 
 //	IOT_CTX* ctx = NULL;
 	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
-	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start - 1;
+	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
 	unsigned char *device_info = (unsigned char *) device_info_start;
-	unsigned int device_info_len = device_info_end - device_info_start - 1;
+	unsigned int device_info_len = device_info_end - device_info_start;
 	IOT_CAP_HANDLE* switch_handle = NULL;
 	IOT_CAP_HANDLE* color_handle = NULL;
 	IOT_CAP_HANDLE* level_handle = NULL;
@@ -457,6 +470,23 @@ void app_main(void)
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartlamp_task, "smartlamp_task", 2048, (void *)switch_handle, 10, NULL);
 
+#if defined(SET_PIN_NUMBER_CONFRIM)
+	iot_pin_t *pin_num;
+
+	pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
+	if(!pin_num)
+		printf("failed to malloc for iot_pin_t\n");
+
+	// 5. to decide the pin confirmation number(ex. "12345678"). It will use for easysetup.
+	//	  pin confirmation number must be 8 digit number.
+	pin_num_memcpy(pin_num, "12345678", sizeof(iot_pin_t));
+
+	// 6. process on-boarding procedure. There is nothing more to do on the app side than call the API.
+	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
+
+	free(pin_num);
+#else
 	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
+#endif
 }

@@ -20,7 +20,7 @@ CORE_PATH="${PWD}/iot-core"
 if [ -e ${STDK_PATH}/.git ]; then
   BUILD_ID_STDK=`git log --pretty=format:'%h' -n 1`
 else
-  BUILD_ID_STDK=`date +%H:%M`
+  BUILD_ID_STDK=`date +%H%M`
 fi
 
 if [ -e ${CORE_PATH}/.git ]; then
@@ -28,7 +28,7 @@ if [ -e ${CORE_PATH}/.git ]; then
   BUILD_ID_CORE=`git log --pretty=format:'%h' -n 1`
   cd ${STDK_PATH}
 else
-  BUILD_ID_CORE=`date +%H:%M`
+  BUILD_ID_CORE=`date +%H%M`
 fi
 
 BUILD_ID=${BUILD_ID_STDK}_${BUILD_ID_CORE}
@@ -134,7 +134,7 @@ cp -f ${PROJECT_PATH}/build/bootloader/bootloader.map ${OUTPUT_PATH}/debug/
 cp -f ${PROJECT_PATH}/sdkconfig ${OUTPUT_PATH}/debug/sdkconfig
 
 BUILD_INFO_FILE=${OUTPUT_PATH}/debug/build_info.txt
-date "+%Y/%m/%d %H:%M:%S" > ${BUILD_INFO_FILE}
+date "+%Y/%m/%d %H%M:%S" > ${BUILD_INFO_FILE}
 echo "---------------------------------------------------------" >> ${BUILD_INFO_FILE}
 
 

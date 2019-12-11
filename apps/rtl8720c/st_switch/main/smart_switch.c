@@ -15,7 +15,8 @@
  * language governing permissions and limitations under the License.
  *
  ****************************************************************************/
-#include <stdbool.h>
+
+#include "platform_stdlib.h"
 #include "st_dev.h"
 #include "PinNames.h"
 #include <gpio_api.h>
@@ -43,15 +44,12 @@ static int smartswitch_switch_state = SMARTSWITCH_SWITCH_ON;
 #define BUTTON_LONG_THRESHOLD_MS 5000
 #define BUTTON_DELAY_MS 300
 
-
-#define GPIO_OUTPUT_COLORLED_0 PC_5
-#define GPIO_OUTPUT_NOTIFICATION_LED PC_4
-#define GPIO_INPUT_BUTTON PC_1
+#define GPIO_OUTPUT_NOTIFICATION_LED PA_23
+#define GPIO_INPUT_BUTTON PA_4
 #define BUTTON_LONG_PRESS	0
 #define BUTTON_SHORT_PRESS	1
 
 gpio_t gpio_ctrl_noti;
-gpio_t gpio_ctrl_zero;
 gpio_t gpio_ctrl_button;
 
 static xQueueHandle button_event_queue = NULL;
@@ -119,7 +117,7 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 					led_state_switch(SMARTSWITCH_SWITCH_OFF);
 					led_switch(0);
 				} else {
-					led_state_switch(SMARTSWITCH_SWITCH_ON);
+	led_state_switch(SMARTSWITCH_SWITCH_ON);
 					led_switch(1);
 				}
 				break;
@@ -154,7 +152,7 @@ static void iot_status_cb(iot_status_t status,
 	}
 }
 
-bool get_button_event(int* button_event_type, int* button_event_count)
+int get_button_event(int* button_event_type, int* button_event_count)
 {
 	static uint32_t button_count = 0;
 	static uint32_t button_last_state = BUTTON_GPIO_RELEASED;
@@ -200,25 +198,18 @@ bool get_button_event(int* button_event_type, int* button_event_count)
 
 void led_button_init(void)
 {
-	//0 init
-	gpio_init(&gpio_ctrl_zero, GPIO_OUTPUT_COLORLED_0);
-	gpio_mode(&gpio_ctrl_zero, PullDown);
-	gpio_dir(&gpio_ctrl_zero, PIN_OUTPUT);
-	gpio_write(&gpio_ctrl_zero, 0);
-
 	//notify led init
 	gpio_init(&gpio_ctrl_noti, GPIO_OUTPUT_NOTIFICATION_LED);
 	gpio_mode(&gpio_ctrl_noti, PullNone);
 	gpio_dir(&gpio_ctrl_noti, PIN_OUTPUT);
 	gpio_write(&gpio_ctrl_noti, 1);
-	led_state_switch(SMARTSWITCH_SWITCH_ON);
 
 	//button init
 	gpio_init(&gpio_ctrl_button, GPIO_INPUT_BUTTON);
 	gpio_mode(&gpio_ctrl_button, PullUp);
 	gpio_dir(&gpio_ctrl_button, PIN_INPUT);
-
 }
+
 void cap_switch_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 {
 	IOT_EVENT *init_evt;
@@ -242,6 +233,7 @@ void cap_switch_cmd_off_cb(IOT_CAP_HANDLE *handle,
 {
 	led_switch(0);
 }
+
 
 void cap_switch_cmd_on_cb(IOT_CAP_HANDLE *handle,
 			iot_cap_cmd_data_t *cmd_data, void *usr_data)
@@ -307,8 +299,6 @@ void app_main(void)
 	unsigned int device_info_len = device_info_end - device_info_start;
 	int iot_err;
 
-	printf("APP_MAIN_START >>PT<<\r\n");
-
 	// 1. create a iot context
 	ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
 	if (ctx != NULL) {
@@ -335,15 +325,12 @@ void app_main(void)
 		printf("fail to create the iot_context\r\n");
 	}
 
-	printf("IOT_INIT_DONE >>PT<<\r\n");
-
 	led_button_init();
+
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartswitch_task, "smartswitch_task", 2048, (void *)handle, 10, NULL);
 
 	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
-
-	printf("IOT_CONNECT_DONE >>PT<<\r\n");
 
 }

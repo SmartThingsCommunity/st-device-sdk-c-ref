@@ -1,0 +1,35 @@
+From 8ce36e8ca00157ee15f3723b71182be823e01544 Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Thu, 24 Oct 2019 11:46:32 +0800
+Subject: [PATCH 5/6] Update utilities for iot-core
+
+Change-Id: Ibd3f75ee6955bb9c5efc7d53ed92505a64e37509
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ .../soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c    | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c b/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
+index 712c717..94d4089 100644
+--- a/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
++++ b/component/soc/realtek/8710c/misc/utilities/source/ram/libc_wrap.c
+@@ -195,6 +195,16 @@ void *__wrap_memset(void *dst0, int val, size_t length)
+ // define in AmebaPro utilites/include/strporc.h
+ // replace by linking command
+ #include "strproc.h"
++char *__wrap_strdup(char const *src)
++{
++	int len = strlen(src);
++	void * dst = calloc(1, len + 1);
++	if(dst) {
++		memcpy(dst, src, len);
++	}
++	return dst;
++}
++
+ char *__wrap_strcat(char *dest,  char const *src)
+ {
+ 	return strcat(dest, src);
+-- 
+2.7.4
+

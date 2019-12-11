@@ -1,0 +1,406 @@
+From 4b06ac47f69b7f05df1401259d255ebf82c9d68c Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Thu, 24 Oct 2019 13:28:31 +0800
+Subject: [PATCH 6/6] Update amebaz2 rtl8720c configuration
+
+Change-Id: Iea495180639aea697abadd115fe77d87c3749e6e
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ .../GCC-RELEASE/application.is.mk                  | 169 ++++++++++++++-------
+ .../GCC-RELEASE/config.mk                          |  43 ++++++
+ project/realtek_amebaz2_v0_example/src/main.c      |  40 +++--
+ 3 files changed, 172 insertions(+), 80 deletions(-)
+ create mode 100644 project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
+
+diff --git a/project/realtek_amebaz2_v0_example/GCC-RELEASE/application.is.mk b/project/realtek_amebaz2_v0_example/GCC-RELEASE/application.is.mk
+index 651ba5b..e685457 100644
+--- a/project/realtek_amebaz2_v0_example/GCC-RELEASE/application.is.mk
++++ b/project/realtek_amebaz2_v0_example/GCC-RELEASE/application.is.mk
+@@ -41,6 +41,8 @@ OS := $(shell uname)
+ 
+ LDSCRIPT := ./rtl8710c_ram.ld
+ 
++include config.mk
++
+ # Initialize target name and target object files
+ # -------------------------------------------------------------------
+ 
+@@ -85,11 +87,13 @@ INCLUDES += -I../../../component/common/mbed/targets/hal/rtl8710c
+ INCLUDES += -I../../../component/common/network
+ INCLUDES += -I../../../component/common/network/coap/include
+ INCLUDES += -I../../../component/common/network/http2/nghttp2-1.31.0/includes
++INCLUDES += -I../../../component/common/network/lwip/lwip_v2.0.2/src/include/posix
+ INCLUDES += -I../../../component/common/network/lwip/lwip_v2.0.2/src/include
+ INCLUDES += -I../../../component/common/network/lwip/lwip_v2.0.2/src/include/lwip
+ INCLUDES += -I../../../component/common/network/lwip/lwip_v2.0.2/port/realtek
+ INCLUDES += -I../../../component/common/network/lwip/lwip_v2.0.2/port/realtek/freertos
+ INCLUDES += -I../../../component/common/network/ssl/mbedtls-2.4.0/include
++INCLUDES += -I../../../component/common/network/ssl/mbedtls-2.4.0/include/mbedtls
+ INCLUDES += -I../../../component/common/network/ssl/ssl_ram_map/rom
+ INCLUDES += -I../../../component/common/drivers/wlan/realtek/include
+ INCLUDES += -I../../../component/common/drivers/wlan/realtek/src/osdep
+@@ -115,6 +119,10 @@ INCLUDES += -I../../../component/os/freertos/freertos_v10.0.1/Source/include
+ INCLUDES += -I../../../component/os/freertos/freertos_v10.0.1/Source/portable/GCC/ARM_RTL8710C
+ INCLUDES += -I../../../component/os/os_dep/include
+ 
++INCLUDES += -I../../../component/common/network/ssl/openssl/include/
++INCLUDES += -I../../../component/common/network/ssl/openssl/include/internal
++INCLUDES += -I../../../component/common/network/ssl/openssl/include/platform
++
+ # Source file list
+ # -------------------------------------------------------------------
+ 
+@@ -167,22 +175,23 @@ SRC_C += ../../../component/common/api/network/src/wlan_network.c
+ 
+ #utilities
+ SRC_C += ../../../component/common/utilities/cJSON.c
++SRC_C += ../../../component/common/utilities/cJSON_Utils.c
+ SRC_C += ../../../component/common/utilities/http_client.c
+ SRC_C += ../../../component/common/utilities/xml.c
+ 
+ #network - app - mqtt
+-SRC_C += ../../../component/common/application/mqtt/MQTTClient/MQTTClient.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTConnectClient.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTConnectServer.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTDeserializePublish.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTFormat.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTClient/MQTTFreertos.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTPacket.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSerializePublish.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSubscribeClient.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSubscribeServer.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTUnsubscribeClient.c
+-SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTUnsubscribeServer.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTClient/MQTTClient.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTConnectClient.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTConnectServer.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTDeserializePublish.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTFormat.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTClient/MQTTFreertos.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTPacket.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSerializePublish.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSubscribeClient.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTSubscribeServer.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTUnsubscribeClient.c
++#SRC_C += ../../../component/common/application/mqtt/MQTTPacket/MQTTUnsubscribeServer.c
+ 
+ #network - coap
+ SRC_C += ../../../component/common/network/coap/sn_coap_ameba_port.c
+@@ -197,9 +206,10 @@ SRC_C += ../../../component/common/network/httpd/httpd_tls.c
+ 
+ #network
+ SRC_C += ../../../component/common/network/dhcp/dhcps.c
+-SRC_C += ../../../component/common/network/sntp/sntp.c
+ 
+ #network - lwip
++SRC_C += ../../../component/common/network/lwip/lwip_v2.0.2/src/apps/sntp/sntp.c
++
+ #network - lwip - api
+ SRC_C += ../../../component/common/network/lwip/lwip_v2.0.2/src/api/api_lib.c
+ SRC_C += ../../../component/common/network/lwip/lwip_v2.0.2/src/api/api_msg.c
+@@ -261,56 +271,87 @@ SRC_C += ../../../component/common/network/lwip/lwip_v2.0.2/port/realtek/freerto
+ #network - mdns
+ SRC_C += ../../../component/common/network/mDNS/mDNSPlatform.c
+ 
++#libsodium
++SODIUM_DIR =  ../../../component/common/libsodium
++include $(SODIUM_DIR)/component.mk
++SRC_C += $(LIBSODIUM_C)
++
++#st_iot_core
++ST_IOT_CORE_DIR = $(COMPONENT_PATH)
++include $(ST_IOT_CORE_DIR)/component.mk
++INCLUDES += $(CPPFLAGS)
++INCLUDES += -I$(PROJECT_PATH)
++IOT_CORE_EXCLUDE_C += $(ST_IOT_CORE_DIR)/easysetup/http/lwip_httpd/fsdata_custom.c
++IOT_CORE_C += $(foreach srcdir,$(COMPONENT_SRCDIRS),$(wildcard $(ST_IOT_CORE_DIR)/$(srcdir)/*.c))
++SRC_C += $(filter-out $(IOT_CORE_EXCLUDE_C), $(IOT_CORE_C))
++INCLUDES += $(foreach inc,$(COMPONENT_ADD_INCLUDEDIRS), -I$(ST_IOT_CORE_DIR)/$(inc))
++
++#openssl
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_cert.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_lib.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_methods.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_pkey.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_stack.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/library/ssl_x509.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/platform/ssl_pm.c
++SRC_C += ../../../component/common/network/ssl/openssl/source/platform/ssl_pm_extend.c
++
+ #network - ssl - mbedtls
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/aesni.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/blowfish.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/camellia.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ccm.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/certs.c
++#mbedtls
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/base64.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/sha256.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ctr_drbg.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ecdh.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ecp.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/entropy.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/bignum.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/aes.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/sha512.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/entropy_poll.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ecp_curves.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/timing.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkparse.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pk.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/asn1parse.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/rsa.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/oid.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkcs12.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pem.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/rsa_internal.c
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/cipher.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/cipher_wrap.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/cmac.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/debug.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/error.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkcs5.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/arc4.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md5.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/des.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pk_wrap.c
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/gcm.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/havege.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md2.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md4.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/cipher_wrap.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ecdsa.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ccm.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/camellia.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/blowfish.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/hmac_drbg.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/asn1write.c
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/md_wrap.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/memory_buffer_alloc.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/net_sockets.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/padlock.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkcs11.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkcs12.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkcs5.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/pkparse.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/platform.c
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ripemd160.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/sha256.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_cache.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_ciphersuites.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/sha1.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509_crt.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_tls.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/debug.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/dhm.c
++
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_cli.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_cookie.c
+ SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_srv.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_ticket.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_tls.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/threading.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/timing.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/version.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/version_features.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509_create.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509_crl.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509_crt.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509_csr.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509write_crt.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/x509write_csr.c
+-SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/xtea.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/ssl_ciphersuites.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/library/net_sockets.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/port/rtl8710/net.c
++SRC_C += ../../../component/common/network/ssl/mbedtls-2.4.0/port/rtl8710/rtl_hardware.c
+ 
+ #network - ssl - ssl_ram_map
+-SRC_C += ../../../component/common/network/ssl/ssl_ram_map/rom/rom_ssl_ram_map.c
+-SRC_C += ../../../component/common/network/ssl/ssl_func_stubs/ssl_func_stubs.c
++#SRC_C += ../../../component/common/network/ssl/ssl_ram_map/rom/rom_ssl_ram_map.c
++#SRC_C += ../../../component/common/network/ssl/ssl_func_stubs/ssl_func_stubs.c
+ 
+ #network - websocket
+ SRC_C += ../../../component/common/network/websocket/wsclient_tls.c
+@@ -416,7 +457,7 @@ SRC_C += ../../../component/common/example/fatfs/example_fatfs.c
+ 
+ #user
+ SRC_C += ../src/main.c
+-
++SRC_C += $(wildcard $(PROJECT_PATH)/main/*.c)
+ #SRAM
+ # -------------------------------------------------------------------
+ #@SRAM
+@@ -435,12 +476,14 @@ ERAM_O = $(patsubst %.c,%_$(TARGET).o,$(ERAM_C))
+ 
+ SRC_C_LIST = $(notdir $(SRC_C)) $(notdir $(SRAM_C)) $(notdir $(ERAM_C))
+ OBJ_LIST = $(addprefix $(OBJ_DIR)/,$(patsubst %.c,%_$(TARGET).o,$(SRC_C_LIST)))
++PROJECT_PROFILE_LIST += onboarding_config.json device_info.json
++OBJ_LIST += $(foreach profile,$(PROJECT_PROFILE_LIST), $(OBJ_DIR)/$(profile).o)
+ DEPENDENCY_LIST = $(addprefix $(OBJ_DIR)/,$(patsubst %.c,%_$(TARGET).d,$(SRC_C_LIST)))
+ 
+ # Compile options
+ # -------------------------------------------------------------------
+ 
+-CFLAGS =
++CFLAGS += -std=gnu99
+ CFLAGS += -march=armv8-m.main+dsp -mthumb -mcmse -mfloat-abi=soft -D__thumb2__ -g -gdwarf-3 -O2
+ CFLAGS += -D__ARM_ARCH_8M_MAIN__=1 -gdwarf-3 -fstack-usage -fdata-sections -ffunction-sections 
+ CFLAGS += -fdiagnostics-color=always -Wall -Wpointer-arith -Wstrict-prototypes -Wundef -Wno-write-strings 
+@@ -448,7 +491,7 @@ CFLAGS += -Wno-maybe-uninitialized --save-temps -c -MMD
+ CFLAGS += -DCONFIG_PLATFORM_8710C -DCONFIG_BUILD_RAM=1
+ CFLAGS += -DV8M_STKOVF
+ 
+-LFLAGS = 
++LFLAGS +=
+ LFLAGS += -O2 -march=armv8-m.main+dsp -mthumb -mcmse -mfloat-abi=soft -nostartfiles -nodefaultlibs -nostdlib -specs=nosys.specs
+ LFLAGS += -Wl,--gc-sections -Wl,--warn-section-align -Wl,--cref -Wl,--build-id=none -Wl,--use-blx
+ LFLAGS += -Wl,-Map=$(BIN_DIR)/$(TARGET).map
+@@ -469,7 +512,9 @@ LFLAGS += -Wl,-wrap,memcmp  -Wl,-wrap,memcpy
+ LFLAGS += -Wl,-wrap,memmove -Wl,-wrap,memset
+ LFLAGS += -Wl,-wrap,printf  -Wl,-wrap,sprintf
+ LFLAGS += -Wl,-wrap,puts  -Wl,-wrap,putc -Wl,-wrap,putchar
+-LFLAGS += -Wl,-wrap,snprintf  -Wl,-wrap,vsnprintf
++#LFLAGS += -Wl,-wrap,snprintf  -Wl,-wrap,vsnprintf
++LFLAGS += -Wl,-wrap,vprintf
++LFLAGS += -Wl,-wrap,strdup
+ LFLAGS += -Wl,-wrap,aesccmp_construct_mic_iv
+ LFLAGS += -Wl,-wrap,aesccmp_construct_mic_header1
+ LFLAGS += -Wl,-wrap,aesccmp_construct_ctr_preload
+@@ -478,7 +523,7 @@ LFLAGS += -Wl,-wrap,rom_psk_CalcPTK
+ LFLAGS += -Wl,-wrap,aes_80211_encrypt
+ LFLAGS += -Wl,-wrap,aes_80211_decrypt
+ 
+-LIBFLAGS =
++LIBFLAGS +=
+ LIBFLAGS += -L$(AMEBAZ2_ROMSYMDIR)
+ LIBFLAGS += -Wl,--start-group ../../../component/soc/realtek/8710c/fwlib/lib/lib/hal_pmc.a -Wl,--end-group
+ LIBFLAGS += -L../../../component/soc/realtek/8710c/misc/bsp/lib/common/GCC -l_soc_is -l_http -l_dct -l_eap -l_p2p -l_websocket -l_wps
+@@ -552,6 +597,12 @@ prerequirement:
+ 	mkdir -p $(BIN_DIR)
+ 	mkdir -p $(BOOT_BIN_DIR)
+ 	mkdir -p $(INFO_DIR)
++	for profiles in $(PROJECT_PROFILE_LIST); \
++		do\
++			cp $(PROJECT_PATH)/main/$$profiles .; \
++			$(OBJCOPY) -I binary -O elf32-littlearm -B arm $$profiles $(OBJ_DIR)/$$profiles.o; \
++			rm $$profiles; \
++		done
+ 
+ $(SRC_O): %_$(TARGET).o : %.c
+ 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+diff --git a/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk b/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
+new file mode 100644
+index 0000000..c384f8c
+--- /dev/null
++++ b/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
+@@ -0,0 +1,43 @@
++########################################
++# Config
++########################################
++
++#/* For STDK */
++CONFIG_STDK_IOT_CORE=y
++CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP=y
++CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
++CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8720C=y
++CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
++
++ifeq ($(CONFIG_STDK_IOT_CORE),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_USE_MBEDTLS),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_USE_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195
++endif
++
++ifeq ($(CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP),y)
++CFLAGS += -DCONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION
++endif
++
++ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
++CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++endif
+diff --git a/project/realtek_amebaz2_v0_example/src/main.c b/project/realtek_amebaz2_v0_example/src/main.c
+index b20e44a..1653214 100644
+--- a/project/realtek_amebaz2_v0_example/src/main.c
++++ b/project/realtek_amebaz2_v0_example/src/main.c
+@@ -1,33 +1,31 @@
++
++#include <stdio.h>
++#include <stdlib.h>
++
+ #include "FreeRTOS.h"
+ #include "task.h"
+-#include "diag.h"
+-#include "main.h"
+-#include <example_entry.h>
++
+ 
+ extern void console_init(void);
++extern void app_main(void);
++
++static void user_init_entry(void *arg)
++{
++	printf("user_init_entry...\r\n");
++
++	// Call app_main() to start user application
++	app_main();
++
++	vTaskDelete(NULL);
++}
+ 
+ /**
+   * @brief  Main program.
+   * @param  None
+   * @retval None
+   */
+-int main(void)
++void main(void)
+ {
+-	/* Initialize log uart and at command service */
+-	console_init();
+-
+-	/* pre-processor of application example */
+-	pre_example_entry();
+-
+-	/* wlan intialization */
+-	wlan_network();
+-
+-	/* Execute application example */
+-	example_entry();
+-
+-	/* Enable Schedule, Start Kernel */
++	xTaskCreate(user_init_entry, "user_init_entry", 8192, NULL, 10, NULL);
+ 	vTaskStartScheduler();
+-
+-	/* Should NEVER reach here */
+-	return 0;
+-}
+\ No newline at end of file
++}
+-- 
+2.7.4
+

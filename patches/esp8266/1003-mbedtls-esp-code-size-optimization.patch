@@ -716,24 +716,6 @@ index c869e8d3..45ad60ef 100644
  }
  
  #if defined(MBEDTLS_X509_CHECK_KEY_USAGE)
-@@ -1763,6 +1777,9 @@ static int x509_memcasecmp( const void *s1, const void *s2, size_t len )
-  */
- static int x509_check_wildcard( const char *cn, mbedtls_x509_buf *name )
- {
-+#if defined(MBEDTLS_IOT_CORE_OPTIM)
-+    return -1;
-+#else
-     size_t i;
-     size_t cn_idx = 0, cn_len = strlen( cn );
- 
-@@ -1788,6 +1805,7 @@ static int x509_check_wildcard( const char *cn, mbedtls_x509_buf *name )
-     }
- 
-     return( -1 );
-+#endif
- }
- 
- /*
 -- 
 2.17.1
 

@@ -1,0 +1,104 @@
+From 8e7fb5669a28eaed7ac6eda591fed5acc296337b Mon Sep 17 00:00:00 2001
+From: Kai Lv <kai.lv@samsung.com>
+Date: Thu, 24 Oct 2019 11:45:16 +0800
+Subject: [PATCH 4/6] Updatge network for iot-core
+
+Change-Id: I01e7b53f6d65ed45c361165e3cea54843f6ade3f
+Signed-off-by: Kai Lv <kai.lv@samsung.com>
+---
+ .../common/network/lwip/lwip_v2.0.2/port/realtek/arch/cc.h    |  1 +
+ .../lwip/lwip_v2.0.2/src/include/lwip/apps/sntp_opts.h        | 11 +++++++++--
+ .../common/network/lwip/lwip_v2.0.2/src/include/lwip/opt.h    |  2 +-
+ .../network/lwip/lwip_v2.0.2/src/include/lwip/sockets.h       |  2 +-
+ component/common/utilities/tcptest.c                          |  1 +
+ 5 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/component/common/network/lwip/lwip_v2.0.2/port/realtek/arch/cc.h b/component/common/network/lwip/lwip_v2.0.2/port/realtek/arch/cc.h
+index b0598db..a1c0584 100644
+--- a/component/common/network/lwip/lwip_v2.0.2/port/realtek/arch/cc.h
++++ b/component/common/network/lwip/lwip_v2.0.2/port/realtek/arch/cc.h
+@@ -33,6 +33,7 @@
+ #define __CC_H__
+ 
+ #include "cpu.h"
++#include <sys/time.h>
+ 
+ typedef unsigned   char    u8_t;
+ typedef signed     char    s8_t;
+diff --git a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/apps/sntp_opts.h b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/apps/sntp_opts.h
+index f3651f9..c7c5e8b 100644
+--- a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/apps/sntp_opts.h
++++ b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/apps/sntp_opts.h
+@@ -53,6 +53,13 @@
+ #define SNTP_SET_SYSTEM_TIME(sec)   LWIP_UNUSED_ARG(sec)
+ #endif
+ 
++#include <sys/time.h>
++#define SNTP_SET_SYSTEM_TIME_US(sec, us)  \
++    do { \
++        struct timeval tv = { .tv_sec = sec, .tv_usec = us }; \
++        settimeofday(&tv, NULL); \
++    } while (0);
++
+ /** The maximum number of SNTP servers that can be set */
+ #if !defined SNTP_MAX_SERVERS || defined __DOXYGEN__
+ #define SNTP_MAX_SERVERS           LWIP_DHCP_MAX_NTP_SERVERS
+@@ -69,7 +76,7 @@
+  * \#define SNTP_SERVER_ADDRESS "pool.ntp.org"
+  */
+ #if !defined SNTP_SERVER_DNS || defined __DOXYGEN__
+-#define SNTP_SERVER_DNS            0
++#define SNTP_SERVER_DNS            1
+ #endif
+ 
+ /**
+@@ -86,7 +93,7 @@
+ 
+ /** Set this to 1 to allow config of SNTP server(s) by DNS name */
+ #if !defined SNTP_SERVER_DNS || defined __DOXYGEN__
+-#define SNTP_SERVER_DNS             0
++#define SNTP_SERVER_DNS             1
+ #endif
+ 
+ /** Sanity check:
+diff --git a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/opt.h b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/opt.h
+index fd459af..7f9f8e0 100644
+--- a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/opt.h
++++ b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/opt.h
+@@ -880,7 +880,7 @@
+  * The maximum of NTP servers requested
+  */
+ #if !defined LWIP_DHCP_MAX_NTP_SERVERS || defined __DOXYGEN__
+-#define LWIP_DHCP_MAX_NTP_SERVERS       1
++#define LWIP_DHCP_MAX_NTP_SERVERS       10
+ #endif
+ 
+ /**
+diff --git a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/sockets.h b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/sockets.h
+index bd457d2..053683b 100644
+--- a/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/sockets.h
++++ b/component/common/network/lwip/lwip_v2.0.2/src/include/lwip/sockets.h
+@@ -434,7 +434,7 @@ typedef struct fd_set
+ /** LWIP_TIMEVAL_PRIVATE: if you want to use the struct timeval provided
+  * by your system, set this to 0 and include <sys/time.h> in cc.h */
+ #ifndef LWIP_TIMEVAL_PRIVATE
+-#define LWIP_TIMEVAL_PRIVATE 1
++#define LWIP_TIMEVAL_PRIVATE 0
+ #endif
+ 
+ #if LWIP_TIMEVAL_PRIVATE
+diff --git a/component/common/utilities/tcptest.c b/component/common/utilities/tcptest.c
+index 59b9fc1..db284d9 100644
+--- a/component/common/utilities/tcptest.c
++++ b/component/common/utilities/tcptest.c
+@@ -7,6 +7,7 @@
+ #include <lwip/icmp.h>
+ #include <lwip/inet_chksum.h>
+ #include <platform/platform_stdlib.h>
++#include <sys/time.h>
+ 
+ #define BSD_STACK_SIZE		    512
+ #define DEFAULT_PORT            5001
+-- 
+2.7.4
+

@@ -22,20 +22,20 @@ The first thing you need to do is set up your programming environment.
 
 ### Get STDK source code
 
-There are two git repositories for working with the SmartThinks SDK. One git repository has the core Internet of Things (IoT) library while the second git repository has example device applications.
+There are two git repositories for working with the SmartThings Device SDK. The first git repository has the Internet of Things (IoT) core device library while the second git repository has sample device applications for reference.
 
 - [IoT Core Device Library](https://github.com/SmartThingsCommunity/st-device-sdk-c)
 - [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref)
 
 #### Download [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref)
 
-You can choose to only download the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) from git, if you have already ported your project. The `IoT Core Device Library` is downloaded as a submodule in the `Reference`.
+You can choose to only download the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository from git, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` can be easily downloaded as a submodule in the `Reference` by the predefined `setup.sh` script. If you are the first to use this STDK, we strongly recommend  that you choose the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository for easier understanding.
 
 From the terminal, navigate to the directory you want the STDK to live and clone it using the following git command:
 
 ```sh
-cd ~
-git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
+$ cd ~
+$ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
 ```
 
 > **Note** : For the rest of this document, we will assume the above path (~/st-device-sdk-c-ref) is the default reference source code.
@@ -43,42 +43,45 @@ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
 You can use a script to setup a chipset SDK as follows:
 
 ```sh
-cd ~/st-device-sdk-c-ref
-./setup.sh
+$ cd ~/st-device-sdk-c-ref
+$ ./setup.sh
     Usage: ./setup.sh CHIP_NAME
 - - - - - - - - - - - - - - - - - - -
     ex) ./setup.sh esp8266
     ex) ./setup.sh esp32
     ex) ./setup.sh rtl8195
+    ex) ./setup.sh rtl8720c
 
-./setup.sh esp8266                       # ./setup.sh {chip_name}
+$ ./setup.sh esp8266                       # ./setup.sh {chip_name}
 ```
 
-#### Create device identity
+### Create device identity
 
-In order for your IoT device to connect to the SmartThings Cloud, there are authentication data files required. To create authentication data, you must know your MNID in the personal information window of  [Developer Workspace](https://smartthings.developer.samsung.com/workspace/). Please sign in with Samsung Account and check your MNID first.
+In order for your IoT device to connect to the SmartThings Cloud, there are required authentication data files. To create these authentication data, you must know your MNID in the personal information window of  [Developer Workspace](https://smartthings.developer.samsung.com/workspace/). Please sign in with Samsung Account and check your MNID first.
 
 Open a terminal window and run the following `stdk-keygen` command to create a Device Identity.
 
 ```sh
 $ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/linux
-i$ ./stdk-keygen -h
+$ ./stdk-keygen -h
 usage: stdk-keygen -m MNID [-f firmware_version]
-$
+
 $ ./stdk-keygen -m **** -f V201910       # replace '****' with your MNID
-For Device Identity of Developer Workspace,
+Go Device Identity of Developer Workspace.
 
 Serial Number:
-STDK************
+┌──────────┬──────────┐
+│ STDK**** │ ce**2**3 │
+└──────────┴──────────┘
 
 Public Key:
-********************************************
-$
+1D********a21F********8WwP********yU/n8vFvM=
+
 $ tree
 .
 ├── ed25519.pubkey
 ├── ed25519.seckey
-└── output_STDK************
+└── output_STDK****ce**2**3
     └── device_info.json
 ```
 
@@ -86,7 +89,7 @@ Copy the Serial Number and Public Key after you run the command on your computer
 
 If you create a device identity with a command with an option like above,  You can get the ready-to-use device_info.json file directly.
 
-#### Setup toolchain
+### Setup toolchain
 
 You must setup a toolchain according to each chipset you selected.
 
@@ -104,7 +107,7 @@ You must setup a toolchain according to each chipset you selected.
    *Get the following packages :*
 
    ```sh
-   sudo apt-get install gcc git wget make libncurses-dev flex bison gperf python python-pip python-setuptools python-serial python-cryptography python-future python-pyparsing python-pyelftools
+   $ sudo apt-get install gcc git wget make libncurses-dev flex bison gperf python python-pip python-setuptools python-serial python-cryptography python-future python-pyparsing python-pyelftools
    ```
 
    > ***Note :***
@@ -124,9 +127,9 @@ You must setup a toolchain according to each chipset you selected.
    *Once the file is downloaded, extract it in the ~/esp directory.*
 
    ```sh
-   mkdir -p ~/esp
-   cd ~/esp
-   tar -xzf ~/Downloads/xtensa-lx106-elf-linux64-1.22.0-92-g8facf4c-5.2.0.tar.gz
+   $ mkdir -p ~/esp
+   $ cd ~/esp
+   $ tar -xzf ~/Downloads/xtensa-lx106-elf-linux64-1.22.0-92-g8facf4c-5.2.0.tar.gz
    ```
 
    *The above command places the files in the ~/esp/xtensa-lx106-elf/ directory.*
@@ -171,7 +174,9 @@ Click the "GO TO DEVICE ONBOARDING" and then, enter the all remaining informatio
 
 ### Deploy to test
 
-You can publish it on the SmartThings catalog server. And then you will be able to access your device in the SmartThings app.
+You can publish your device to the SmartThings platform for testing. And then you will be able to access your device through the SmartThings app. Actually this step is for self-testing. If you officially want to publish your device with enrolled organizations ID(e.g. company MNID), please refer to the process below.
+
+- [Official Publishing Process](https://smartthings.developer.samsung.com/docs/devices/publishing/publishing-basics.html)
 
 <img src="res/deploy_to_test.jpg" style="zoom:50%;" align="left"/>
 
@@ -195,9 +200,9 @@ And then, click ADD button.
 
 ### Download onboarding_config.json
 
-This is the information that the IoT device must have in order to connect to the SmartThings Cloud Server.
+This is the information that the IoT device must have in order to connect to the SmartThings Cloud. 
 
-Please download it.
+If you use a pre-supplied sample device application, please download it and then, just overwrite the existing `onboarding_config.json` file is in the `main` directory of sample device application with the new one you downloaded.
 
 <img src="res/downloading_onboarding_config_file.jpg" style="zoom:50%;" align="left"/>
 
@@ -218,7 +223,7 @@ An easy way to get started is to branch off of one of the example projects provi
 
 ### Update device information
 
-Your IoT device needs two pieces of information before connecting to the SmartThings Cloud Server:
+Your IoT device needs two pieces of information before connecting to the SmartThings Cloud :
 
 - Device Identity
 - onboarding_config.json
@@ -229,11 +234,17 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
 
    - Individual developer
 
-     All of the data below should be included in the device_info.json file in the `main` directory of the device application.
+     All of the data below should be included in the `device_info.json` file in the `main` directory of the device application.
 
      **[For ED25519]**
 
-     If you create a device identity with a command with an option like `./stdk-keygen -m **** -f V201910` like the first phase,  you can get the ready-to-use device_info.json file directly.
+     If you create a device identity with a command with an option like `./stdk-keygen -m **** -f V201910` like the first phase,  you can get the ready-to-use `device_info.json` file directly. In this case, please make sure you overwrite the existing `device_info.json` file with the new one you created.
+
+     > ***Note :***
+     >
+     > If you are using the `device_info.json` file, please disable the build configuration associated with SmartThings Non-Volatile memory partition as follows. That is, don't set the build configuration below to `y`. :
+     >
+     > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=`
 
      ```sh
      $ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/linux
@@ -241,37 +252,46 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
      .
      ├── ed25519.pubkey
      ├── ed25519.seckey
-     └── output_STDK************
+     └── output_STDK****ce**2**3
          └── device_info.json
 
-     $ cat output_STDK************/device_info.json
+     $ cat output_STDK****ce**2**3/device_info.json
      {
        "deviceInfo": {
          "firmwareVersion": "V201910",
-         "privateKey": "********************************************",
-         "publicKey": "********************************************",
-         "serialNumber": "STDK************"
+         "privateKey": "3d********AOyY********ezJQ********TMKLGxzbQ=",
+         "publicKey": "1D********a21F********8WwP********yU/n8vFvM=",
+         "serialNumber": "STDK****ce**2**3"
        }
      }
+
+     # overwrite device_info.json file
+     $ cp ./output_STDK****ce**2**3/device_info.json ~/st-device-sdk-c-ref/apps/esp8266/st_switch/main/
      ```
 
    -  Manufacturer
 
-     For the manufacturer, we cannot place the device identity files in the source code because it is impossible to build and flash every time for each device. To solve this problem, the production level application should store device identity files for each device in a secure location during the manufacturing process. For example, device identity data will be flashed into the SmartThings Non-Volatile memory location.
+     For the manufacturer, we cannot place the device identity data in the source code because it is impossible to build and flash every time for each device. To solve this problem, the production level application should store device identity data for each device in a secure location during the manufacturing process. For example, device identity data will be flashed into the SmartThings Non-Volatile memory location.
+
+     > ***Note :***
+   >
+     > If you want to flash the device identity data in a specific partition, you should set the build configuration below to `y`. : 
+     >
+     > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=y`
 
      **[For ED25519]**
 
-     | Flashed items | Type | Description                   | Examples          |
-     | :------------ | :--- | :---------------------------- | :---------------- |
-     | PKType        | data | PubKey Algorithm type         | ED25519           |
-     | CACert        | file | Server CA Certificate         | root.crt.pem      |
-     | PublicKey     | file | Client (= Device) Public key  | device.pubkey.b64 |
-     | PrivateKey    | file | Client (= Device) Private key | device.seckey.b64 |
-     | SerialNum     | data | Device Serial Number          | cc50e309dcd0      |
+   | Flashed items | Type | Description                   | Examples          |
+   | :------------ | :--- | :---------------------------- | :---------------- |
+   | PKType        | data | PubKey Algorithm type         | ED25519           |
+   | CACert        | file | Server CA Certificate         | root.crt.pem      |
+   | PublicKey     | file | Client (= Device) Public key  | device.pubkey.b64 |
+   | PrivateKey    | file | Client (= Device) Private key | device.seckey.b64 |
+   | SerialNum     | data | Device Serial Number          | cc50e309dcd0      |
 
 2. onboarding_config.json
 
-   Place the onboarding_config.json file created during the device registration phase in the `main` directory of device application.
+   Place the `onboarding_config.json` file created during the device registration phase in the `main` directory of device application. Please make sure you overwrite the existing `onboarding_config.json` file with the new one you created like `device_info.json` file above.
 
    ***Example***
 
@@ -284,10 +304,10 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
    # Example of onboarding_config.json
    {
      "onboardingConfig": {
-       "deviceOnboardingId": "STDK",
+       "deviceOnboardingId": "T_DOI_SWITCH_001",
        "mnId": "****",
        "setupId": "001",
-       "vid": "STDK_SMARTLAMP_0001",
+       "vid": "T_VID_SWITCH_001",
        "deviceTypeId": "Switch",
        "ownershipValidationTypes": [
          "BUTTON"
@@ -298,9 +318,9 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
    ```
 
    - deviceOnboardingId : It is a prefix to be used for the SSID of Soft-AP during Easy-setup process. This value comes from ‘Device Onboarding ID’ when doing `Create a device information` on the DevWS.
-     - Example of SSID : STDK[x28d]
+     - Example of SSID : STDK[x28d], T_DOI_SWITCH_001[5678]
    - mnId : Manufacturer ID. A unique four-letter ID assigned to SmartThings developers (individual MNID) or enrolled organizations (company MNID) that can be viewed at My Page > MNID.
-   - setupId : a unique three-digit number. This value comes from ‘Device onboarding ID’ when doing `Create a device onboarding profile` on the DevWS.
+   - setupId : a unique three-digit number. This value comes from `Device Onboarding` when doing `Create a device onboarding profile` on the DevWS.
    - vid :   An alphanumeric identifier for your device. This value comes from ‘VID(Vendor ID)’ when doing `Create a device profile` on the DevWS.
    - deviceTypeId : This determines the device's icon and default UI layout in the SmartThings app. This is the value you selected from the value given as a list when doing `Create a device profile`.
    - ownershipValidationTypes : This is the type of ownership confirmation used during onboarding process. There are four supported types
@@ -309,13 +329,13 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
      - PIN
      - QR
 
-   - identityType : A unique certificate or public key pair type used to authenticate a device on SmartThings Cloud Server. You can choose between
+   - identityType : A unique certificate or public key pair type used to authenticate a device on SmartThings Cloud. You can choose between
      - ED25519
      - *X.509 (will be supported)*
 
 ### Develop device application
 
-A device application is developed using the APIs provided by the IoT Core Library. We recommend reuse of the pre-supplied sample applications, like st_switch. This allows for rapid development as you begin to develop your new device. Please refer to the API references related to the IoT core device library as shown:
+A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the pre-supplied sample device applications, like `st_switch`. This allows for rapid development as you begin to develop your new device. Please refer to the [API references](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/master/doc/STDK_APIs.pdf) related to the IoT core device library as shown:
 
 - connection management
   - st_conn_init()
@@ -338,10 +358,10 @@ A device application is developed using the APIs provided by the IoT Core Librar
 
 ```sh
 /**
-SmartThings Device Kit(STDK) aims to make it easier to develop IoT devices by providing
-additional IoT Core Library to the existing chip vendor SW Architecture.
+SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
+additional IoT Core Library to the existing chipset vendor's SW Architecture.
 
-That is, you can simply develop a basic application by just calling the APIs provided by IoT Core Library like below. Currently, IoT Core Library offers 13 APIs.
+That is, you can simply develop a basic device application by just calling the APIs provided by IoT Core Device Library like below. Currently, IoT Core Device Library offers 13 APIs.
 
 //create an iot context
 1. st_conn_init();
@@ -349,7 +369,7 @@ That is, you can simply develop a basic application by just calling the APIs pro
 //create a handle to process capability
 2. st_cap_handle_init();
 
-//register a callback function to process capability command when it comes from the SmartThings Server.
+//register a callback function to process capability command when it comes from the SmartThings Cloud.
 3. st_cap_cmd_set_cb();
 
 //needed when it is necessary to keep monitoring the device status
@@ -380,7 +400,7 @@ void app_main(void)
     // implement init_callback function (cap_switch_init_cb)
     handle = st_cap_handle_init(ctx, "main", "switch", cap_switch_init_cb, NULL);
 
-    // 3. register a callback function to process capability command when it comes from the SmartThings Server
+    // 3. register a callback function to process capability command when it comes from the SmartThings Cloud
     // implement callback function (cap_switch_cmd_off_cb)
     iot_err = st_cap_cmd_set_cb(handle, "off", cap_switch_cmd_off_cb, NULL);
     if (iot_err)
@@ -409,36 +429,41 @@ void app_main(void)
 Go to the root directory of the STDK and execute the build script(build.sh) with the below parameter.
 
 ```sh
-cd ~/st-device-sdk-c-ref/
-./build.sh esp8266 st_switch             # ./build.sh {chip_name} {app_directory}
+# Example for ESP8266
+$ cd ~/st-device-sdk-c-ref/
+$ ./build.sh esp8266 st_switch             # ./build.sh {chip_name} {app_directory}
 ```
 
-After compiling, you should see a result similar to below.
+After compiling, following results can be seen. In fact, as you know, we have to flash these results according to the binary download method that exists per chipset.
 
 ```sh
 # Example for ESP8266
-|-- output
-| `-- iotcore_st_switch_20190719_771f5140   # iotcore_'project_name'_'date'_'commit_id'
-| |-- address_info.txt
-| |-- bootloader.bin
-| |-- debug
-| |-- partition.bin
-| `-- st_switch_demo.bin
+$ cd ~/st-device-sdk-c-ref/
+$ tree output/ -L 3
+output/
+`-- esp8266
+    `-- iotcore_st_switch_20191125_ab144f7_d63f3d2    #iotcore_'app_name'_'date'_'commit'
+        |-- address_info.txt
+        |-- bootloader.bin
+        |-- debug
+        |-- partition.bin
+        `-- st_switch_demo.bin
 ```
 
-You can now execute the following command to flash the entire project (app, bootloader, and init data bin) to a new chip.
+In case of ESP8266, you can now execute the following command to flash the entire binaries(e.g. app, bootloader, and init data bin) to a new chipset.
 
 ```sh
-cd ~/st-device-sdk-c-ref/
-./build.sh esp8266 st_switch flash
+# Example for ESP8266
+$ cd ~/st-device-sdk-c-ref/
+$ ./build.sh esp8266 st_switch flash
 ```
 
 The serial port needs to be matched to the computer environment for serial port flashing. For example, in ESP8266 the settings for serial port flashing can be configured with `make menuconfig`. If the serial port setting does not match your environment, please execute the following:
 
 ```sh
 # Example for ESP8266
-cd ~/st-device-sdk-c-ref/apps/esp8266/st_switch
-make menuconfig
+$ cd ~/st-device-sdk-c-ref/apps/esp8266/st_switch
+$ make menuconfig
 ```
 
 You don't need to run ‘./build.sh esp8266 st_switch’ before running “./build.sh esp8266 st_switch flash”, this will automatically rebuild anything which needs it.
@@ -448,8 +473,8 @@ You don't need to run ‘./build.sh esp8266 st_switch’ before running “./bui
 The SmartThings App should be used to control an IoT device that is running with the SmartThings Cloud. Go to Google Play or the iOS App Store and download the SmartThings app on your phone.
 
 | Step | Description                                                  |
-| ---- | ------------------------------------------------------------ |
-| 1    | Just push the reset button of device or run the command below in the console window.<br>  $ cd ~/st-device-sdk-c-ref<br/>  $ ./build.sh esp8266 st_switch monitor |
-| 2    | Launch SmartThings App and select the onboarding profile name of your testing device.<img src="res/my_testing_device.jpg" style="zoom:75%;" align="left"/> |
-| 3    | Add your test device which was executed through above step 1.<img src="res/easy_setup.jpg" style="zoom:75%;" align="left"/> |
-| 4    | Control & Monitor a device<br>Now that your device is on the SmartThings App you can control and monitor your device. Execute your test scripts to make sure the App is working the way you think it should.<img src="res/added_device.jpg" style="zoom:75%;" align="left"/> |
+| :--: | ------------------------------------------------------------ |
+|  1   | **Enable developer mode**<br />You must enable the `Developer Mode` in the SmartThings app before testing<br />Please refer to the link below<br />https://smartthings.developer.samsung.com/docs/testing/developer-mode.html |
+|  2   | **Reset the device**<br />Just push the reset button of device or run the command below in the console window.<br />  $ cd ~/st-device-sdk-c-ref<br />  $ ./build.sh esp8266 st_switch monitor         # This is only for ESP8266 |
+|  3   | **Add device(Onboarding Process)**<br />There are two ways to add a device in SmartThings application.<br />1. Select the Device Onboarding Name via "My Testing Devices" menu.(Left Fig.) <br />2. Use the Detection popup window(Right Fig.)<br /><img src="res/my_testing_device.jpg" style="zoom:75%;" align="left"/><img src="res/easy_setup.jpg" style="zoom:75%;" align="right"/> |
+|  4   | **Control & Monitor a device**<br />Now that your device is on the SmartThings App. If there is no problem during above onboarding process, it means your device is well registered on the SmartThings Cloud. <br />Control & Monitor your device via the App and make sure the App is working the way you think it should.<br /><img src="res/added_device.jpg" style="zoom:75%;" align="left"/> |

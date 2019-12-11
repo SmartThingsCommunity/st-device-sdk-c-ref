@@ -247,7 +247,7 @@ static void smartswitch_task(void *arg)
 void app_main(void)
 {
 	/**
-	  SmartThings Device Kit(STDK) aims to make it easier to develop IoT devices by providing
+	  SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
 	  additional st_iot_core layer to the existing chip vendor SW Architecture.
 
 	  That is, you can simply develop a basic application by just calling the APIs provided by st_iot_core layer
@@ -270,9 +270,9 @@ void app_main(void)
 	 */
 
 	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
-	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start - 1;
+	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
 	unsigned char *device_info = (unsigned char *) device_info_start;
-	unsigned int device_info_len = device_info_end - device_info_start - 1;
+	unsigned int device_info_len = device_info_end - device_info_start;
 	IOT_CAP_HANDLE *handle = NULL;
 	int iot_err;
 
