@@ -25,6 +25,7 @@
 #include "queue.h"
 #include "task.h"
 
+static iot_status_t g_iot_status;
 IOT_CTX *ctx = NULL;
 IOT_CAP_HANDLE *handle = NULL;
 
@@ -114,16 +115,20 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 		printf("Button short press, count: %d\r\n", count);
 		switch(count) {
 			case 1:
-				/* change switch state and LED state */
-				if (smartswitch_switch_state == SMARTSWITCH_SWITCH_ON) {
-					led_state_switch(SMARTSWITCH_SWITCH_OFF);
-					led_switch(0);
-				} else {
-					led_state_switch(SMARTSWITCH_SWITCH_ON);
-					led_switch(1);
+				if (g_iot_status == IOT_STATUS_NEED_INTERACT){
+					st_conn_ownership_confirm(ctx,true);
+					gpio_write(&gpio_ctrl_noti,0);
+				} else{
+					/* change switch state and LED state */
+					if (smartswitch_switch_state == SMARTSWITCH_SWITCH_ON) {
+						led_switch(SMARTSWITCH_SWITCH_OFF);
+					} else {
+						led_switch(SMARTSWITCH_SWITCH_ON);
+					}
 				}
 				break;
 			default:
+				led_blink(GPIO_OUTPUT_NOTIFICATION_LED, 100, count);
 				break;
 		}
 	} else if (type == BUTTON_LONG_PRESS) {
@@ -137,19 +142,21 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 static void iot_status_cb(iot_status_t status,
 		iot_stat_lv_t stat_lv, void *usr_data)
 {
+	g_iot_status = status;
+	printf("iot_status: %d, lv: %d\n",status, stat_lv);
 	switch(status)
 	{
 		case IOT_STATUS_NEED_INTERACT:
-			printf("come here \r\n");
 			break;
 		case IOT_STATUS_IDLE:
-			printf("come here \r\n");
-			break;
 		case IOT_STATUS_CONNECTING:
-			printf("come here \r\n");
+			if (smartswitch_switch_state == SMARTSWITCH_SWITCH_ON) {
+				led_state_switch(SMARTSWITCH_SWITCH_ON);
+			} else {
+				led_state_switch(SMARTSWITCH_SWITCH_OFF);
+			}
 			break;
 		default:
-			printf("come here \r\n");
 			break;
 	}
 }

@@ -22,6 +22,11 @@ if [ "${3}" = "clean" ]; then
 	OUTPUT_BUILD=n
 fi
 
+if [ ! `command -v gawk` ];then
+        echo " Enviroment: gawk lost, please install, sudo apt-get install gawk"
+        exit
+fi
+
 generate_output() {
 
 	RELEASE_DATE=`date +%Y%m%d`
