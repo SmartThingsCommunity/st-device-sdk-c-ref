@@ -6,7 +6,7 @@ This article demonstrates how to integrate a direct-connected device with SmartT
 
 ## Workflow
 
-When developing a new direct-connected device application with SmartThings Device SDK (STDK for short), you will progress through the following steps.
+When developing a new direct-connected device application with SmartThings Device SDK (STDK for short), you will progress through the following steps. You can also refer to the [Code Lab data of the 2019 Samsung Developer Conference](https://developer.samsung.com/codelab/smartThings/device/overview). It will be more practical for you to understand the STDK.
 
 - [Setup Environment](#Setup Environment)
 
@@ -29,7 +29,7 @@ There are two git repositories for working with the SmartThings Device SDK. The 
 
 #### Download [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref)
 
-You can choose to only download the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository from git, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` can be easily downloaded as a submodule in the `Reference` by the predefined `setup.sh` script. If you are the first to use this STDK, we strongly recommend  that you choose the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository for easier understanding.
+You can just choose to download the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository from git, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` can be easily downloaded as a submodule in the `Reference` through the predefined `setup.sh` script. If you are the first to use this STDK, we strongly recommend  that you choose the [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) repository for easier understanding.
 
 From the terminal, navigate to the directory you want the STDK to live and clone it using the following git command:
 
@@ -38,7 +38,9 @@ $ cd ~
 $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
 ```
 
-> **Note** : For the rest of this document, we will assume the above path (~/st-device-sdk-c-ref) is the default reference source code.
+> **Note** :
+>
+> For the rest of this document, we will assume the above path (~/st-device-sdk-c-ref) is the default reference source code.
 
 You can use a script to setup a chipset SDK as follows:
 
@@ -61,6 +63,11 @@ In order for your IoT device to connect to the SmartThings Cloud, there are requ
 
 Open a terminal window and run the following `stdk-keygen` command to create a Device Identity.
 
+> **Info :**
+>
+> If you want to directly execute the  `stdk-keygen` command, please add the `$HOME/st-device-sdk-c-ref/iot-core/tools/keygen/linux` path in your `.bashrc` file like below and log out and log in back to make the `.bashrc` changes effective.
+>
+> PATH="$PATH:$HOME/st-device-sdk-c-ref/iot-core/tools/keygen/linux"
 ```sh
 $ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/linux
 $ ./stdk-keygen -h
@@ -95,46 +102,20 @@ You must setup a toolchain according to each chipset you selected.
 
 ***Example for ESP8266*** :
 
-*For additional information see the following git repositories.*
+*In fact, ESP8266 supports multiple host environments including Windows, Linux, and macOS. But, based on experience, compile times are significantly faster on Linux. Therefore, we will only describe the Linux environment. And yet, if you prefer to use another environment, please refer to the Espressif's guideline matched on the [Espressif Doc site](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/index.html). For additional information see the following document.*
 
-- *[ESP8266 RTOS Example](https://github.com/espressif/ESP8266_RTOS_SDK/tree/release/v3.2)*
-- *[ESP8266 Docs](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/index.html)*
+- *[ESP8266 Toolchain Setup for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html)*
 
-*ESP8266 supports multiple host environments including Windows, Linux, and macOS. Based on experience, compile times are significantly faster on Linux but it is up to you which environment you prefer to use.*
+> ***Note :***
+> *Install the following packages because some older Linux distributions may be missing some of the Python packages. Also note pyserial version 2.x is not supported by ESP-IDF.*
+>
+> ```sh
+> $ sudo apt-get install gcc git wget make libncurses-dev flex bison gperf python python-pip python-setuptools python-serial python-cryptography python-future python-pyparsing python-pyelftools
+> ```
+>
+> *In order to use a pre-supplied build script, please extract the toolchain into `~/esp/xtensa-lx106-elf/` directory like the above ESP8266 guideline. And according to the above Espressif guideline, you will need to add it to your PATH environment variable in ~/.profile file. But If you installed the toolchain along the guideline, it is not necessary. Because that path is exported in the our build script.*
 
-1. *Install Prerequisites*
 
-   *Get the following packages :*
-
-   ```sh
-   $ sudo apt-get install gcc git wget make libncurses-dev flex bison gperf python python-pip python-setuptools python-serial python-cryptography python-future python-pyparsing python-pyelftools
-   ```
-
-   > ***Note :***
-   >
-   > *Some older Linux distributions may be missing some of the Python packages listed above.*
-   >
-   > *Also note pyserial version 2.x is not supported by ESP-IDF.*
-
-2. *Setup Toolchain*
-
-   *Get the ESP8266 toolchain for Linux, available on the Expressif website:*
-
-   - *[64-bit Linux](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-92-g8facf4c-5.2.0.tar.gz)*
-
-   - *[32-bit Linux](https://dl.espressif.com/dl/xtensa-lx106-elf-linux32-1.22.0-92-g8facf4c-5.2.0.tar.gz)*
-
-   *Once the file is downloaded, extract it in the ~/esp directory.*
-
-   ```sh
-   $ mkdir -p ~/esp
-   $ cd ~/esp
-   $ tar -xzf ~/Downloads/xtensa-lx106-elf-linux64-1.22.0-92-g8facf4c-5.2.0.tar.gz
-   ```
-
-   *The above command places the files in the ~/esp/xtensa-lx106-elf/ directory.*
-
-   *According to the original ESP8266 guideline, you will need to add it to your PATH environment variable in ~/.profile file. But If you installed the toolchain along the step above, it is not necessary. Because that path is exported in the build script.*
 
 ## Register a Device
 
@@ -162,7 +143,9 @@ Click the "GO TO DEVICE PROFILE" and then, enter the all remaining information r
 
 <img src="res/create_device_profile.jpg" style="zoom:50%;" align="left"/>
 
+At this time, please note that you will need to add a "[Health Check](https://smartthings.developer.samsung.com/docs/devices/health.html)" capability to update the connectivity status of a device. It is only required on the `main` component.
 
+<img src="res/add_health_check_capability.jpg" style="zoom:50%;" align="left"/>
 
 ### Create a device onboarding profile
 
@@ -174,7 +157,7 @@ Click the "GO TO DEVICE ONBOARDING" and then, enter the all remaining informatio
 
 ### Deploy to test
 
-You can publish your device to the SmartThings platform for testing. And then you will be able to access your device through the SmartThings app. Actually this step is for self-testing. If you officially want to publish your device with enrolled organizations ID(e.g. company MNID), please refer to the process below.
+You can publish your device to the SmartThings platform for testing. And then you will be able to access your device through the SmartThings app. Actually this step is for self-testing. If you want to officially publish your device with enrolled organizations ID(e.g. company MNID), please refer to the process below.
 
 - [Official Publishing Process](https://smartthings.developer.samsung.com/docs/devices/publishing/publishing-basics.html)
 
@@ -200,9 +183,9 @@ And then, click ADD button.
 
 ### Download onboarding_config.json
 
-This is the information that the IoT device must have in order to connect to the SmartThings Cloud. 
+This is the information that the IoT device must have in order to connect to the SmartThings Cloud.
 
-If you use a pre-supplied sample device application, please download it and then, just overwrite the existing `onboarding_config.json` file is in the `main` directory of sample device application with the new one you downloaded.
+If you use a pre-supplied sample device application, please download it and then, just overwrite the existing `onboarding_config.json` file is in the `main` directory of sample device application with the new one you downloaded. In fact, overwriting is just one of several possible ways to inject it to the device. If the json information is guaranteed to be a paramenter in the `st_conn_init()` function, you can refer to it differently according to your own development way.
 
 <img src="res/downloading_onboarding_config_file.jpg" style="zoom:50%;" align="left"/>
 
@@ -240,10 +223,8 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
 
      If you create a device identity with a command with an option like `./stdk-keygen -m **** -f V201910` like the first phase,  you can get the ready-to-use `device_info.json` file directly. In this case, please make sure you overwrite the existing `device_info.json` file with the new one you created.
 
-     > ***Note :***
-     >
+     > **Note :**
      > If you are using the `device_info.json` file, please disable the build configuration associated with SmartThings Non-Volatile memory partition as follows. That is, don't set the build configuration below to `y`. :
-     >
      > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=`
 
      ```sh
@@ -273,10 +254,8 @@ Your IoT device needs two pieces of information before connecting to the SmartTh
 
      For the manufacturer, we cannot place the device identity data in the source code because it is impossible to build and flash every time for each device. To solve this problem, the production level application should store device identity data for each device in a secure location during the manufacturing process. For example, device identity data will be flashed into the SmartThings Non-Volatile memory location.
 
-     > ***Note :***
-   >
+     > **Note :**
      > If you want to flash the device identity data in a specific partition, you should set the build configuration below to `y`. : 
-     >
      > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=y`
 
      **[For ED25519]**
@@ -454,16 +433,20 @@ In case of ESP8266, you can now execute the following command to flash the entir
 
 ```sh
 # Example for ESP8266
+# ./build.sh {chip_name} {app_name} {option}
 $ cd ~/st-device-sdk-c-ref/
 $ ./build.sh esp8266 st_switch flash
 ```
 
-The serial port needs to be matched to the computer environment for serial port flashing. For example, in ESP8266 the settings for serial port flashing can be configured with `make menuconfig`. If the serial port setting does not match your environment, please execute the following:
+The serial port needs to be matched to the computer environment for serial port flashing. For example, in ESP8266 the settings for serial port flashing can be configured with `menuconfig` option. If the serial port setting does not match your environment, please execute the following:
 
+> Note :
+> The `menuconfig` option is only supported on the Espressif chipset. If you use a different chipset, please set it according to the selected original chipset guide.
 ```sh
 # Example for ESP8266
-$ cd ~/st-device-sdk-c-ref/apps/esp8266/st_switch
-$ make menuconfig
+# ./build.sh {chip_name} {app_name} {option}
+$ cd ~/st-device-sdk-c-ref
+$ ./build.sh esp8266 st_switch menuconfig
 ```
 
 You don't need to run ‘./build.sh esp8266 st_switch’ before running “./build.sh esp8266 st_switch flash”, this will automatically rebuild anything which needs it.
