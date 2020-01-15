@@ -73,17 +73,21 @@ fi
 PARTITION_NAME=${PARTITION_NAME%.*}
 PARTITION_TABLE=${PARTITION_TABLE}/${PARTITION_NAME}.csv
 
+GET_PART_INFO="${STDK_PATH}/bsp/${CHIP_NAME}/components/partition_table/parttool.py -q"
+
 BOOTLOADER_OFFSET=`cat ${IDF_PATH}/components/bootloader/Makefile.projbuild | grep  -E "BOOTLOADER_OFFSET" | awk -F ':= ' '{print $2}'`
-APP_OFFSET=`cat ${PARTITION_TABLE} | grep  -E "factory|ota_0" | awk -F', ' '{print $4}'`
+APP_OFFSET=`${GET_PART_INFO} --default-boot-partition --offset ${PROJECT_PATH}/build/${PARTITION_NAME}.bin`
+OTA_DATA_OFFSET=`${GET_PART_INFO} --type data --subtype ota --offset ${PROJECT_PATH}/build/${PARTITION_NAME}.bin`
 PARTITION_OFFSET=`cat ${PROJECT_PATH}/sdkconfig | grep ^CONFIG_PARTITION_TABLE_OFFSET\= | awk -F'=' '{print $2}'`
 
 ADDRESS_INFO_FILE=${PROJECT_PATH}/address_info.txt
-echo bootloader.bin : ${BOOTLOADER_OFFSET} > ${ADDRESS_INFO_FILE}
+echo ota_data_initial.bin : ${OTA_DATA_OFFSET} > ${ADDRESS_INFO_FILE}
+echo bootloader.bin : ${BOOTLOADER_OFFSET} >> ${ADDRESS_INFO_FILE}
 echo ${PROJECT_NAME}.bin : ${APP_OFFSET} >> ${ADDRESS_INFO_FILE}
 echo partition.bin : ${PARTITION_OFFSET} >> ${ADDRESS_INFO_FILE}
 
 ### Generate output
-export OUTPUT_FILE_LIST="${PROJECT_PATH}/build/bootloader/bootloader.bin ${PROJECT_PATH}/build/${PROJECT_NAME}.bin ${PROJECT_PATH}/build/${PARTITION_NAME}.bin ${ADDRESS_INFO_FILE}"
+export OUTPUT_FILE_LIST="${PROJECT_PATH}/build/ota_data_initial.bin ${PROJECT_PATH}/build/bootloader/bootloader.bin ${PROJECT_PATH}/build/${PROJECT_NAME}.bin ${PROJECT_PATH}/build/${PARTITION_NAME}.bin ${ADDRESS_INFO_FILE}"
 
 export DEBUG_FILE_LIST="${PROJECT_PATH}/build/${PROJECT_NAME}.elf ${PROJECT_PATH}/build/${PROJECT_NAME}.map ${PROJECT_PATH}/build/bootloader/bootloader.elf ${PROJECT_PATH}/build/bootloader/bootloader.map ${PROJECT_PATH}/sdkconfig"
 
