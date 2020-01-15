@@ -6,9 +6,9 @@
     "vid": "VID",
     "deviceTypeId": "TYPE",
     "ownershipValidationTypes": [
-      "JUSTWORKS"
-      "BUTTON"
-      "PIN"
+      "JUSTWORKS",
+      "BUTTON",
+      "PIN",
       "QR"
     ],
     "identityType": "ED25519_or_CERIFICATE"
