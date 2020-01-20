@@ -20,19 +20,11 @@ The reference git is delivered via the following directory structure :
 
 ## Building a sample device application
 
-Basically, this release builds on the environments of chipset SDKs.
+Basically, this release builds on the environments of chipset vendor's SDKs.
 
 ### Prerequisites
 
 - Install the toolchain defined in the chipset SDK you use. If there is no environmental comment, it is basically only described for 64-bit Ubuntu-based.
-  - Example for ESP32 (Ubuntu/Debian quickstart)
-    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html) according to the available Expressif website.
-      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
-
-      > Info :
-      >
-      > The ESP32 example of STDK was developed from the beb34b5 commit ID based on esp-idf v3.3.
-
   - Example for ESP8266 (Ubuntu/Debian quickstart)
     - Setup [ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html) according to the available Expressif website.
       In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
@@ -41,10 +33,20 @@ Basically, this release builds on the environments of chipset SDKs.
       >
       > The ESP8266 example of STDK was developed from the 19cfb19 commit ID based on ESP8266_RTOS_SDK v3.2.
 
+  - Example for ESP32 (Ubuntu/Debian quickstart)
+
+    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html) according to the available Expressif website.
+      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+
+      > Info :
+      >
+      > The ESP32 example of STDK was developed from the beb34b5 commit ID based on esp-idf v3.3.
+
   - Example for RTL8195
+
     - Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
-    - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
-      Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
+  - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
+    Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
 
       > Note :
       >
@@ -65,9 +67,10 @@ Basically, this release builds on the environments of chipset SDKs.
      - - - - - - - - - - - - - - - - - - -
          ex) ./setup.sh esp8266
          ex) ./setup.sh esp32
-         ex) ./setup.sh rtl8710
          ex) ./setup.sh rtl8195
          ex) ./setup.sh rtl8720c
+         ex) ./setup.sh rtl8721c
+
      $ ./setup.sh esp8266
      ```
 
