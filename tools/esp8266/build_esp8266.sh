@@ -43,12 +43,18 @@ fi
 
 cd ${PROJECT_PATH}
 
+
+
 if [ ! "${3}" = "" ]; then
   shift 2
   MAKE_OPTION=$@
 fi
 
 make ${MAKE_OPTION}
+
+if [ ! "${?}" = "0" ]; then
+  exit ${?}
+fi
 
 for value in "${OUTPUT_OPTION_ARRAY[@]}"; do
   if [ "${value}" = "${MAKE_OPTION}" ]; then
