@@ -403,7 +403,6 @@ void app_main(void)
 	  5. st_conn_start();
 	 */
 
-//	IOT_CTX* ctx = NULL;
 	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
 	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
 	unsigned char *device_info = (unsigned char *) device_info_start;
