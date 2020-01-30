@@ -74,7 +74,7 @@ generate_output() {
   fi
 
   pushd ${STDK_PATH}/output/${CHIP_NAME}/
-  ln -s ${OUTPUT_DIR_NAME} iotcore_${PROJECT_TITLE}_latest
+  ln -Tfs ${OUTPUT_DIR_NAME} iotcore_${PROJECT_TITLE}_latest
   popd
 
   echo
