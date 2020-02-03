@@ -13,3 +13,6 @@
 [submodule "bsp/rtl8720c"]
 	path = bsp/rtl8720c
 	url = https://github.com/ambiot/ambz2_sdk.git
+[submodule "bsp/rtl8721c"]
+	path = bsp/rtl8721c
+	url = https://github.com/ambiot/ambd_sdk.git

@@ -15,31 +15,55 @@
  * language governing permissions and limitations under the License.
  *
  ****************************************************************************/
-
-#include <stdbool.h>
-#include <stdlib.h>
-
+#include "platform_stdlib.h"
 #include "st_dev.h"
-#include "device_control.h"
+#include "iot_debug.h"
+#include "PinNames.h"
+#include <gpio_api.h>
+#include "gpio_irq_api.h"
+#include "gpio_irq_ex_api.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
+#include "timer_api.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/gpio.h"
+enum led_animation_mode_list {
+     LED_ANIMATION_MODE_IDLE = 0,
+     LED_ANIMATION_MODE_FAST,
+     LED_ANIMATION_MODE_SLOW,
+};
 
-// onboarding_config_start is null-terminated string
-extern const uint8_t onboarding_config_start[]	asm("_binary_onboarding_config_json_start");
-extern const uint8_t onboarding_config_end[]	asm("_binary_onboarding_config_json_end");
+#define LED_BLINK_TIME 50
 
-// device_info_start is null-terminated string
-extern const uint8_t device_info_start[]	asm("_binary_device_info_json_start");
-extern const uint8_t device_info_end[]		asm("_binary_device_info_json_end");
+enum notification_led_gpio_state {
+	NOTIFICATION_LED_GPIO_ON = 0,
+	NOTIFICATION_LED_GPIO_OFF = 1,
+};
 
+static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
+
+IOT_CTX *ctx = NULL;
+
+static iot_status_t g_iot_status;
 enum smartlamp_switch_onoff_state {
 	SMARTLAMP_SWITCH_OFF = 0,
 	SMARTLAMP_SWITCH_ON = 1,
 };
 
+enum button_gpio_state {
+    BUTTON_GPIO_RELEASED = 1,
+    BUTTON_GPIO_PRESSED = 0,
+};
+#define BUTTON_DEBOUNCE_TIME_MS 20
+#define BUTTON_LONG_THRESHOLD_MS 5000
+#define BUTTON_DELAY_MS 300
+
+enum button_event_type {
+     BUTTON_LONG_PRESS = 0,
+     BUTTON_SHORT_PRESS = 1,
+};
 static int smartlamp_switch_state = SMARTLAMP_SWITCH_ON;
+
 static double smartlamp_color_hue = 0;
 static double smartlamp_color_saturation = 100;
 static int smartlamp_color_level = 50;
@@ -48,15 +72,173 @@ static int smartlamp_color_green = 255;
 static int smartlamp_color_blue = 255;
 static int smartlamp_brightness_level = 100;
 
-static iot_status_t g_iot_status;
+#define GPIO_OUTPUT_COLORLED_0 PB_4
+#define GPIO_OUTPUT_COLORLED_R PB_5
+#define GPIO_OUTPUT_COLORLED_G PB_6
+#define GPIO_OUTPUT_COLORLED_B PB_7
 
-static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
+#define GPIO_OUTPUT_NOTIFICATION_LED PA_26
 
-IOT_CTX* ctx = NULL;
+#define GPIO_INPUT_BUTTON		PB_2
+#define GPIO_INPUT_BUTTON_0 	PB_1
 
-//#define SET_PIN_NUMBER_CONFRIM
+gpio_t gpio_ctrl_noti;
+gpio_t gpio_ctrl_zero;
+gpio_t gpio_button_zero;
+gpio_t gpio_ctrl_button;
+gpio_t gpio_ctrl_r;
+gpio_t gpio_ctrl_g;
+gpio_t gpio_ctrl_b;
 
-/* Send integer type capability to SmartThings Sever */
+gtimer_t level_timer;
+// onboarding_config_start is null-terminated string
+extern const uint8_t onboarding_config_start[]	asm("_binary_onboarding_config_json_start");
+extern const uint8_t onboarding_config_end[]	asm("_binary_onboarding_config_json_end");
+extern unsigned int _binary_onboarding_config_json_size;
+// device_info_start is null-terminated string
+extern const uint8_t device_info_start[]	asm("_binary_device_info_json_start");
+extern const uint8_t device_info_end[]		asm("_binary_device_info_json_end");
+extern unsigned int _binary_device_info_json_size;
+
+static float calculate_rgb(float v1, float v2, float vh)
+{
+	if (vh < 0) vh += 1;
+	if (vh > 1) vh -= 1;
+
+	if ((6 * vh) < 1)
+		return (v1 + (v2 - v1) * 6 * vh);
+
+	if ((2 * vh) < 1)
+		return v2;
+
+	if ((3 * vh) < 2)
+		return (v1 + (v2 - v1) * ((2.0f / 3) - vh) * 6);
+
+	return v1;
+}
+
+/* SmartThings manage color by using Hue-Saturation format,
+   If you use LED by using RGB color format, you need to change color format */
+void update_rgb_from_hsl(double hue, double saturation, int level,
+		int *red, int *green, int *blue)
+{
+	if (saturation == 0)
+	{
+		*red = *green = *blue = 255;
+		return;
+	}
+
+	float v1, v2;
+	float h = ((float) hue) / 100;
+	float s = ((float) saturation) / 100;
+	float l = ((float) level) / 100;
+
+	if (l < 0.5) {
+		v2 = l * (1 + s);
+	} else {
+		v2 = l + s - l * s;
+	}
+
+	v1 = 2 * l - v2;
+
+	*red   = (int)(255 * calculate_rgb(v1, v2, h + (1.0f / 3)));
+	*green = (int)(255 * calculate_rgb(v1, v2, h));
+	*blue  = (int)(255 * calculate_rgb(v1, v2, h - (1.0f / 3)));
+}
+
+void led_blink(int gpio, int delay, int count)
+{
+	for (int i = 0; i < count; i++) {
+		gpio_write(&gpio_ctrl_noti, 0);
+		vTaskDelay(delay / portTICK_PERIOD_MS);
+		gpio_write(&gpio_ctrl_noti, 1);
+		vTaskDelay(delay / portTICK_PERIOD_MS);
+	}
+}
+
+bool get_button_event(int* button_event_type, int* button_event_count)
+{
+	static uint32_t button_count = 0;
+	static uint32_t button_last_state = BUTTON_GPIO_RELEASED;
+	static TimeOut_t button_timeout;
+	static TickType_t long_press_tick = pdMS_TO_TICKS(BUTTON_LONG_THRESHOLD_MS);
+	static TickType_t button_delay_tick = pdMS_TO_TICKS(BUTTON_DELAY_MS);
+
+	uint32_t gpio_level = 0;
+
+	gpio_level = gpio_read(&gpio_ctrl_button);
+	if (button_last_state != gpio_level) {
+		/* wait debounce time to ignore small ripple of currunt */
+		vTaskDelay( pdMS_TO_TICKS(BUTTON_DEBOUNCE_TIME_MS) );
+		gpio_level = gpio_read(&gpio_ctrl_button);
+		if (button_last_state != gpio_level) {
+			printf("Button event, val: %d, tick: %u\r\n", gpio_level, (uint32_t)xTaskGetTickCount());
+			button_last_state = gpio_level;
+			if (gpio_level == BUTTON_GPIO_PRESSED) {
+				button_count++;
+			}
+			vTaskSetTimeOutState(&button_timeout);
+			button_delay_tick = pdMS_TO_TICKS(BUTTON_DELAY_MS);
+			long_press_tick = pdMS_TO_TICKS(BUTTON_LONG_THRESHOLD_MS);
+		}
+	} else if (button_count > 0) {
+		if ((gpio_level == BUTTON_GPIO_PRESSED)
+				&& (xTaskCheckForTimeOut(&button_timeout, &long_press_tick ) != pdFALSE)) {
+			*button_event_type = BUTTON_LONG_PRESS;
+			*button_event_count = 1;
+			button_count = 0;
+			return true;
+		} else if ((gpio_level == BUTTON_GPIO_RELEASED)
+				&& (xTaskCheckForTimeOut(&button_timeout, &button_delay_tick ) != pdFALSE)) {
+			*button_event_type = BUTTON_SHORT_PRESS;
+			*button_event_count = button_count;
+			button_count = 0;
+			return true;
+		}
+	}
+	return false;
+}
+
+void led_button_init(void)
+{
+	//0 init
+	gpio_init(&gpio_ctrl_zero, GPIO_OUTPUT_COLORLED_0);
+	gpio_mode(&gpio_ctrl_zero, PullDown);
+	gpio_dir(&gpio_ctrl_zero, PIN_OUTPUT);
+	gpio_write(&gpio_ctrl_zero, 0);
+
+	gpio_init(&gpio_button_zero, GPIO_INPUT_BUTTON_0);
+	gpio_mode(&gpio_button_zero, PullDown);
+	gpio_dir(&gpio_button_zero, PIN_OUTPUT);
+	gpio_write(&gpio_button_zero, 0);
+
+	//notify led init
+	gpio_init(&gpio_ctrl_noti, GPIO_OUTPUT_NOTIFICATION_LED);
+	gpio_mode(&gpio_ctrl_noti, PullNone);
+	gpio_dir(&gpio_ctrl_noti, PIN_OUTPUT);
+	gpio_write(&gpio_ctrl_noti, 1);
+
+	//red init
+	gpio_init(&gpio_ctrl_r, GPIO_OUTPUT_COLORLED_R);
+	gpio_mode(&gpio_ctrl_r, PullDown);
+	gpio_dir(&gpio_ctrl_r, PIN_OUTPUT);
+
+	//green init
+	gpio_init(&gpio_ctrl_g, GPIO_OUTPUT_COLORLED_G);
+	gpio_mode(&gpio_ctrl_g, PullDown);
+	gpio_dir(&gpio_ctrl_g, PIN_OUTPUT);
+
+	//blue init
+	gpio_init(&gpio_ctrl_b, GPIO_OUTPUT_COLORLED_B);
+	gpio_mode(&gpio_ctrl_b, PullDown);
+	gpio_dir(&gpio_ctrl_b, PIN_OUTPUT);
+
+	//button init
+	gpio_init(&gpio_ctrl_button, GPIO_INPUT_BUTTON);
+	gpio_mode(&gpio_ctrl_button, PullUp);
+	gpio_dir(&gpio_ctrl_button, PIN_INPUT);
+}
+
 static void send_capability_integer(IOT_CAP_HANDLE *handle, char* attribute_name, int value)
 {
 	IOT_EVENT *cap_evt;
@@ -92,17 +274,16 @@ static void send_color_capability(IOT_CAP_HANDLE *handle, double hue, double sat
 
 }
 
-
-static void color_led_onoff(int32_t state)
+void color_led_onoff(int32_t state)
 {
 	if (state == 0) {
-		gpio_set_level(GPIO_OUTPUT_COLORLED_R, 0);
-		gpio_set_level(GPIO_OUTPUT_COLORLED_G, 0);
-		gpio_set_level(GPIO_OUTPUT_COLORLED_B, 0);
+		gpio_write(&gpio_ctrl_r, 0);
+		gpio_write(&gpio_ctrl_g, 0);
+		gpio_write(&gpio_ctrl_b, 0);
 	} else {
-		gpio_set_level(GPIO_OUTPUT_COLORLED_R, (smartlamp_color_red > 127));
-		gpio_set_level(GPIO_OUTPUT_COLORLED_G, (smartlamp_color_green > 127));
-		gpio_set_level(GPIO_OUTPUT_COLORLED_B, (smartlamp_color_blue > 127));
+		gpio_write(&gpio_ctrl_r, (smartlamp_color_red > 127));
+		gpio_write(&gpio_ctrl_g, (smartlamp_color_green > 127));
+		gpio_write(&gpio_ctrl_b, (smartlamp_color_blue > 127));
 	}
 }
 
@@ -112,10 +293,10 @@ static void change_switch_state(int32_t state)
 	smartlamp_switch_state = state;
 	color_led_onoff(smartlamp_switch_state);
 	if(state == SMARTLAMP_SWITCH_ON) {
-		gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
+		gpio_write(&gpio_ctrl_noti, 1);
 		color_led_onoff(1);
 	} else {
-		gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
+		gpio_write(&gpio_ctrl_noti, 0);
 		color_led_onoff(0);
 	}
 }
@@ -141,7 +322,6 @@ static void send_switch_cap_evt(IOT_CAP_HANDLE *handle, int32_t state)
 	printf("Sequence number return : %d\n", sequence_no);
 	st_cap_attr_free(switch_evt);
 }
-
 static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 {
 	if (type == BUTTON_SHORT_PRESS) {
@@ -150,7 +330,7 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 			case 1:
 				if (g_iot_status == IOT_STATUS_NEED_INTERACT) {
 					st_conn_ownership_confirm(ctx, true);
-					gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
+					gpio_write(&gpio_ctrl_noti, 0);
 					noti_led_mode = LED_ANIMATION_MODE_IDLE;
 				} else {
 					/* change switch state and LED state */
@@ -180,8 +360,6 @@ static void iot_status_cb(iot_status_t status,
 		iot_stat_lv_t stat_lv, void *usr_data)
 {
 	g_iot_status = status;
-	printf("iot_status: %d, lv: %d\n", status, stat_lv);
-
 	switch(status)
 	{
 		case IOT_STATUS_NEED_INTERACT:
@@ -191,26 +369,24 @@ static void iot_status_cb(iot_status_t status,
 		case IOT_STATUS_CONNECTING:
 			noti_led_mode = LED_ANIMATION_MODE_IDLE;
 			if (smartlamp_switch_state == SMARTLAMP_SWITCH_ON) {
-				gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
+				gpio_write(&gpio_ctrl_noti, 1);
 			} else {
-				gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
+				gpio_write(&gpio_ctrl_noti, 0);
 			}
 			break;
 		default:
+			HIT();
 			break;
 	}
 }
 
-
-#include "driver/hw_timer.h"
 #define PWM_LEVEL 10
 uint32_t ulHighFrequencyTimerTicks;
-void hw_timer_callback(void *arg)
+void level_timer_callback(void *arg)
 {
 	ulHighFrequencyTimerTicks++;
-
 	color_led_onoff((ulHighFrequencyTimerTicks% (PWM_LEVEL + 1))
-			< (smartlamp_switch_state * PWM_LEVEL * smartlamp_brightness_level/100));
+					< (smartlamp_switch_state * PWM_LEVEL * smartlamp_brightness_level/100));
 }
 
 void cap_color_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
@@ -238,6 +414,7 @@ void cap_color_cmd_cb(IOT_CAP_HANDLE *handle,
 	tmp_state = smartlamp_switch_state;
 	smartlamp_switch_state = SMARTLAMP_SWITCH_ON;
 
+	color_led_onoff(smartlamp_switch_state);
 
 	send_color_capability(handle, smartlamp_color_hue, smartlamp_color_saturation);
 
@@ -286,8 +463,6 @@ void cap_switch_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 	st_cap_attr_free(init_evt);
 }
 
-
-
 void cap_switch_cmd_off_cb(IOT_CAP_HANDLE *handle,
 			iot_cap_cmd_data_t *cmd_data, void *usr_data)
 {
@@ -312,7 +487,6 @@ void cap_switch_cmd_off_cb(IOT_CAP_HANDLE *handle,
 	st_cap_attr_free(off_evt);
 }
 
-
 void cap_switch_cmd_on_cb(IOT_CAP_HANDLE *handle,
 			iot_cap_cmd_data_t *cmd_data, void *usr_data)
 {
@@ -335,6 +509,7 @@ void cap_switch_cmd_on_cb(IOT_CAP_HANDLE *handle,
 
 	printf("Sequence number return : %d\n", sequence_no);
 	st_cap_attr_free(on_evt);
+
 }
 
 void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
@@ -342,10 +517,49 @@ void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 	printf("Notification message received\n");
 
 	if (noti_data->type == IOT_NOTI_TYPE_DEV_DELETED) {
-		printf("[device deleted]\n");
+		IOT_INFO("[device deleted]");
 	} else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT) {
 		printf("[rate limit] Remaining time:%d, sequence number:%d\n",
 			noti_data->raw.rate_limit.remainingTime, noti_data->raw.rate_limit.sequenceNumber);
+	}
+}
+
+void change_led_state(int noti_led_mode)
+{
+	static uint32_t led_last_time_ms = 0;
+
+	uint32_t now_ms = 0;
+	uint32_t gpio_level = 0;
+
+	now_ms = xTaskGetTickCount() * portTICK_PERIOD_MS;
+	switch (noti_led_mode)
+	{
+		case LED_ANIMATION_MODE_IDLE:
+			break;
+		case LED_ANIMATION_MODE_SLOW:
+			//gpio_level =  gpio_get_level(GPIO_OUTPUT_NOTIFICATION_LED);
+			if ((gpio_level == NOTIFICATION_LED_GPIO_ON) && (now_ms - led_last_time_ms > 200)) {
+				gpio_write(&gpio_ctrl_noti, 0);
+				led_last_time_ms = now_ms;
+			}
+			if ((gpio_level == NOTIFICATION_LED_GPIO_OFF) && (now_ms - led_last_time_ms > 1000)) {
+				gpio_write(&gpio_ctrl_noti, 1);
+				led_last_time_ms = now_ms;
+			}
+			break;
+		case LED_ANIMATION_MODE_FAST:
+			//gpio_level =  gpio_get_level(GPIO_OUTPUT_NOTIFICATION_LED);
+			if ((gpio_level == NOTIFICATION_LED_GPIO_ON) && (now_ms - led_last_time_ms > 100)) {
+				gpio_write(&gpio_ctrl_noti, 0);
+				led_last_time_ms = now_ms;
+			}
+			if ((gpio_level == NOTIFICATION_LED_GPIO_OFF) && (now_ms - led_last_time_ms > 100)) {
+				gpio_write(&gpio_ctrl_noti, 1);
+				led_last_time_ms = now_ms;
+			}
+			break;
+		default:
+			break;
 	}
 }
 
@@ -360,23 +574,12 @@ static void smartlamp_task(void *arg)
 		if (get_button_event(&button_event_type, &button_event_count)) {
 			button_event(handle, button_event_type, button_event_count);
 		}
-
 		if (noti_led_mode != LED_ANIMATION_MODE_IDLE) {
 			change_led_state(noti_led_mode);
 		}
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 }
-
-#if defined(SET_PIN_NUMBER_CONFRIM)
-void* pin_num_memcpy(void *dest, const void *src, unsigned int count)
-{
-	unsigned int i;
-	for (i = 0; i < count; i++)
-		*((char*)dest + i) = *((char*)src + i);
-	return dest;
-}
-#endif
 
 void app_main(void)
 {
@@ -402,18 +605,18 @@ void app_main(void)
 	  //process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	  5. st_conn_start();
 	 */
-
 	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
 	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
 	unsigned char *device_info = (unsigned char *) device_info_start;
 	unsigned int device_info_len = device_info_end - device_info_start;
+	int iot_err;
+
 	IOT_CAP_HANDLE* switch_handle = NULL;
 	IOT_CAP_HANDLE* color_handle = NULL;
 	IOT_CAP_HANDLE* level_handle = NULL;
-	int iot_err;
 
-	hw_timer_init(hw_timer_callback, NULL);
-	hw_timer_alarm_us(1000, true);
+	gtimer_init(&level_timer, TIMER0);
+	gtimer_start_periodical(&level_timer, 1000, (void*)level_timer_callback, NULL);
 
 	// 1. create a iot context
 	ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
@@ -423,31 +626,29 @@ void app_main(void)
 			printf("fail to set notification callback function\n");
 
 	// 2. create a handle to process capability
-	//	implement init_callback function
+	//	implement init_callback function (cap_switch_init_cb)
 		switch_handle = st_cap_handle_init(ctx, "main", "switch", cap_switch_init_cb, NULL);
 		color_handle = st_cap_handle_init(ctx, "main", "colorControl", cap_color_init_cb, NULL);
 		level_handle = st_cap_handle_init(ctx, "main", "switchLevel", cap_level_init_cb, NULL);
 
 	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function
-		iot_err = st_cap_cmd_set_cb(switch_handle, "off", cap_switch_cmd_off_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
 		iot_err = st_cap_cmd_set_cb(switch_handle, "on", cap_switch_cmd_on_cb, NULL);
 		if (iot_err)
 			printf("fail to set cmd_cb for on\n");
+		iot_err = st_cap_cmd_set_cb(switch_handle, "off", cap_switch_cmd_off_cb, NULL);
+		if (iot_err)
+			printf("fail to set cmd_cb for off\n");
 		iot_err = st_cap_cmd_set_cb(color_handle, "setColor", cap_color_cmd_cb, NULL);
 		if (iot_err)
 			printf("fail to set cmd_cb for setcolor\n");
 		iot_err = st_cap_cmd_set_cb(level_handle, "setLevel", level_cmd_cb, NULL);
 		if (iot_err)
 			printf("fail to set cmd_cb for setcolor\n");
-
 	} else {
 		printf("fail to create the iot_context\n");
 	}
 
-	gpio_init();
+	led_button_init();
 
 	update_rgb_from_hsl(smartlamp_color_hue, smartlamp_color_saturation, smartlamp_color_level,
 			&smartlamp_color_red, &smartlamp_color_green, &smartlamp_color_blue);
@@ -460,23 +661,6 @@ void app_main(void)
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartlamp_task, "smartlamp_task", 2048, (void *)switch_handle, 10, NULL);
 
-#if defined(SET_PIN_NUMBER_CONFRIM)
-	iot_pin_t *pin_num;
-
-	pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
-	if(!pin_num)
-		printf("failed to malloc for iot_pin_t\n");
-
-	// 5. to decide the pin confirmation number(ex. "12345678"). It will use for easysetup.
-	//    pin confirmation number must be 8 digit number.
-	pin_num_memcpy(pin_num, "12345678", sizeof(iot_pin_t));
-
-	// 6. process on-boarding procedure. There is nothing more to do on the app side than call the API.
-	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
-
-	free(pin_num);
-#else
 	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
-#endif
 }

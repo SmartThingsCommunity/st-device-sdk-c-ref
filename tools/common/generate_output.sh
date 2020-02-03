@@ -31,12 +31,14 @@ generate_output() {
 
   BUILD_ID=${BUILD_ID_STDK}_${BUILD_ID_CORE}
 
-  OUTPUT_PATH=${STDK_PATH}/output/${CHIP_NAME}/iotcore_${PROJECT_TITLE}_${RELEASE_DATE}_${BUILD_ID}
+  OUTPUT_DIR_NAME=iotcore_${PROJECT_TITLE}_${RELEASE_DATE}_${BUILD_ID}
   if [ ${RELEASE_CONFIG} ]; then
-    OUTPUT_PATH=${OUTPUT_PATH}_RELEASE
+    OUTPUT_DIR_NAME=${OUTPUT_DIR_NAME}_RELEASE
   elif [ ${DEBUG_CONFIG} ]; then
-    OUTPUT_PATH=${OUTPUT_PATH}_DEBUG
+    OUTPUT_DIR_NAME=${OUTPUT_DIR_NAME}_DEBUG
   fi
+
+  OUTPUT_PATH=${STDK_PATH}/output/${CHIP_NAME}/${OUTPUT_DIR_NAME}
 
   if [ ! -d ${OUTPUT_PATH} ]; then
     mkdir -p ${OUTPUT_PATH}
@@ -70,6 +72,10 @@ generate_output() {
     git submodule foreach git diff >> ${BUILD_INFO_FILE}
     popd > /dev/null
   fi
+
+  pushd ${STDK_PATH}/output/${CHIP_NAME}/
+  ln -s ${OUTPUT_DIR_NAME} iotcore_${PROJECT_TITLE}_latest
+  popd
 
   echo
   echo "-------------------------------------------------"

@@ -2,18 +2,18 @@
 
 [![License](https://img.shields.io/badge/licence-Apache%202.0-brightgreen.svg?style=flat)](LICENSE)
 
-The SmartThings Device SDK Reference is the git repository of examples using the core device library that allow device applications to securely connect to the SmartThings Cloud. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
+The SmartThings Device SDK(STDK for short) Reference is the git repository of examples using the core device library that allow device applications to securely connect to the SmartThings Cloud. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
 
 It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
 
 ## Directory layout
 
-The reference examples git is delivered via the following directory structure :
+The reference git is delivered via the following directory structure :
 
 - `apps` : sample device applications for each chipset
-- `bsp` : original chipset vendor's SDKs as submodules
+- `bsp` : An original chipset vendor's SDK is located.  If you use a chipset that has already been ported, this vendor's SDK can be easily downloaded as a submodule in this directory through the predefined script(e.g. `setup.sh`).
 - `doc` : documents
-- `iot-core` : core device library as submodule
+- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.sh`).
 - `output` : build outputs will be placed
 - `patches` : patches to be applied in the original chipset vendor's SDK for resolving some problems
 - `tools` : scripts to be applied for each chipset
@@ -24,44 +24,56 @@ Basically, this release builds on the environments of chipset SDKs.
 
 ### Prerequisites
 
-- Install the toolchain defined in the chipset SDK used.
+- Install the toolchain defined in the chipset SDK you use. If there is no environmental comment, it is basically only described for 64-bit Ubuntu-based.
   - Example for ESP32 (Ubuntu/Debian quickstart)
-    - Get the ESP toolchain for Linux, available on the Expressif website:
-      - [64-bit Linux](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html#get-started-get-prerequisites)
-      Steps (Ubuntu, Debian)
-      1. sudo apt-get install git wget flex bison gperf python python-pip python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools cmake ninja-build ccache libncurses-dev
-      2. mkdir ~/esp; cd esp; git clone --recursive https://github.com/espressif/esp-idf.git; cd esp-idf
-      3. pip install --user -r ./requirements.txt
-      4. git checkout --track remotes/origin/release/v3.3
-      5. ./install.sh esp32
-      6. . ./export.sh
-      7. Proceed to [build step](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/README.md#Build).
+    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html) according to the available Expressif website.
+      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
-  - Example for ESP8266
-    - Setup [Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html) according to the available Expressif website.
-      In order to use a pre-supplied build script, please extract the toolchain into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide.
+      > Info :
+      >
+      > The ESP32 example of STDK was developed from the beb34b5 commit ID based on esp-idf v3.3.
+
+  - Example for ESP8266 (Ubuntu/Debian quickstart)
+    - Setup [ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html) according to the available Expressif website.
+      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+
+      > Info :
+      >
+      > The ESP8266 example of STDK was developed from the 19cfb19 commit ID based on ESP8266_RTOS_SDK v3.2.
 
   - Example for RTL8195
     - Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
     - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
       Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
 
+      > Note :
+      >
+      > You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
+
 ### Build
 
-1. Clone the source code and submodules. Basically, the SmartThings Device SDK Reference will use ported original chipset vendor's SDKs as submodules in the `bsp` directory. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
+1. Downlaod the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
 
    - Download the source code via `git clone`.
-   - And then, use the `setup.sh` to clone submodules automatically in the SDK's root directory.
+   - And then, run the `setup.sh` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
      ```sh
      $ cd ~
      $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
      $ cd st-device-sdk-c-ref
-     $ ./setup.sh esp8266                       # ./setup.sh {chip_name}
+     $ ./setup.sh
+         Usage: ./setup.sh CHIP_NAME
+     - - - - - - - - - - - - - - - - - - -
+         ex) ./setup.sh esp8266
+         ex) ./setup.sh esp32
+         ex) ./setup.sh rtl8710
+         ex) ./setup.sh rtl8195
+         ex) ./setup.sh rtl8720c
+     $ ./setup.sh esp8266
      ```
 
 2. Check the build configuration of a sample device application. If you want to use specific build options, you can directly modify the build configuration file(e.g. sdkconfig, sdkconfig.h) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option to configure them.
 
-   - If you use a default build configuration file, you can skip this step.
+   - If you just want to use the default build configuration, you can skip this step.
    - Example for ESP8266
      > Note :
      > The `menuconfig` option is just supported on the Espressif chipset.
@@ -71,18 +83,17 @@ Basically, this release builds on the environments of chipset SDKs.
      $ ./build.sh esp8266 st_switch menuconfig
      ```
 
-3. Run build.sh in the SDK's root directory. This builds the sample executables and places them in `output/{chip_name}/`.
+3. Run `build.sh` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
 
-   - build
-     ```sh
-     $ ./build.sh esp8266 st_switch          # ./build.sh {chip_name} {app_name}
-     ```
+   ```sh
+   $ ./build.sh esp8266 st_switch          # ./build.sh {chip_name} {app_name}
+   ```
 
 ### flash & monitor
 
 Serial port needs to be matched to the computer environment for serial port flashing and monitoring.
 
-- Example for ESP8266
+- Example for ESP8266/ESP32
   - Baud rate 115200 for flashing or 74880 for monitoring, Date bit 8, Parity None, Stop bits 1
   - These data are described in the build configuration file(e.g.  sdkconfig)
 - Example for RTL8195
@@ -90,9 +101,9 @@ Serial port needs to be matched to the computer environment for serial port flas
 
 Flashing can be done according to the method supported by chipset SDK.
 
-- Example for ESP8266
+- Example for ESP8266/ESP32
 
-  You can flash the executables into a target device via build.sh with additional option. Actually, you don't need to run `./build.sh esp8266 st_switch` before running `./build.sh esp8266 st_switch flash`, this will automatically rebuild anything which needs it.
+  You can flash the executables into a target device via `build.sh` with additional option. Actually, you don't need to run `./build.sh esp8266 st_switch` before running `./build.sh esp8266 st_switch flash`, this will automatically rebuild anything which needs it.
 
   - options
     - clean : clean previous build outputs
@@ -109,7 +120,7 @@ Flashing can be done according to the method supported by chipset SDK.
 
 - Example for RTL8195
 
-  In order to flash, you have to proceed at Windows PC, even if you build the source code for the RTL chipset on Linux.
+  In order to flash the RTL chipset binary, you have to proceed steps below at Windows PC, even though you build the source code on Linux environment.
   - Connect Ameba RTL8195 to Windows PC, you can find removable disk named MBED.
   - Just copy `ram_all.bin` in `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
   - After copy successfully, please reset Ameba RTL8195 target and monitor
