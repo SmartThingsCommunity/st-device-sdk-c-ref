@@ -2,7 +2,11 @@
 
 ## 1. Introduction
 
-This is an example device application installed on the IoT device. This SmartThings Direct-connected device is Wi-Fi enabled device that uses the SmartThings cloud as its primary cloud infrastructure. And this device will use the MQTT protocol for communication.
+SmartThings direct-connected device is Wi-Fi enabled device that uses the SmartThings cloud as its primary cloud infrastructure. And this device will use the MQTT protocol for communication.
+
+This is for an example device application installed on the IoT device. For an easier and more practical understanding about the development of IoT device applications, we described in detail the execution results of scripts, commands, and UI used in the Demo below.
+
+However, the detailed results of these execution used in the basic flow can be modified at any time through an upgrade of STDK due to improvements. In this case, the basic flow itself will be valid. And we will update these changes first in the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md) document.
 
 ## 2. Setup Environment
 
@@ -79,7 +83,7 @@ $ cat output_STDK****ce**2**3/device_info.json
 
 Copy the Serial Number and Public Key after running the command. You will need to upload these values to the SmartThings Cloud via [Developer Workspace](https://smartthings.developer.samsung.com/workspace/projects) during the next phase.
 
-If you create a device identity with a command with an option like above,  You can get the ready-to-use device_info.json file directly.
+If you create a device identity with a command with an option like above,  You can get the ready-to-use `device_info.json` file directly.
 
 ### 2.3. Setup toolchain
 
@@ -89,7 +93,7 @@ In fact, ESP8266 supports multiple host environments including Windows, Linux, a
 
 - [ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html)
 
-In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toolchain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
 ## 3. Register a Device
 
@@ -209,7 +213,7 @@ $ tree
 
 ### 4.2. Update device information
 
-To properly connect to the SmartThings cloud, you must update the device information registered in the cloud equally with IoT devices. There are two types of information that need to be updated :
+In order to properly connect to the SmartThings cloud, you must equally update the device information registered in the cloud to IoT devices. There are two types of information that need to be updated as follows:
 
 - device_info.json
 
@@ -262,12 +266,13 @@ After compiling, following results can be seen. In fact, as you know, we have to
 $ tree output/ -L 3
 output/
 `-- esp8266
-    `-- iotcore_st_lamp_20191125_ab144f7_d63f3d2    #iotcore_'app_name'_'date'_'commit'
+    `-- iotcore_st_lamp_20200211_ab144f7_d63f3d2    #iotcore_'app_name'_'date'_'commit'
         |-- address_info.txt
         |-- bootloader.bin
         |-- debug
-        |-- partition.bin
-        `-- st_lamp_demo.bin
+        |-- ota_data_initial.bin
+        |-- partitions.2MB.bin
+        `-- smart_lamp_demo.bin
 ```
 
 In case of Espressif chipset(e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries(e.g. app, bootloader, and init data bin) to the chipset.
