@@ -50,6 +50,10 @@ fi
 
 make ${MAKE_OPTION}
 
+if [ ! "${?}" = "0" ]; then
+  exit ${?}
+fi
+
 for value in "${OUTPUT_OPTION_ARRAY[@]}"; do
   if [ "${value}" = "${MAKE_OPTION}" ]; then
    OUTPUT_BUILD=y
