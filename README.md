@@ -45,8 +45,8 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
   - Example for RTL8195
 
     - Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
-  - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
-    Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
+    - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
+      Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
 
       > Note :
       >
@@ -54,7 +54,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 
 ### Build
 
-1. Downlaod the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
+1. Download the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
 
    - Download the source code via `git clone`.
    - And then, run the `setup.sh` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
