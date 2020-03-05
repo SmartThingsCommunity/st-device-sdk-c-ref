@@ -55,7 +55,7 @@ if [ ! "${?}" = "0" ]; then
 fi
 
 for value in "${OUTPUT_OPTION_ARRAY[@]}"; do
-  if [ "${value}" = "${MAKE_OPTION}" ]; then
+  if [[ "${MAKE_OPTION}" == *"${value}"* ]]; then
    OUTPUT_BUILD=y
   fi
 done
