@@ -18,13 +18,19 @@
 
 //for implementing main features of IoT device
 #include <stdbool.h>
+#include <string.h>
 
 #include "st_dev.h"
-#include "device_control.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+
+#include "caps_airQualitySensor.h"
+#include "caps_alarm.h"
+#include "caps_carbonDioxideMeasurement.h"
+#include "caps_carbonMonoxideDetector.h"
+#include "caps_formaldehydeMeasurement.h"
 
 // onboarding_config_start is null-terminated string
 extern const uint8_t onboarding_config_start[]	asm("_binary_onboarding_config_json_start");
@@ -35,35 +41,61 @@ extern const uint8_t device_info_start[]	asm("_binary_device_info_json_start");
 extern const uint8_t device_info_end[]		asm("_binary_device_info_json_end");
 
 static iot_status_t g_iot_status;
-
-static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
+static iot_stat_lv_t g_iot_stat_lv;
 
 IOT_CTX *ctx = NULL;
 
-IOT_CAP_HANDLE* alarm_handle = NULL;
-IOT_CAP_HANDLE* air_quality_handle = NULL;
-IOT_CAP_HANDLE* carbon_dioxide_handle = NULL;
-IOT_CAP_HANDLE* carbon_monoxide_handle = NULL;
-IOT_CAP_HANDLE* formaldehyde_handle = NULL;
+struct caps_airQualitySensor_data *cap_airQualitySensor_data;
+struct caps_alarm_data *cap_alarm_data;
+struct caps_carbonDioxideMeasurement_data *cap_carbonDioxideMeasurement_data;
+struct caps_carbonMonoxideDetector_data *cap_carbonMonoxideDetector_data;
+struct caps_formaldehydeMeasurement_data *cap_formaldehydeMeasurement_data;
 
-enum {
-	ALARM_STATE_OFF = 0,
-	ALARM_STATE_BOTH,
-	ALARM_STATE_SIREN,
-	ALARM_STATE_STROBE,
-};
+void change_siren_state(int onoff)
+{
+	/*
+	 * YOUR CODE:
+	 */
+}
 
-int g_alarm_state = ALARM_STATE_OFF;
+void change_strobe_state(int onoff)
+{
+	/*
+	 * YOUR CODE:
+	 */
+}
 
+void change_alarm_state(int state)
+{
+	switch(state)
+	{
+		case CAPS_HELPER_ALARM_VALUE_BOTH:
+			change_siren_state(1);
+			change_strobe_state(1);
+			break;
+		case CAPS_HELPER_ALARM_VALUE_SIREN:
+			change_siren_state(1);
+			change_strobe_state(0);
+			break;
+		case CAPS_HELPER_ALARM_VALUE_STROBE:
+			change_siren_state(0);
+			change_strobe_state(1);
+			break;
+		case CAPS_HELPER_ALARM_VALUE_OFF:
+			change_siren_state(0);
+			change_strobe_state(0);
+			break;
+		default:
+			change_siren_state(0);
+			change_strobe_state(0);
+			printf("Error: unexpected alarm state : %d\n", state);
+	}
+}
 /* dummy value for test */
 #define AIR_QUALITY_THRESHOLD 50
 #define CARBON_DIOXIDE_THRESHOLD 500
-#define CARBON_MONOXIDE_THRESHOLD 1
+#define CARBON_MONOXIDE_THRESHOLD 100
 #define FORMALDEHYDE_THRESHOLD 500
-int g_air_quality_value = 25;
-int g_carbon_dioxide_value= 250;
-int g_carbon_monoxide_value = 0;
-int g_formaldehyde_value = 250;
 
 int get_air_quality(void)
 {
@@ -71,8 +103,9 @@ int get_air_quality(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain the value from your sensor
 	 */
+	int air_quality_value = 80;
 
-	return g_air_quality_value;
+	return air_quality_value;
 }
 
 int get_carbon_dioxide(void)
@@ -81,8 +114,9 @@ int get_carbon_dioxide(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain the value from your sensor
 	 */
+	int carbon_dioxide_value = 300;
 
-	return g_carbon_dioxide_value;
+	return carbon_dioxide_value;
 }
 
 int get_carbon_monoxide(void)
@@ -91,8 +125,17 @@ int get_carbon_monoxide(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain the value from your sensor
 	 */
+	int carbon_monoxide_value = 70;
 
-	return g_carbon_monoxide_value;
+	return carbon_monoxide_value;
+}
+
+const char* get_carbon_monoxide_state(void)
+{
+	if (get_carbon_monoxide() > CARBON_MONOXIDE_THRESHOLD) {
+		return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_DETECTED];
+	}
+	return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_CLEAR];
 }
 
 int get_formaldehyde(void)
@@ -101,181 +144,75 @@ int get_formaldehyde(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain the value from your sensor
 	 */
+	int formaldehyde_value = 200;
 
-	return g_formaldehyde_value;
+	return formaldehyde_value;
 }
 
 int get_alarm_state(void)
 {
-	return g_alarm_state;
-}
-
-void change_alarm_state(int state)
-{
-	switch(state)
-	{
-		case ALARM_STATE_BOTH:
-			change_siren_state(1);
-			change_strobe_state(1);
-			break;
-		case ALARM_STATE_SIREN:
-			change_siren_state(1);
-			change_strobe_state(0);
-			break;
-		case ALARM_STATE_STROBE:
-			change_siren_state(0);
-			change_strobe_state(1);
-			break;
-		case ALARM_STATE_OFF:
-			change_siren_state(0);
-			change_strobe_state(0);
-			break;
-		default:
-			change_siren_state(0);
-			change_strobe_state(0);
-			printf("error: unexpected alarm state : %d\n", state);
-	}
-	g_alarm_state = state;
-}
-
-void send_alarm_capability(int state)
-{
-	IOT_CAP_HANDLE *handle = alarm_handle;
-	IOT_EVENT *cap_evt;
-	int32_t sequence_no;
-	switch(state)
-	{
-		case ALARM_STATE_BOTH:
-			cap_evt = st_cap_attr_create_string("alarm", "both", NULL);
-			break;
-		case ALARM_STATE_SIREN:
-			cap_evt = st_cap_attr_create_string("alarm", "siren", NULL);
-			break;
-		case ALARM_STATE_STROBE:
-			cap_evt = st_cap_attr_create_string("alarm", "strobe", NULL);
-			break;
-		case ALARM_STATE_OFF:
-			cap_evt = st_cap_attr_create_string("alarm", "off", NULL);
-			break;
-		default:
-			printf("error: unexpected alarm state : %d\n", state);
-			cap_evt = st_cap_attr_create_string("alarm", "off", NULL);
+	int alarm_state;
+	if ( (AIR_QUALITY_THRESHOLD > cap_airQualitySensor_data->get_airQuality_value(cap_airQualitySensor_data))
+		|| (CARBON_DIOXIDE_THRESHOLD < cap_carbonDioxideMeasurement_data->get_carbonDioxide_value(cap_carbonDioxideMeasurement_data))
+		|| (FORMALDEHYDE_THRESHOLD < cap_formaldehydeMeasurement_data->get_formaldehydeLevel_value(cap_formaldehydeMeasurement_data))
+		|| (!strcmp(cap_carbonMonoxideDetector_data->get_carbonMonoxide_value(cap_carbonMonoxideDetector_data), caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_DETECTED]))) {
+		alarm_state = CAPS_HELPER_ALARM_VALUE_BOTH;
+	} else {
+		alarm_state = CAPS_HELPER_ALARM_VALUE_OFF;
 	}
 
-	sequence_no = st_cap_attr_send(handle, 1, &cap_evt);
-	if (sequence_no < 0)
-		printf("fail to send data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(cap_evt);
+	return alarm_state;
 }
 
-void send_air_quality_capability(int value)
+void cap_alarm_init_cb(struct caps_alarm_data *caps_data)
 {
-	IOT_CAP_HANDLE *handle = air_quality_handle;
-	IOT_EVENT *cap_evt;
-	int32_t sequence_no;
-
-	cap_evt = st_cap_attr_create_int("airQuality", value, "CAQI");
-	sequence_no = st_cap_attr_send(handle, 1, &cap_evt);
-	if (sequence_no < 0)
-		printf("fail to send data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(cap_evt);
+	caps_data->set_alarm_value(caps_data, caps_helper_alarm.attr_alarm.values[CAPS_HELPER_ALARM_VALUE_OFF]);
 }
 
-void send_carbon_dioxide_capability(int value)
+void cap_airQualitySensor_init_cb(struct caps_airQualitySensor_data *caps_data)
 {
-	IOT_CAP_HANDLE *handle = carbon_dioxide_handle;
-	IOT_EVENT *cap_evt;
-	int32_t sequence_no;
-
-	cap_evt = st_cap_attr_create_int("carbonDioxide", value, "ppm");
-	sequence_no = st_cap_attr_send(handle, 1, &cap_evt);
-	if (sequence_no < 0)
-		printf("fail to send data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(cap_evt);
+	caps_data->set_airQuality_value(caps_data, get_air_quality());
+	caps_data->set_airQuality_unit(caps_data, caps_helper_airQualitySensor.attr_airQuality.units[CAPS_HELPER_AIR_QUALITY_SENSOR_UNIT_CAQI]);
 }
 
-void send_carbon_monoxide_capability(int value)
+void cap_carbonDioxideMeasurement_init_cb(struct caps_carbonDioxideMeasurement_data *caps_data)
 {
-	IOT_CAP_HANDLE *handle = carbon_monoxide_handle;
-	IOT_EVENT *cap_evt;
-	int32_t sequence_no;
-
-	if (value)
-		cap_evt = st_cap_attr_create_string("carbonMonoxide", "detected", NULL);
-	else
-		cap_evt = st_cap_attr_create_string("carbonMonoxide", "clear", NULL);
-
-	sequence_no = st_cap_attr_send(handle, 1, &cap_evt);
-	if (sequence_no < 0)
-		printf("fail to send data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(cap_evt);
+	caps_data->set_carbonDioxide_value(caps_data, get_carbon_dioxide());
+	caps_data->set_carbonDioxide_unit(caps_data, caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.units[CAPS_HELPER_CARBON_DIOXIDE_MEASUREMENT_UNIT_PPM]);
 }
 
-void send_formaldehyde_capability(int value)
+void cap_carbonMonoxideDetector_init_cb(struct caps_carbonMonoxideDetector_data *caps_data)
 {
-	IOT_CAP_HANDLE *handle = formaldehyde_handle;
-	IOT_EVENT *cap_evt;
-	int32_t sequence_no;
-
-	cap_evt = st_cap_attr_create_int("formaldehydeLevel", value, "ppm");
-
-	sequence_no = st_cap_attr_send(handle, 1, &cap_evt);
-	if (sequence_no < 0)
-		printf("fail to send data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(cap_evt);
+	caps_data->set_carbonMonoxide_value(caps_data, get_carbon_monoxide_state());
 }
 
-
-static void button_event(uint32_t type, uint32_t count)
+void cap_formaldehydeMeasurement_init_cb(struct caps_formaldehydeMeasurement_data *caps_data)
 {
-	if (type == BUTTON_SHORT_PRESS) {
-		printf("Button short press, count: %d\n", count);
-		switch(count) {
-			case 1:
-				change_alarm_state(ALARM_STATE_OFF);
-				send_alarm_capability(ALARM_STATE_OFF);
-				break;
-			default:
-				led_blink(GPIO_OUTPUT_NOTIFICATION_LED, 100, count);
-				break;
+	caps_data->set_formaldehydeLevel_value(caps_data, get_formaldehyde());
+	caps_data->set_formaldehydeLevel_unit(caps_data, caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.units[CAPS_HELPER_FORMALDEHYDE_MEASUREMENT_UNIT_PPM]);
+}
+
+void cap_alarm_cmd_cb(struct caps_alarm_data *caps_data)
+{
+	const char *alarm_value = caps_data->get_alarm_value(caps_data);
+	int alarm_state;
+
+	for (alarm_state = 0; alarm_state < CAPS_HELPER_ALARM_VALUE_MAX; alarm_state++) {
+		if (!strcmp(alarm_value, caps_helper_alarm.attr_alarm.values[alarm_state])) {
+			change_alarm_state(alarm_state);
+			return;
 		}
-	} else if (type == BUTTON_LONG_PRESS) {
-		printf("Button long press, count: %d\n", count);
-		led_blink(GPIO_OUTPUT_NOTIFICATION_LED, 100, 3);
-		/* clean-up provisioning & registered data with reboot option*/
-		st_conn_cleanup(ctx, true);
 	}
+	printf("Error: unexpected alarm value %s\n", alarm_value);
 }
 
 static void iot_status_cb(iot_status_t status,
-		iot_stat_lv_t stat_lv, void *usr_data)
+			iot_stat_lv_t stat_lv, void *usr_data)
 {
 	g_iot_status = status;
-	printf("iot_status: %d, lv: %d\n", status, stat_lv);
+	g_iot_stat_lv = stat_lv;
 
-	switch(status)
-	{
-		case IOT_STATUS_NEED_INTERACT:
-			noti_led_mode = LED_ANIMATION_MODE_FAST;
-			break;
-		case IOT_STATUS_IDLE:
-		case IOT_STATUS_CONNECTING:
-			noti_led_mode = LED_ANIMATION_MODE_IDLE;
-			gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
-			break;
-		default:
-			break;
-	}
+	printf("status: %d, stat: %d\n", g_iot_status, g_iot_stat_lv);
 }
 
 void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
@@ -290,114 +227,50 @@ void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 	}
 }
 
+void update_air_monitor_info(void)
+{
+	cap_airQualitySensor_data->set_airQuality_value(cap_airQualitySensor_data, get_air_quality());
+	cap_carbonDioxideMeasurement_data->set_carbonDioxide_value(cap_carbonDioxideMeasurement_data, get_carbon_dioxide());
+	cap_carbonMonoxideDetector_data->set_carbonMonoxide_value(cap_carbonMonoxideDetector_data, get_carbon_monoxide_state());
+	cap_formaldehydeMeasurement_data->set_formaldehydeLevel_value(cap_formaldehydeMeasurement_data, get_formaldehyde());
+}
+
+void update_alarm_state(void)
+{
+	int alarm_state = get_alarm_state();
+	change_alarm_state(alarm_state);
+	cap_alarm_data->set_alarm_value(cap_alarm_data, caps_helper_alarm.attr_alarm.values[alarm_state]);
+}
+
+void send_air_monitor_info(void)
+{
+	cap_alarm_data->attr_alarm_send(cap_alarm_data);
+	cap_airQualitySensor_data->attr_airQuality_send(cap_airQualitySensor_data);
+	cap_carbonDioxideMeasurement_data->attr_carbonDioxide_send(cap_carbonDioxideMeasurement_data);
+	cap_carbonMonoxideDetector_data->attr_carbonMonoxide_send(cap_carbonMonoxideDetector_data);
+	cap_formaldehydeMeasurement_data->attr_formaldehydeLevel_send(cap_formaldehydeMeasurement_data);
+}
+
 #define MONITOR_DELAY_MS 60000
 static void app_task(void *arg)
 {
-	int button_event_type;
-	int button_event_count;
-
-	int air_quality_value;
-	int carbon_dioxide_value;
-	int carbon_monoxide_value;
-	int formaldehyde_value;
-	int alarm_state;
-
 	TimeOut_t monitor_timeout;
 	TickType_t monitor_delay_tick = pdMS_TO_TICKS(MONITOR_DELAY_MS);
 
 	vTaskSetTimeOutState(&monitor_timeout);
 	for (;;) {
-		if (get_button_event(&button_event_type, &button_event_count)) {
-			button_event(button_event_type, button_event_count);
-		}
-
 		if (xTaskCheckForTimeOut(&monitor_timeout, &monitor_delay_tick ) != pdFALSE) {
 			vTaskSetTimeOutState(&monitor_timeout);
 			monitor_delay_tick = pdMS_TO_TICKS(MONITOR_DELAY_MS);
 
-			air_quality_value = get_air_quality();
-			carbon_dioxide_value= get_carbon_dioxide();
-			carbon_monoxide_value = get_carbon_monoxide();
-			formaldehyde_value = get_formaldehyde();
+			update_air_monitor_info();
+			update_alarm_state();
 
-			if ( (air_quality_value >= AIR_QUALITY_THRESHOLD) ||
-					(carbon_dioxide_value >= CARBON_DIOXIDE_THRESHOLD) ||
-					(carbon_monoxide_value >= CARBON_MONOXIDE_THRESHOLD) ||
-					(formaldehyde_value >= FORMALDEHYDE_THRESHOLD) ) {
-			 	alarm_state = ALARM_STATE_BOTH;
-			} else {
-				alarm_state = ALARM_STATE_OFF;
-			}
-
-			change_alarm_state(alarm_state);
-			send_alarm_capability(alarm_state);
-			send_air_quality_capability(air_quality_value);
-			send_carbon_dioxide_capability(carbon_dioxide_value);
-			send_carbon_monoxide_capability(carbon_monoxide_value);
-			send_formaldehyde_capability(formaldehyde_value);
-		}
-
-		if (noti_led_mode != LED_ANIMATION_MODE_IDLE) {
-			change_led_state(noti_led_mode);
+			send_air_monitor_capabilities();
 		}
 
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
-}
-
-/* capability command callback functions */
-void cap_alarm_cmd_both_cb(IOT_CAP_HANDLE *handle,
-		            iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	change_alarm_state(ALARM_STATE_BOTH);
-	send_alarm_capability(ALARM_STATE_BOTH);
-}
-
-void cap_alarm_cmd_siren_cb(IOT_CAP_HANDLE *handle,
-		            iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	change_alarm_state(ALARM_STATE_SIREN);
-	send_alarm_capability(ALARM_STATE_SIREN);
-}
-
-void cap_alarm_cmd_strobe_cb(IOT_CAP_HANDLE *handle,
-		            iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	change_alarm_state(ALARM_STATE_STROBE);
-	send_alarm_capability(ALARM_STATE_STROBE);
-}
-
-void cap_alarm_cmd_off_cb(IOT_CAP_HANDLE *handle,
-		            iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	change_alarm_state(ALARM_STATE_OFF);
-	send_alarm_capability(ALARM_STATE_OFF);
-}
-
-/* capability init callback functions */
-void cap_alarm_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	send_alarm_capability(get_alarm_state());
-}
-
-void cap_air_quality_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	send_air_quality_capability(get_air_quality());
-}
-
-void cap_carbon_dioxide_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	send_carbon_dioxide_capability(get_carbon_dioxide());
-}
-
-void cap_carbon_monoxide_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	send_carbon_monoxide_capability(get_carbon_monoxide());
-}
-
-void cap_formaldehyde_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	send_formaldehyde_capability(get_formaldehyde());
 }
 
 void app_main(void)
@@ -432,40 +305,30 @@ void app_main(void)
 
 	int iot_err;
 
+	// 1. create a iot context
 	ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
 	if (ctx != NULL) {
 		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
 		if (iot_err)
 			printf("fail to set notification callback function\n");
+	// 2. create a handle to process capability
+	//	implement init_callback function
+		cap_alarm_data = caps_alarm_initialize(ctx, "main", cap_alarm_init_cb, NULL);
+		cap_airQualitySensor_data = caps_airQualitySensor_initialize(ctx, "main", cap_airQualitySensor_init_cb, NULL);
+		cap_carbonDioxideMeasurement_data = caps_carbonDioxideMeasurement_initialize(ctx, "main", cap_carbonDioxideMeasurement_init_cb, NULL);
+		cap_carbonMonoxideDetector_data = caps_carbonMonoxideDetector_initialize(ctx, "main", cap_carbonMonoxideDetector_init_cb, NULL);
+		cap_formaldehydeMeasurement_data = caps_formaldehydeMeasurement_initialize(ctx, "main", cap_formaldehydeMeasurement_init_cb, NULL);
 
-		alarm_handle = st_cap_handle_init(ctx, "main", "alarm", cap_alarm_init_cb, NULL);
-		iot_err = st_cap_cmd_set_cb(alarm_handle, "both", cap_alarm_cmd_both_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
-		iot_err = st_cap_cmd_set_cb(alarm_handle, "off", cap_alarm_cmd_off_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
-		iot_err = st_cap_cmd_set_cb(alarm_handle, "siren", cap_alarm_cmd_siren_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
-		iot_err = st_cap_cmd_set_cb(alarm_handle, "strobe", cap_alarm_cmd_strobe_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
-
-		air_quality_handle = st_cap_handle_init(ctx, "main", "airQualitySensor",
-				cap_air_quality_init_cb, NULL);
-		carbon_dioxide_handle = st_cap_handle_init(ctx, "main", "carbonDioxideMeasurement",
-				cap_carbon_dioxide_init_cb, NULL);
-		carbon_monoxide_handle = st_cap_handle_init(ctx, "main", "carbonMonoxideDetector",
-				cap_carbon_monoxide_init_cb, NULL);
-		formaldehyde_handle = st_cap_handle_init(ctx, "main", "formaldehydeMeasurement",
-				cap_formaldehyde_init_cb, NULL);
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function
+		cap_alarm_data->cmd_both_usr_cb = cap_alarm_cmd_cb;
+		cap_alarm_data->cmd_off_usr_cb = cap_alarm_cmd_cb;
+		cap_alarm_data->cmd_siren_usr_cb = cap_alarm_cmd_cb;
+		cap_alarm_data->cmd_strobe_usr_cb = cap_alarm_cmd_cb;
 
 	} else {
 		printf("fail to create the iot_context\n");
 	}
-
-	gpio_init();
 
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(app_task, "app_task", 2048, NULL, 10, NULL);
