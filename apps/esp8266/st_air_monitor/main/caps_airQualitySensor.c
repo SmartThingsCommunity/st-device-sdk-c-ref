@@ -27,7 +27,7 @@ static int caps_airQualitySensor_get_airQuality_value(caps_airQualitySensor_data
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return NULL;
+		return caps_helper_airQualitySensor.attr_airQuality.min - 1;
 	}
 	return caps_data->airQuality_value;
 }
@@ -65,7 +65,16 @@ static void caps_airQualitySensor_attr_airQuality_send(caps_airQualitySensor_dat
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *) caps_helper_airQualitySensor.attr_airQuality.name, caps_data->airQuality_value, caps_data->airQuality_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -95,7 +104,6 @@ caps_airQualitySensor_data_t *caps_airQualitySensor_initialize(IOT_CTX *ctx, con
 
 	memset(caps_data, 0, sizeof(caps_airQualitySensor_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_airQualitySensor.id , caps_airQualitySensor_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -107,6 +115,13 @@ caps_airQualitySensor_data_t *caps_airQualitySensor_initialize(IOT_CTX *ctx, con
 
 	caps_data->airQuality_value = caps_helper_airQualitySensor.attr_airQuality.min;
 	caps_data->airQuality_unit = (char *)caps_helper_airQualitySensor.attr_airQuality.units[CAPS_HELPER_AIR_QUALITY_SENSOR_UNIT_CAQI];
+
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_airQualitySensor.id , caps_airQualitySensor_init_cb, caps_data);
+	}
+	if (!caps_data->handle) {
+		printf("fail to init airQuality handle\n");
+	}
 
 	return caps_data;
 }

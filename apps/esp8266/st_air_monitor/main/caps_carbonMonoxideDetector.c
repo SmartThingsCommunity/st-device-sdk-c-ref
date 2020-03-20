@@ -47,6 +47,11 @@ static void caps_carbonMonoxideDetector_attr_carbonMonoxide_send(caps_carbonMono
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string((char *)caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.name,
 		caps_data->carbonMonoxide_value, NULL);
 
@@ -78,7 +83,6 @@ caps_carbonMonoxideDetector_data_t *caps_carbonMonoxideDetector_initialize(IOT_C
 
 	memset(caps_data, 0, sizeof(caps_carbonMonoxideDetector_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_carbonMonoxideDetector.id , caps_carbonMonoxideDetector_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -87,6 +91,13 @@ caps_carbonMonoxideDetector_data_t *caps_carbonMonoxideDetector_initialize(IOT_C
 	caps_data->attr_carbonMonoxide_send = caps_carbonMonoxideDetector_attr_carbonMonoxide_send;
 
 	caps_data->carbonMonoxide_value = (char *)caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_CLEAR];
+
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_carbonMonoxideDetector.id , caps_carbonMonoxideDetector_init_cb, caps_data);
+	}
+	if (!caps_data->handle) {
+		printf("fail to init switchLevel handle\n");
+	}
 
 	return caps_data;
 }

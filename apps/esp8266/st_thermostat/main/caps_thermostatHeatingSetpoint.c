@@ -27,7 +27,7 @@ static int caps_thermostatHeatingSetpoint_get_heatingSetpoint_value(caps_thermos
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return NULL;
+		return caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.min - 1;
 	}
 	return caps_data->heatingSetpoint_value;
 }
@@ -65,7 +65,16 @@ static void caps_thermostatHeatingSetpoint_attr_heatingSetpoint_send(caps_thermo
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *) caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.name, caps_data->heatingSetpoint_value, caps_data->heatingSetpoint_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -113,7 +122,6 @@ caps_thermostatHeatingSetpoint_data_t *caps_thermostatHeatingSetpoint_initialize
 
 	memset(caps_data, 0, sizeof(caps_thermostatHeatingSetpoint_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatHeatingSetpoint.id , caps_thermostatHeatingSetpoint_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -126,10 +134,16 @@ caps_thermostatHeatingSetpoint_data_t *caps_thermostatHeatingSetpoint_initialize
 	caps_data->heatingSetpoint_value = caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.min;
 	caps_data->heatingSetpoint_unit = (char *)caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAPS_HELPER_THERMOSTAT_HEATING_SETPOINT_UNIT_C];
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatHeatingSetpoint.cmd_setHeatingSetpoint.name, caps_thermostatHeatingSetpoint_cmd_set_heatingSetpoint_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for set_heatingSetpoint\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatHeatingSetpoint.id , caps_thermostatHeatingSetpoint_init_cb, caps_data);
+	}
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatHeatingSetpoint.cmd_setHeatingSetpoint.name, caps_thermostatHeatingSetpoint_cmd_set_heatingSetpoint_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for set_heatingSetpoint\n");
+		}
+	} else {
+		printf("fail to init thermostatHeatingSetpoint handle\n");
 	}
 
 	return caps_data;

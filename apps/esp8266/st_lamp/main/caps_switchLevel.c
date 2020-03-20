@@ -27,7 +27,7 @@ static int caps_switchLevel_get_level_value(caps_switchLevel_data_t *caps_data)
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return -1;
+		return caps_helper_switchLevel.attr_level.min - 1;
 	}
 	return caps_data->level_value;
 }
@@ -56,7 +56,6 @@ static void caps_switchLevel_set_level_unit(caps_switchLevel_data_t *caps_data, 
 		printf("caps_data is NULL\n");
 		return;
 	}
-
 	caps_data->level_unit = (char *)unit;
 }
 
@@ -66,7 +65,16 @@ static void caps_switchLevel_attr_level_send(caps_switchLevel_data_t *caps_data)
 	uint8_t evt_num = 1;
 	int32_t sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *)caps_helper_switchLevel.attr_level.name, caps_data->level_value, caps_data->level_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -99,7 +107,6 @@ static void caps_switchLevel_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 	if (caps_data && caps_data->init_usr_cb)
 		caps_data->init_usr_cb(caps_data);
 	caps_switchLevel_attr_level_send(caps_data);
-
 }
 
 caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data)
@@ -115,7 +122,6 @@ caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *c
 
 	memset(caps_data, 0, sizeof(caps_switchLevel_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_switchLevel.id, caps_switchLevel_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -128,10 +134,16 @@ caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *c
 	caps_data->level_value = caps_helper_switchLevel.attr_level.min;
 	caps_data->level_unit = (char *)caps_helper_switchLevel.attr_level.units[CAPS_HELPER_SWITCH_LEVEL_UNIT_PERCENT];
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switchLevel.cmd_setLevel.name, caps_switchLevel_cmd_set_level_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setLevel\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_switchLevel.id, caps_switchLevel_init_cb, caps_data);
+	}
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switchLevel.cmd_setLevel.name, caps_switchLevel_cmd_set_level_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setLevel\n");
+		}
+	} else {
+		printf("fail to init switchLevel handle\n");
 	}
 
 	return caps_data;

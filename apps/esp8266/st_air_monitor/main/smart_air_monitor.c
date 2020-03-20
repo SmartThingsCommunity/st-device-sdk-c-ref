@@ -164,11 +164,6 @@ int get_alarm_state(void)
 	return alarm_state;
 }
 
-void cap_alarm_init_cb(struct caps_alarm_data *caps_data)
-{
-	caps_data->set_alarm_value(caps_data, caps_helper_alarm.attr_alarm.values[CAPS_HELPER_ALARM_VALUE_OFF]);
-}
-
 void cap_airQualitySensor_init_cb(struct caps_airQualitySensor_data *caps_data)
 {
 	caps_data->set_airQuality_value(caps_data, get_air_quality());
@@ -266,11 +261,19 @@ static void app_task(void *arg)
 			update_air_monitor_info();
 			update_alarm_state();
 
-			send_air_monitor_capabilities();
+			send_air_monitor_info();
 		}
 
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
+}
+
+static void device_init(void)
+{
+	int alarm_init_state = CAPS_HELPER_ALARM_VALUE_OFF;
+	cap_alarm_data->set_alarm_value(cap_alarm_data, caps_helper_alarm.attr_alarm.values[alarm_init_state]);
+
+	change_alarm_state(alarm_init_state);
 }
 
 void app_main(void)
@@ -311,29 +314,30 @@ void app_main(void)
 		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
 		if (iot_err)
 			printf("fail to set notification callback function\n");
-	// 2. create a handle to process capability
-	//	implement init_callback function
-		cap_alarm_data = caps_alarm_initialize(ctx, "main", cap_alarm_init_cb, NULL);
-		cap_airQualitySensor_data = caps_airQualitySensor_initialize(ctx, "main", cap_airQualitySensor_init_cb, NULL);
-		cap_carbonDioxideMeasurement_data = caps_carbonDioxideMeasurement_initialize(ctx, "main", cap_carbonDioxideMeasurement_init_cb, NULL);
-		cap_carbonMonoxideDetector_data = caps_carbonMonoxideDetector_initialize(ctx, "main", cap_carbonMonoxideDetector_init_cb, NULL);
-		cap_formaldehydeMeasurement_data = caps_formaldehydeMeasurement_initialize(ctx, "main", cap_formaldehydeMeasurement_init_cb, NULL);
-
-	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function
-		cap_alarm_data->cmd_both_usr_cb = cap_alarm_cmd_cb;
-		cap_alarm_data->cmd_off_usr_cb = cap_alarm_cmd_cb;
-		cap_alarm_data->cmd_siren_usr_cb = cap_alarm_cmd_cb;
-		cap_alarm_data->cmd_strobe_usr_cb = cap_alarm_cmd_cb;
-
 	} else {
 		printf("fail to create the iot_context\n");
 	}
+
+	// 2. create a handle to process capability
+	//	implement init_callback function
+	cap_alarm_data = caps_alarm_initialize(ctx, "main", NULL, NULL);
+	cap_airQualitySensor_data = caps_airQualitySensor_initialize(ctx, "main", cap_airQualitySensor_init_cb, NULL);
+	cap_carbonDioxideMeasurement_data = caps_carbonDioxideMeasurement_initialize(ctx, "main", cap_carbonDioxideMeasurement_init_cb, NULL);
+	cap_carbonMonoxideDetector_data = caps_carbonMonoxideDetector_initialize(ctx, "main", cap_carbonMonoxideDetector_init_cb, NULL);
+	cap_formaldehydeMeasurement_data = caps_formaldehydeMeasurement_initialize(ctx, "main", cap_formaldehydeMeasurement_init_cb, NULL);
+
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function
+	cap_alarm_data->cmd_both_usr_cb = cap_alarm_cmd_cb;
+	cap_alarm_data->cmd_off_usr_cb = cap_alarm_cmd_cb;
+	cap_alarm_data->cmd_siren_usr_cb = cap_alarm_cmd_cb;
+	cap_alarm_data->cmd_strobe_usr_cb = cap_alarm_cmd_cb;
+
+	device_init();
 
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(app_task, "app_task", 2048, NULL, 10, NULL);
 
 	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
-
 }

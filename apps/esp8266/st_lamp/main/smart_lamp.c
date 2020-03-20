@@ -121,32 +121,12 @@ static void update_color_info(void)
 	update_rgb_from_hsl(hue, saturation, hsl_color_lightness,
 			&rgb_color_red, &rgb_color_green, &rgb_color_blue);
 
-	printf("HSL (%lf, %lf, %d), RGB (%d, %d, %d)\n",
-			hue, saturation, hsl_color_lightness,
+	printf("HSL (%d, %d, %d), RGB (%d, %d, %d)\n",
+			(int)hue, (int)saturation, hsl_color_lightness,
 			rgb_color_red, rgb_color_green, rgb_color_blue);
 
 	switch_state = get_switch_state();
 	color_led_onoff(switch_state);
-}
-
-void cap_switch_init_cb(struct caps_switch_data *caps_data)
-{
-	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_OFF;
-	caps_data->set_switch_value(caps_data, caps_helper_switch.attr_switch.values[switch_init_state]);
-}
-
-void cap_colorControl_init_cb(struct caps_colorControl_data *caps_data)
-{
-	int hue_init_value = 0;
-	int saturation_init_value = 100;
-	caps_data->set_color_value(caps_data, hue_init_value, saturation_init_value);
-}
-
-void cap_switchLevel_init_cb(struct caps_switchLevel_data *caps_data)
-{
-	int switch_init_level = 50;
-	caps_data->set_level_value(caps_data, switch_init_level);
-	caps_data->set_level_unit(caps_data, caps_helper_switchLevel.attr_level.units[CAPS_HELPER_SWITCH_LEVEL_UNIT_PERCENT]);
 }
 
 void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
@@ -265,6 +245,22 @@ void* pin_num_memcpy(void *dest, const void *src, unsigned int count)
 }
 #endif
 
+void device_init()
+{
+	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_ON;
+	int switch_init_level = 50;
+	int hue_init_value = 0;
+	int saturation_init_value = 100;
+
+	cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[switch_init_state]);
+	cap_switchLevel_data->set_level_value(cap_switchLevel_data, switch_init_level);
+	cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.units[CAPS_HELPER_SWITCH_LEVEL_UNIT_PERCENT]);
+	cap_colorControl_data->set_color_value(cap_colorControl_data, hue_init_value, saturation_init_value);
+
+	noti_led_onoff(switch_init_state);
+	update_color_info();
+}
+
 void app_main(void)
 {
 	/**
@@ -303,26 +299,27 @@ void app_main(void)
 		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
 		if (iot_err)
 			printf("fail to set notification callback function\n");
-
-	// 2. create a handle to process capability
-	//	implement init_callback function
-		cap_switch_data = caps_switch_initialize(ctx, "main", cap_switch_init_cb, NULL);
-		cap_switchLevel_data = caps_switchLevel_initialize(ctx, "main", cap_switchLevel_init_cb, NULL);
-		cap_colorControl_data = caps_colorControl_initialize(ctx, "main", cap_colorControl_init_cb, NULL);
-
-	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function
-		cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
-		cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
-		cap_switchLevel_data->cmd_set_level_usr_cb = cap_switchLevel_cmd_cb;
-		cap_colorControl_data->cmd_setColor_usr_cb = cap_colorControl_cmd_cb;
 	} else {
 		printf("fail to create the iot_context\n");
 	}
 
-	gpio_init();
+	// 2. create a handle to process capability
+	//	implement init_callback function
+	cap_switch_data = caps_switch_initialize(ctx, "main", NULL, NULL);
+	cap_switchLevel_data = caps_switchLevel_initialize(ctx, "main", NULL, NULL);
+	cap_colorControl_data = caps_colorControl_initialize(ctx, "main", NULL, NULL);
 
-	update_color_info();
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function
+	cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
+	cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
+	cap_switchLevel_data->cmd_set_level_usr_cb = cap_switchLevel_cmd_cb;
+	cap_colorControl_data->cmd_setColor_usr_cb = cap_colorControl_cmd_cb;
+	cap_colorControl_data->cmd_setHue_usr_cb = cap_colorControl_cmd_cb;
+	cap_colorControl_data->cmd_setSaturation_usr_cb = cap_colorControl_cmd_cb;
+
+	gpio_init();
+	device_init();
 
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartlamp_task, "smartlamp_task", 2048, NULL, 10, NULL);

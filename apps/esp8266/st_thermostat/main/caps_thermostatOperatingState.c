@@ -47,8 +47,17 @@ static void caps_thermostatOperatingState_attr_thermostatOperatingState_send(cap
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string((char *)caps_helper_thermostatOperatingState.attr_thermostatOperatingState.name,
 		caps_data->thermostatOperatingState_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -78,7 +87,6 @@ caps_thermostatOperatingState_data_t *caps_thermostatOperatingState_initialize(I
 
 	memset(caps_data, 0, sizeof(caps_thermostatOperatingState_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatOperatingState.id , caps_thermostatOperatingState_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -87,6 +95,13 @@ caps_thermostatOperatingState_data_t *caps_thermostatOperatingState_initialize(I
 	caps_data->attr_thermostatOperatingState_send = caps_thermostatOperatingState_attr_thermostatOperatingState_send;
 
 	caps_data->thermostatOperatingState_value = (char *)caps_helper_thermostatOperatingState.attr_thermostatOperatingState.values[CAPS_HELPER_THERMOSTAT_OPERATING_STATE_VALUE_IDLE];
+
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatOperatingState.id , caps_thermostatOperatingState_init_cb, caps_data);
+	}
+	if (!caps_data->handle) {
+		printf("fail to init thermostatOperatingState handle\n");
+	}
 
 	return caps_data;
 }

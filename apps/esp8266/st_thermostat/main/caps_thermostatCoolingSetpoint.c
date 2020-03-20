@@ -27,7 +27,7 @@ static int caps_thermostatCoolingSetpoint_get_coolingSetpoint_value(caps_thermos
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return NULL;
+		return caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.min - 1;
 	}
 	return caps_data->coolingSetpoint_value;
 }
@@ -65,7 +65,16 @@ static void caps_thermostatCoolingSetpoint_attr_coolingSetpoint_send(caps_thermo
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *) caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.name, caps_data->coolingSetpoint_value, caps_data->coolingSetpoint_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -113,7 +122,6 @@ caps_thermostatCoolingSetpoint_data_t *caps_thermostatCoolingSetpoint_initialize
 
 	memset(caps_data, 0, sizeof(caps_thermostatCoolingSetpoint_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatCoolingSetpoint.id , caps_thermostatCoolingSetpoint_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -126,10 +134,16 @@ caps_thermostatCoolingSetpoint_data_t *caps_thermostatCoolingSetpoint_initialize
 	caps_data->coolingSetpoint_value = caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.min;
 	caps_data->coolingSetpoint_unit = (char *)caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAPS_HELPER_THERMOSTAT_COOLING_SETPOINT_UNIT_C];
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatCoolingSetpoint.cmd_setCoolingSetpoint.name, caps_thermostatCoolingSetpoint_cmd_setCoolingSetpoint_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for set_coolingSetpoint\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatCoolingSetpoint.id , caps_thermostatCoolingSetpoint_init_cb, caps_data);
+	}
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatCoolingSetpoint.cmd_setCoolingSetpoint.name, caps_thermostatCoolingSetpoint_cmd_setCoolingSetpoint_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for set_coolingSetpoint\n");
+		}
+	} else {
+		printf("fail to init thermostatCoolingSetpoint handle");
 	}
 
 	return caps_data;

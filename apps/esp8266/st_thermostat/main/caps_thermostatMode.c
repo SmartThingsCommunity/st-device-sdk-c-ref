@@ -47,8 +47,17 @@ static void caps_thermostatMode_attr_thermostatMode_send(caps_thermostatMode_dat
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string(caps_helper_thermostatMode.attr_thermostatMode.name,
 		caps_data->thermostatMode_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -83,8 +92,17 @@ static void caps_thermostatMode_attr_supportedThermostatModes_send(caps_thermost
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string_array((char *)caps_helper_thermostatMode.attr_supportedThermostatModes.name,
 		caps_data->supportedThermostatModes_array_size, caps_data->supportedThermostatModes_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -225,7 +243,6 @@ caps_thermostatMode_data_t *caps_thermostatMode_initialize(IOT_CTX *ctx, const c
 
 	memset(caps_data, 0, sizeof(caps_thermostatMode_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatMode.id , caps_thermostatMode_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -241,35 +258,36 @@ caps_thermostatMode_data_t *caps_thermostatMode_initialize(IOT_CTX *ctx, const c
 	caps_data->supportedThermostatModes_value = (char **)caps_helper_thermostatMode.attr_supportedThermostatModes.values;
 	caps_data->supportedThermostatModes_array_size = sizeof(caps_helper_thermostatMode.attr_supportedThermostatModes.values)/sizeof(char *);
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_auto.name, caps_thermostatMode_cmd_auto_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for auto\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatMode.id , caps_thermostatMode_init_cb, caps_data);
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_cool.name, caps_thermostatMode_cmd_cool_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for cool\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_emergencyHeat.name, caps_thermostatMode_cmd_emergencyHeat_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for emergencyHeat\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_heat.name, caps_thermostatMode_cmd_heat_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for heat\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_off.name, caps_thermostatMode_cmd_off_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for off\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_setThermostatMode.name, caps_thermostatMode_cmd_setThermostatMode_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setThermostatMode\n");
-		return NULL;
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_auto.name, caps_thermostatMode_cmd_auto_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for auto\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_cool.name, caps_thermostatMode_cmd_cool_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for cool\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_emergencyHeat.name, caps_thermostatMode_cmd_emergencyHeat_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for emergencyHeat\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_heat.name, caps_thermostatMode_cmd_heat_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for heat\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_off.name, caps_thermostatMode_cmd_off_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for off\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatMode.cmd_setThermostatMode.name, caps_thermostatMode_cmd_setThermostatMode_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setThermostatMode\n");
+		}
+	} else {
+		printf("fail to init thermostatMode handle\n");
 	}
 
 	return caps_data;

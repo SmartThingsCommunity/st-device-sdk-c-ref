@@ -17,6 +17,9 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdlib.h>
+
+#include "JSON.h"
 
 #include "st_dev.h"
 #include "caps_colorControl.h"
@@ -27,7 +30,7 @@ static double caps_colorControl_get_hue_value(caps_colorControl_data_t *caps_dat
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return -1;
+		return caps_helper_colorControl.attr_hue.min - 1;
 	}
 	return caps_data->hue_value;
 }
@@ -36,7 +39,7 @@ static double caps_colorControl_get_saturation_value(caps_colorControl_data_t *c
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return -1;
+		return caps_helper_colorControl.attr_saturation.min - 1;
 	}
 	return caps_data->saturation_value;
 }
@@ -78,8 +81,18 @@ static void caps_colorControl_attr_color_send(caps_colorControl_data_t *caps_dat
 	uint8_t evt_num = 2;
 	int32_t sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt[0] = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_hue.name, caps_data->hue_value, NULL);
 	cap_evt[1] = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_saturation.name, caps_data->saturation_value, NULL);
+	if (!cap_evt[0] || !cap_evt[1]) {
+		printf("fail to create cap_evt\n");
+		free(cap_evt[0]);
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, cap_evt);
 	if (sequence_no < 0)
@@ -94,13 +107,28 @@ static void caps_colorControl_cmd_setColor_cb(IOT_CAP_HANDLE *handle,
 			iot_cap_cmd_data_t *cmd_data, void *usr_data)
 {
 	caps_colorControl_data_t *caps_data = usr_data;
-	double hue, saturation;
+	JSON_H* json_object;
+	JSON_H* item;
+	double hue = caps_helper_colorControl.attr_hue.min - 1;
+	double saturation = caps_helper_colorControl.attr_saturation.min - 1;
 
 	printf("called [%s] func with : num_args:%u\n",
 		__func__, cmd_data->num_args);
 
-	saturation = cmd_data->cmd_data[0].number;
-	hue = cmd_data->cmd_data[1].number;
+	json_object = JSON_PARSE(cmd_data->cmd_data[0].json_object);
+	if (!json_object) {
+		printf("fail to parse json object\n");
+		return;
+	}
+	item = JSON_GET_OBJECT_ITEM(json_object, "hue");
+	if (JSON_IS_NUMBER(item)) {
+		hue = item->valuedouble;
+	}
+	item = JSON_GET_OBJECT_ITEM(json_object, "saturation");
+	if (JSON_IS_NUMBER(item)) {
+		saturation = item->valuedouble;
+	}
+	JSON_DELETE(json_object);
 
 	caps_colorControl_set_color_value(caps_data, hue, saturation);
 	if (caps_data && caps_data->cmd_setColor_usr_cb)
@@ -163,7 +191,6 @@ caps_colorControl_data_t *caps_colorControl_initialize(IOT_CTX *ctx, const char 
 
 	memset(caps_data, 0, sizeof(caps_colorControl_data_t));
 
-	caps_data->handle =	st_cap_handle_init(ctx, component, caps_helper_colorControl.id, caps_colorControl_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -174,24 +201,27 @@ caps_colorControl_data_t *caps_colorControl_initialize(IOT_CTX *ctx, const char 
 	caps_data->set_saturation_value = caps_colorControl_set_saturation_value;
 	caps_data->attr_color_send = caps_colorControl_attr_color_send;
 
-
 	caps_data->hue_value = caps_helper_colorControl.attr_hue.min;
 	caps_data->saturation_value = caps_helper_colorControl.attr_saturation.min;
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setColor.name, caps_colorControl_cmd_setColor_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setColor\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_colorControl.id, caps_colorControl_init_cb, caps_data);
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setHue.name, caps_colorControl_cmd_setHue_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setHue\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setSaturation.name, caps_colorControl_cmd_setSaturation_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setSaturation\n");
-		return NULL;
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setColor.name, caps_colorControl_cmd_setColor_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setColor\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setHue.name, caps_colorControl_cmd_setHue_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setHue\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorControl.cmd_setSaturation.name, caps_colorControl_cmd_setSaturation_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setSaturation\n");
+		}
+	} else {
+		printf("fail to init colorControl handle\n");
 	}
 
 	return caps_data;

@@ -27,7 +27,7 @@ static int caps_carbonDioxideMeasurement_get_carbonDioxide_value(caps_carbonDiox
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return NULL;
+		return caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.min - 1;
 	}
 	return caps_data->carbonDioxide_value;
 }
@@ -65,7 +65,16 @@ static void caps_carbonDioxideMeasurement_attr_carbonDioxide_send(caps_carbonDio
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *) caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.name, caps_data->carbonDioxide_value, caps_data->carbonDioxide_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -95,7 +104,6 @@ caps_carbonDioxideMeasurement_data_t *caps_carbonDioxideMeasurement_initialize(I
 
 	memset(caps_data, 0, sizeof(caps_carbonDioxideMeasurement_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_carbonDioxideMeasurement.id , caps_carbonDioxideMeasurement_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -107,6 +115,13 @@ caps_carbonDioxideMeasurement_data_t *caps_carbonDioxideMeasurement_initialize(I
 
 	caps_data->carbonDioxide_value = caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.min;
 	caps_data->carbonDioxide_unit = (char *)caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.units[CAPS_HELPER_CARBON_DIOXIDE_MEASUREMENT_UNIT_PPM];
+
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_carbonDioxideMeasurement.id , caps_carbonDioxideMeasurement_init_cb, caps_data);
+	}
+	if (!caps_data->handle) {
+		printf("fail to init carbonDioxideMeasurement handle\n");
+	}
 
 	return caps_data;
 }

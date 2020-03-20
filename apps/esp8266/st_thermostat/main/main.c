@@ -80,7 +80,7 @@ static int thermostat_mode_str2idx(const char *mode)
 			return i;
 	}
 
-	printf("%s: '%s' is not supported mode\n", __func__, mode);
+	printf("%s: '%s' is not supported mode\n\n", __func__, mode);
 
 	return -1;
 }
@@ -91,7 +91,7 @@ static void thermostat_set_mode(int mode)
 	 * YOUR CODE:
 	 * implement a ability to control the mode of thermostat
 	 */
-	printf("%s: changed mode = %s", __func__,
+	printf("%s: changed mode = %s\n", __func__,
 				caps_helper_thermostatMode.attr_thermostatMode.values[mode]);
 }
 
@@ -101,7 +101,7 @@ static void thermostat_set_fan_mode(int mode)
 	 * YOUR CODE:
 	 * implement a ability to control the fan mode of thermostat
 	 */
-	printf("%s: changed fan mode = %s", __func__,
+	printf("%s: changed fan mode = %s\n", __func__,
 				caps_helper_thermostatFanMode.attr_thermostatFanMode.values[mode]);
 }
 
@@ -111,7 +111,7 @@ static void thermostat_set_cooling_point(double point)
 	 * YOUR CODE:
 	 * implement a ability to set cooling point
 	 */
-	printf("%s: changed cooling point = %lf", __func__, point);
+	printf("%s: changed cooling point = %d\n", __func__, (int)point);
 }
 
 static void thermostat_set_heating_point(double point)
@@ -120,7 +120,7 @@ static void thermostat_set_heating_point(double point)
 	 * YOUR CODE:
 	 * implement a ability to set heating point
 	 */
-	printf("%s: changed heating point = %lf", __func__, point);
+	printf("%s: changed heating point = %d\n", __func__, (int)point);
 }
 
 static double thermostat_get_temperature(void)
@@ -132,9 +132,18 @@ static double thermostat_get_temperature(void)
 	return 18.5;
 }
 
+static int thermostat_get_operating_state(void)
+{
+	/*
+	 * YOUR CODE:
+	 * implement a ability to obtain operating state
+	 */
+	return CAPS_HELPER_THERMOSTAT_OPERATING_STATE_VALUE_IDLE;
+}
+
 static void cap_temperatureMeasurement_init_cb(struct caps_temperatureMeasurement_data *caps_data)
 {
-	const int initial_temperature_value = thermostat_get_temperature();
+	int initial_temperature_value = thermostat_get_temperature();
 	const char *temperature_unit =
 		caps_helper_temperatureMeasurement.attr_temperature.units[CAPS_HELPER_TEMPERATURE_MEASUREMENT_UNIT_C];
 
@@ -142,50 +151,10 @@ static void cap_temperatureMeasurement_init_cb(struct caps_temperatureMeasuremen
 	caps_data->set_temperature_unit(caps_data, temperature_unit);
 }
 
-static void cap_thermostatCoolingSetpoint_init_cb(struct caps_thermostatCoolingSetpoint_data *caps_data)
-{
-	const int initial_cooling_point_value = 30.5;
-	const char *cooling_point_unit =
-		caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAPS_HELPER_THERMOSTAT_COOLING_SETPOINT_UNIT_C];
-
-	caps_data->set_coolingSetpoint_value(caps_data, initial_cooling_point_value);
-	caps_data->set_coolingSetpoint_unit(caps_data, cooling_point_unit);
-}
-
-static void cap_thermostatHeatingSetpoint_init_cb(struct caps_thermostatHeatingSetpoint_data *caps_data)
-{
-	const int initial_heating_point_value = 13.5;
-	const char *heating_point_unit =
-		caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAPS_HELPER_THERMOSTAT_HEATING_SETPOINT_UNIT_C];
-
-	caps_data->set_heatingSetpoint_value(caps_data, initial_heating_point_value);
-	caps_data->set_heatingSetpoint_unit(caps_data, heating_point_unit);
-}
-
-static void cap_thermostatFanMode_init_cb(struct caps_thermostatFanMode_data *caps_data)
-{
-	const char *initial_fan_mode =
-		caps_helper_thermostatFanMode.attr_thermostatFanMode.values[CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_AUTO];
-
-	caps_data->set_thermostatFanMode_value(caps_data, initial_fan_mode);
-	caps_data->set_supportedThermostatFanModes_value(caps_data, supported_fan_mode, sizeof(supported_fan_mode)/sizeof(char *));
-}
-
-static void cap_thermostatMode_init_cb(struct caps_thermostatMode_data *caps_data)
-{
-	const char* initial_mode =
-		caps_helper_thermostatMode.attr_thermostatMode.values[CAPS_HELPER_THERMOSTAT_MODE_VALUE_AUTO];
-
-	caps_data->set_thermostatMode_value(caps_data, initial_mode);
-	caps_data->set_supportedThermostatModes_value(caps_data, supported_mode, sizeof(supported_mode)/sizeof(char *));
-
-}
-
 static void cap_thermostatOperatingState_init_cb(struct caps_thermostatOperatingState_data *caps_data)
 {
-	const char* initial_op_state =
-		caps_helper_thermostatOperatingState.attr_thermostatOperatingState.values[CAPS_HELPER_THERMOSTAT_OPERATING_STATE_VALUE_IDLE];
-	caps_data->set_thermostatOperatingState_value(caps_data, initial_op_state);
+	int initial_op_state = thermostat_get_operating_state();
+	caps_data->set_thermostatOperatingState_value(caps_data, caps_helper_thermostatOperatingState.attr_thermostatOperatingState.values[initial_op_state]);
 }
 
 static void cap_thermostatCoolingSetpoint_cmd_cb(struct caps_thermostatCoolingSetpoint_data *caps_data)
@@ -257,6 +226,36 @@ static void thermostat_task(void *arg)
 	}
 }
 
+static void device_init()
+{
+	const int initial_cooling_point_value = 30.5;
+	const int initial_heating_point_value = 13.5;
+
+	const char *cooling_point_unit =
+		caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAPS_HELPER_THERMOSTAT_COOLING_SETPOINT_UNIT_C];
+	const char *heating_point_unit =
+		caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAPS_HELPER_THERMOSTAT_HEATING_SETPOINT_UNIT_C];
+
+	const int initial_fan_mode = CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_AUTO;
+	const int initial_mode = CAPS_HELPER_THERMOSTAT_MODE_VALUE_AUTO;
+
+	cap_coolingsetpoint_handle->set_coolingSetpoint_value(cap_coolingsetpoint_handle, initial_cooling_point_value);
+	cap_coolingsetpoint_handle->set_coolingSetpoint_unit(cap_coolingsetpoint_handle, cooling_point_unit);
+	thermostat_set_cooling_point(initial_cooling_point_value);
+
+	cap_heatingsetpoint_handle->set_heatingSetpoint_value(cap_heatingsetpoint_handle, initial_heating_point_value);
+	cap_heatingsetpoint_handle->set_heatingSetpoint_unit(cap_heatingsetpoint_handle, heating_point_unit);
+	thermostat_set_heating_point(initial_heating_point_value);
+
+	cap_fanmode_handle->set_thermostatFanMode_value(cap_fanmode_handle, caps_helper_thermostatFanMode.attr_thermostatFanMode.values[initial_fan_mode]);
+	cap_fanmode_handle->set_supportedThermostatFanModes_value(cap_fanmode_handle, supported_fan_mode, sizeof(supported_fan_mode)/sizeof(char *));
+	thermostat_set_fan_mode(initial_fan_mode);
+
+	cap_mode_handle->set_thermostatMode_value(cap_mode_handle, caps_helper_thermostatMode.attr_thermostatMode.values[initial_mode]);
+	cap_mode_handle->set_supportedThermostatModes_value(cap_mode_handle, supported_mode, sizeof(supported_mode)/sizeof(char *));
+	thermostat_set_mode(initial_mode);
+}
+
 void app_main(void)
 {
 	/**
@@ -296,24 +295,27 @@ void app_main(void)
 		if (iot_err)
 			printf("fail to set notification callback function\n");
 
-	// 2. create a handle to process capability
-	//	implement init_callback function
-		cap_temperature_handle = caps_temperatureMeasurement_initialize(ctx, "main", cap_temperatureMeasurement_init_cb, NULL);
-		cap_coolingsetpoint_handle = caps_thermostatCoolingSetpoint_initialize(ctx, "main", cap_thermostatCoolingSetpoint_init_cb, NULL);
-		cap_heatingsetpoint_handle = caps_thermostatHeatingSetpoint_initialize(ctx, "main", cap_thermostatHeatingSetpoint_init_cb, NULL);
-		cap_fanmode_handle = caps_thermostatFanMode_initialize(ctx, "main", cap_thermostatFanMode_init_cb, NULL);
-		cap_mode_handle = caps_thermostatMode_initialize(ctx, "main", cap_thermostatMode_init_cb, NULL);
-		cap_opstate_handle = caps_thermostatOperatingState_initialize(ctx, "main", cap_thermostatOperatingState_init_cb, NULL);
-
-	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function
-		cap_coolingsetpoint_handle->cmd_setCoolingSetpoint_usr_cb = cap_thermostatCoolingSetpoint_cmd_cb;
-		cap_heatingsetpoint_handle->cmd_setHeatingSetpoint_usr_cb = cap_thermostatHeatingSetpoint_cmd_cb;
-		cap_fanmode_handle->cmd_setThermostatFanMode_usr_cb = cap_thermostatFanMode_cmd_cb;
-		cap_mode_handle->cmd_setThermostatMode_usr_cb = cap_thermostatMode_cmd_cb;
 	} else {
 		printf("fail to create the iot_context\n");
 	}
+
+	// 2. create a handle to process capability
+	//	implement init_callback function
+	cap_temperature_handle = caps_temperatureMeasurement_initialize(ctx, "main", cap_temperatureMeasurement_init_cb, NULL);
+	cap_coolingsetpoint_handle = caps_thermostatCoolingSetpoint_initialize(ctx, "main", NULL, NULL);
+	cap_heatingsetpoint_handle = caps_thermostatHeatingSetpoint_initialize(ctx, "main", NULL, NULL);
+	cap_fanmode_handle = caps_thermostatFanMode_initialize(ctx, "main", NULL, NULL);
+	cap_mode_handle = caps_thermostatMode_initialize(ctx, "main", NULL, NULL);
+	cap_opstate_handle = caps_thermostatOperatingState_initialize(ctx, "main", cap_thermostatOperatingState_init_cb, NULL);
+
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function
+	cap_coolingsetpoint_handle->cmd_setCoolingSetpoint_usr_cb = cap_thermostatCoolingSetpoint_cmd_cb;
+	cap_heatingsetpoint_handle->cmd_setHeatingSetpoint_usr_cb = cap_thermostatHeatingSetpoint_cmd_cb;
+	cap_fanmode_handle->cmd_setThermostatFanMode_usr_cb = cap_thermostatFanMode_cmd_cb;
+	cap_mode_handle->cmd_setThermostatMode_usr_cb = cap_thermostatMode_cmd_cb;
+
+	device_init();
 
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(thermostat_task, "thermostat_task", 2048, NULL, 10, NULL);

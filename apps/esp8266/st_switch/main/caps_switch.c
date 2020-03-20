@@ -47,8 +47,17 @@ static void caps_switch_attr_switch_send(caps_switch_data_t *caps_data)
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string((char *)caps_helper_switch.attr_switch.name,
 		caps_data->switch_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -109,7 +118,6 @@ caps_switch_data_t *caps_switch_initialize(IOT_CTX *ctx, const char *component, 
 
 	memset(caps_data, 0, sizeof(caps_switch_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_switch.id , caps_switch_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -119,15 +127,20 @@ caps_switch_data_t *caps_switch_initialize(IOT_CTX *ctx, const char *component, 
 
 	caps_data->switch_value = (char *)caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON];
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_off.name, caps_switch_cmd_off_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for off\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_switch.id , caps_switch_init_cb, caps_data);
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_on.name, caps_switch_cmd_on_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for on\n");
-		return NULL;
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_off.name, caps_switch_cmd_off_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for off\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_on.name, caps_switch_cmd_on_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for on\n");
+		}
+	} else {
+		printf("fail to init switch handle\n");
 	}
 
 	return caps_data;

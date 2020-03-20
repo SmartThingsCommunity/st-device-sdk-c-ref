@@ -47,6 +47,11 @@ static void caps_alarm_attr_alarm_send(caps_alarm_data_t *caps_data)
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string((char *)caps_helper_alarm.attr_alarm.name,
 		caps_data->alarm_value, NULL);
 
@@ -134,7 +139,6 @@ caps_alarm_data_t *caps_alarm_initialize(IOT_CTX *ctx, const char *component, vo
 
 	memset(caps_data, 0, sizeof(caps_alarm_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_alarm.id , caps_alarm_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -144,26 +148,28 @@ caps_alarm_data_t *caps_alarm_initialize(IOT_CTX *ctx, const char *component, vo
 
 	caps_data->alarm_value = (char *)caps_helper_alarm.attr_alarm.values[CAPS_HELPER_ALARM_VALUE_OFF];
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_both.name, caps_alarm_cmd_both_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for both\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_alarm.id , caps_alarm_init_cb, caps_data);
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_siren.name, caps_alarm_cmd_siren_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for siren\n");
-		return NULL;
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_both.name, caps_alarm_cmd_both_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for both\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_siren.name, caps_alarm_cmd_siren_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for siren\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_off.name, caps_alarm_cmd_off_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for off\n");
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_strobe.name, caps_alarm_cmd_strobe_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for strobe\n");
+		}
+	} else {
+		printf("fail to init alarm handle\n");
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_off.name, caps_alarm_cmd_off_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for off\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_alarm.cmd_strobe.name, caps_alarm_cmd_strobe_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for strobe\n");
-		return NULL;
-	}
-
 	return caps_data;
 }

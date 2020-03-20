@@ -27,7 +27,7 @@ static int caps_formaldehydeMeasurement_get_formaldehydeLevel_value(caps_formald
 {
 	if (!caps_data) {
 		printf("caps_data is NULL\n");
-		return NULL;
+		return caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.min - 1;
 	}
 	return caps_data->formaldehydeLevel_value;
 }
@@ -65,7 +65,16 @@ static void caps_formaldehydeMeasurement_attr_formaldehydeLevel_send(caps_formal
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_int((char *) caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.name, caps_data->formaldehydeLevel_value, caps_data->formaldehydeLevel_unit);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -95,7 +104,6 @@ caps_formaldehydeMeasurement_data_t *caps_formaldehydeMeasurement_initialize(IOT
 
 	memset(caps_data, 0, sizeof(caps_formaldehydeMeasurement_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_formaldehydeMeasurement.id, caps_formaldehydeMeasurement_init_cb, caps_data);
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -107,6 +115,13 @@ caps_formaldehydeMeasurement_data_t *caps_formaldehydeMeasurement_initialize(IOT
 
 	caps_data->formaldehydeLevel_value = caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.min;
 	caps_data->formaldehydeLevel_unit = (char *)caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.units[CAPS_HELPER_FORMALDEHYDE_MEASUREMENT_UNIT_PPM];
+
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_formaldehydeMeasurement.id, caps_formaldehydeMeasurement_init_cb, caps_data);
+	}
+	if (!caps_data->handle) {
+		printf("fail to init formaldehydeMeasurement handle\n");
+	}
 
 	return caps_data;
 }

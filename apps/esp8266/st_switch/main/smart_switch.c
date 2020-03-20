@@ -227,18 +227,18 @@ void app_main(void)
 		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
 		if (iot_err)
 			printf("fail to set notification callback function\n");
-
-	// 2. create a handle to process capability
-	//	implement init_callback function (cap_switch_init_cb)
-		cap_switch_data = caps_switch_initialize(ctx, "main", cap_switch_init_cb, NULL);
-
-	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function (cap_switch_cmd_off_cb)
-		cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
-		cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
 	} else {
 		printf("fail to create the iot_context\n");
 	}
+
+	// 2. create a handle to process capability
+	//	implement init_callback function (cap_switch_init_cb)
+	cap_switch_data = caps_switch_initialize(ctx, "main", cap_switch_init_cb, NULL);
+
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function (cap_switch_cmd_off_cb)
+	cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
+	cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
 
 	gpio_init();
 

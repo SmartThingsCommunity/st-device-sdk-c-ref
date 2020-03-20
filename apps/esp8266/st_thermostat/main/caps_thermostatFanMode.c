@@ -48,8 +48,18 @@ static void caps_thermostatFanMode_attr_thermostatFanMode_send(caps_thermostatFa
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string((char *)caps_helper_thermostatFanMode.attr_thermostatFanMode.name,
 		caps_data->thermostatFanMode_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -84,8 +94,17 @@ static void caps_thermostatFanMode_attr_supportedThermostatFanModes_send(caps_th
 	uint8_t evt_num = 1;
 	int sequence_no;
 
+	if (!caps_data || !caps_data->handle) {
+		printf("fail to get handle\n");
+		return;
+	}
+
 	cap_evt = st_cap_attr_create_string_array((char *)caps_helper_thermostatFanMode.attr_supportedThermostatFanModes.name,
 		caps_data->supportedThermostatFanModes_array_size, caps_data->supportedThermostatFanModes_value, NULL);
+	if (!cap_evt) {
+		printf("fail to create cap_evt\n");
+		return;
+	}
 
 	sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
 	if (sequence_no < 0)
@@ -196,7 +215,7 @@ caps_thermostatFanMode_data_t *caps_thermostatFanMode_initialize(IOT_CTX *ctx, c
 
 	memset(caps_data, 0, sizeof(caps_thermostatFanMode_data_t));
 
-	caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatFanMode.id , caps_thermostatFanMode_init_cb, caps_data);
+
 	caps_data->init_usr_cb = init_usr_cb;
 	caps_data->usr_data = usr_data;
 
@@ -212,26 +231,32 @@ caps_thermostatFanMode_data_t *caps_thermostatFanMode_initialize(IOT_CTX *ctx, c
 	caps_data->supportedThermostatFanModes_value = (char **)caps_helper_thermostatFanMode.attr_supportedThermostatFanModes.values;
 	caps_data->supportedThermostatFanModes_array_size = sizeof(caps_helper_thermostatFanMode.attr_supportedThermostatFanModes.values)/sizeof(char *);
 
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanAuto.name, caps_thermostatFanMode_cmd_fanAuto_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for fanAuto\n");
-		return NULL;
+	if (ctx) {
+		caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_thermostatFanMode.id , caps_thermostatFanMode_init_cb, caps_data);
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanCirculate.name, caps_thermostatFanMode_cmd_fanCirculate_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for fanCirculate\n");
-		return NULL;
+	if (caps_data->handle) {
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanAuto.name, caps_thermostatFanMode_cmd_fanAuto_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for fanAuto\n");
+			return NULL;
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanCirculate.name, caps_thermostatFanMode_cmd_fanCirculate_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for fanCirculate\n");
+			return NULL;
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanOn.name, caps_thermostatFanMode_cmd_fanOn_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for fanOn\n");
+			return NULL;
+		}
+		err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_setThermostatFanMode.name, caps_thermostatFanMode_cmd_setThermostatFanMode_cb, caps_data);
+		if (err) {
+			printf("fail to set cmd_cb for setThermostatFanMode\n");
+			return NULL;
+		}
+	} else {
+		printf("fail to init thermostatFanMode handle\n");
 	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_fanOn.name, caps_thermostatFanMode_cmd_fanOn_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for fanOn\n");
-		return NULL;
-	}
-	err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_thermostatFanMode.cmd_setThermostatFanMode.name, caps_thermostatFanMode_cmd_setThermostatFanMode_cb, caps_data);
-	if (err) {
-		printf("fail to set cmd_cb for setThermostatFanMode\n");
-		return NULL;
-	}
-
 	return caps_data;
 }
