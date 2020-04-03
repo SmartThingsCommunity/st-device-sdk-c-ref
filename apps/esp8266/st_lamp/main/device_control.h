@@ -32,6 +32,7 @@ enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 0,
 	NOTIFICATION_LED_GPIO_OFF = 1,
 };
+
 #elif defined(CONFIG_TARGET_ESP8266_DEVKITC_V1)
 
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
@@ -60,7 +61,13 @@ enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 0,
 	NOTIFICATION_LED_GPIO_OFF = 1,
 };
+
 #endif
+
+enum color_led_gpio_state {
+	COLOR_LED_OFF = 0,
+	COLOR_LED_ON = 1,
+};
 
 #define LED_BLINK_TIME 50
 

@@ -18,6 +18,7 @@
 
 //for implementing main features of IoT device
 #include <stdbool.h>
+#include <string.h>
 
 #include "st_dev.h"
 #include "device_control.h"
@@ -25,6 +26,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+
+#include "caps_switch.h"
 
 // onboarding_config_start is null-terminated string
 extern const uint8_t onboarding_config_start[]	asm("_binary_onboarding_config_json_start");
@@ -34,56 +37,69 @@ extern const uint8_t onboarding_config_end[]	asm("_binary_onboarding_config_json
 extern const uint8_t device_info_start[]	asm("_binary_device_info_json_start");
 extern const uint8_t device_info_end[]		asm("_binary_device_info_json_end");
 
-enum smartswitch_switch_onoff_state {
-	SMARTSWITCH_SWITCH_OFF = 0,
-	SMARTSWITCH_SWITCH_ON = 1,
+enum switch_onoff_state {
+	SWITCH_OFF = 0,
+	SWITCH_ON = 1,
 };
 
-static int32_t smartswitch_switch_state = SMARTSWITCH_SWITCH_ON;
+static caps_switch_data_t *cap_switch_data;
 
 static iot_status_t g_iot_status;
+static iot_stat_lv_t g_iot_stat_lv;
 
 static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
 
 IOT_CTX *ctx = NULL;
 
-
-static void change_switch_state(int32_t state)
+static int get_switch_state(void)
 {
-	/* change state */
-	smartswitch_switch_state = state;
-	if(state == SMARTSWITCH_SWITCH_ON) {
-		gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_ON);
-		gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
-	} else {
-		gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_OFF);
+	const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
+	int switch_state = SWITCH_OFF;
+	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON])) {
+		switch_state = SWITCH_ON;
+	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF])) {
+		switch_state = SWITCH_OFF;
+	}
+	return switch_state;
+}
+
+static void noti_led_onoff(int onoff)
+{
+	if (onoff == SWITCH_OFF) {
 		gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
-	}
-}
-
-static void send_switch_cap_evt(IOT_CAP_HANDLE *handle, int32_t state)
-{
-	IOT_EVENT *switch_evt;
-	uint8_t evt_num = 1;
-	int32_t sequence_no;
-
-	/* Setup switch onoff state */
-	if(state == SMARTSWITCH_SWITCH_ON) {
-		switch_evt = st_cap_attr_create_string("switch", "on", NULL);
 	} else {
-		switch_evt = st_cap_attr_create_string("switch", "off", NULL);
+		gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
 	}
-
-	/* Send switch onoff event */
-	sequence_no = st_cap_attr_send(handle, evt_num, &switch_evt);
-	if (sequence_no < 0)
-		printf("fail to send switch onoff data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(switch_evt);
 }
 
-static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
+static void main_led_onoff(int onoff)
+{
+	if (onoff == SWITCH_OFF) {
+		gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_OFF);
+	} else {
+		gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_ON);
+	}
+}
+
+static void change_switch_state(int state)
+{
+	noti_led_onoff(state);
+	main_led_onoff(state);
+}
+
+void cap_switch_init_cb(struct caps_switch_data *caps_data)
+{
+	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_OFF;
+	caps_data->set_switch_value(caps_data, caps_helper_switch.attr_switch.values[switch_init_state]);
+}
+
+void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
+{
+	int switch_state = get_switch_state();
+	change_switch_state(switch_state);
+}
+
+static void button_event(IOT_CAP_HANDLE *handle, int type, int count)
 {
 	if (type == BUTTON_SHORT_PRESS) {
 		printf("Button short press, count: %d\n", count);
@@ -94,13 +110,14 @@ static void button_event(IOT_CAP_HANDLE *handle, uint32_t type, uint32_t count)
 					gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
 					noti_led_mode = LED_ANIMATION_MODE_IDLE;
 				} else {
-					/* change switch state and LED state */
-					if (smartswitch_switch_state == SMARTSWITCH_SWITCH_ON) {
-						change_switch_state(SMARTSWITCH_SWITCH_OFF);
-						send_switch_cap_evt(handle, SMARTSWITCH_SWITCH_OFF);
+					if (get_switch_state() == SWITCH_ON) {
+						change_switch_state(SWITCH_OFF);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF]);
+						cap_switch_data->attr_switch_send(cap_switch_data);
 					} else {
-						change_switch_state(SMARTSWITCH_SWITCH_ON);
-						send_switch_cap_evt(handle, SMARTSWITCH_SWITCH_ON);
+						change_switch_state(SWITCH_ON);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON]);
+						cap_switch_data->attr_switch_send(cap_switch_data);
 					}
 				}
 				break;
@@ -121,7 +138,9 @@ static void iot_status_cb(iot_status_t status,
 		iot_stat_lv_t stat_lv, void *usr_data)
 {
 	g_iot_status = status;
-	printf("iot_status: %d, lv: %d\n", status, stat_lv);
+	g_iot_stat_lv = stat_lv;
+
+	printf("status: %d, stat: %d\n", g_iot_status, g_iot_stat_lv);
 
 	switch(status)
 	{
@@ -131,83 +150,11 @@ static void iot_status_cb(iot_status_t status,
 		case IOT_STATUS_IDLE:
 		case IOT_STATUS_CONNECTING:
 			noti_led_mode = LED_ANIMATION_MODE_IDLE;
-			if (smartswitch_switch_state == SMARTSWITCH_SWITCH_ON) {
-				gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
-			} else {
-				gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_OFF);
-			}
+			noti_led_onoff(get_switch_state());
 			break;
 		default:
 			break;
 	}
-}
-
-
-void cap_switch_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	IOT_EVENT *init_evt;
-	uint8_t evt_num = 1;
-	int32_t sequence_no;
-
-	/* Setup switch on state */
-	init_evt = st_cap_attr_create_string("switch", "on", NULL);
-
-	/* Send switch on event */
-	sequence_no = st_cap_attr_send(handle, evt_num, &init_evt);
-	if (sequence_no < 0)
-		printf("fail to send init_data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(init_evt);
-}
-
-void cap_switch_cmd_off_cb(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	IOT_EVENT *off_evt;
-	uint8_t evt_num = 1;
-	int32_t sequence_no;
-
-	printf("called [%s] func with : num_args:%u\n",
-		__func__, cmd_data->num_args);
-
-	change_switch_state(SMARTSWITCH_SWITCH_OFF);
-
-	/* Setup switch off state */
-	off_evt = st_cap_attr_create_string("switch", "off", NULL);
-
-	/* Send switch off event */
-	sequence_no = st_cap_attr_send(handle, evt_num, &off_evt);
-	if (sequence_no < 0)
-		printf("fail to send off_data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(off_evt);
-}
-
-
-void cap_switch_cmd_on_cb(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	IOT_EVENT *on_evt;
-	uint8_t evt_num = 1;
-	int32_t sequence_no;
-
-	printf("called [%s] func with : num_args:%u\n",
-		__func__, cmd_data->num_args);
-
-	change_switch_state(SMARTSWITCH_SWITCH_ON);
-
-	/* Setup switch on state */
-	on_evt = st_cap_attr_create_string("switch", "on", NULL);
-
-	/* Send switch on event */
-	sequence_no = st_cap_attr_send(handle, evt_num, &on_evt);
-	if (sequence_no < 0)
-		printf("fail to send on_data\n");
-
-	printf("Sequence number return : %d\n", sequence_no);
-	st_cap_attr_free(on_evt);
 }
 
 void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
@@ -280,25 +227,18 @@ void app_main(void)
 		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
 		if (iot_err)
 			printf("fail to set notification callback function\n");
-
-	// 2. create a handle to process capability
-	//	implement init_callback function (cap_switch_init_cb)
-		handle = st_cap_handle_init(ctx, "main", "switch", cap_switch_init_cb, NULL);
-
-	// 3. register a callback function to process capability command when it comes from the SmartThings Server
-	//	implement callback function (cap_switch_cmd_off_cb)
-		iot_err = st_cap_cmd_set_cb(handle, "off", cap_switch_cmd_off_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for off\n");
-
-	//	implement callback function (cap_switch_cmd_on_cb)
-		iot_err = st_cap_cmd_set_cb(handle, "on", cap_switch_cmd_on_cb, NULL);
-		if (iot_err)
-			printf("fail to set cmd_cb for on\n");
-
 	} else {
 		printf("fail to create the iot_context\n");
 	}
+
+	// 2. create a handle to process capability
+	//	implement init_callback function (cap_switch_init_cb)
+	cap_switch_data = caps_switch_initialize(ctx, "main", cap_switch_init_cb, NULL);
+
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function (cap_switch_cmd_off_cb)
+	cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
+	cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
 
 	gpio_init();
 
