@@ -25,158 +25,44 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#define POINT_UNIT "C"
-#define TEMPERATURE_PERIOD_MS 2000
-#define TEMPERATURE_SIMUL 1
+#include "caps_temperatureMeasurement.h"
+#include "caps_thermostatCoolingSetpoint.h"
+#include "caps_thermostatHeatingSetpoint.h"
+#include "caps_thermostatFanMode.h"
+#include "caps_thermostatMode.h"
+#include "caps_thermostatOperatingState.h"
 
-typedef enum thermostat_mode {
-	MODE_AUTO,
-	MODE_COOL,
-	MODE_ECO,
-	MODE_RUSH_HOUR,
-	MODE_EMERGENCY_HEAT,
-	MODE_HEAT,
-	MODE_OFF,
-	MODE_MAX_NUM,
-} thermostat_mode_t;
+#define TEMPERATURE_PERIOD_MS 10000
 
-const char *thermostat_mode_str[MODE_MAX_NUM] = {
-	[MODE_AUTO] = "auto",
-	[MODE_COOL] = "cool",
-	[MODE_ECO] = "eco",
-	[MODE_RUSH_HOUR] = "rush hour",
-	[MODE_EMERGENCY_HEAT] = "emergency heat",
-	[MODE_HEAT] = "heat",
-	[MODE_OFF] = "off",
-};
+// onboarding_config_start is null-terminated string
+extern const uint8_t onboarding_config_start[]	asm("_binary_onboarding_config_json_start");
+extern const uint8_t onboarding_config_end[]	asm("_binary_onboarding_config_json_end");
 
-typedef enum thermostat_fan_mode {
-	FAN_MODE_AUTO,
-	FAN_MODE_CIRCULATE,
-	FAN_MODE_FOLLOWSCHEDULE,
-	FAN_MODE_ON,
-	FAN_MODE_MAX_NUM,
-} thermostat_fan_mode_t;
-
-const char *thermostat_fan_mode_str[MODE_MAX_NUM] = {
-	[FAN_MODE_AUTO] = "auto",
-	[FAN_MODE_CIRCULATE] = "circulate",
-	[FAN_MODE_FOLLOWSCHEDULE] = "followschedule",
-	[FAN_MODE_ON] = "on",
-};
-
-typedef enum thermostat_op_sate {
-	OP_STATE_COOLING,
-	OP_STATE_FAN_ONLY,
-	OP_STATE_HEATING,
-	OP_STATE_IDLE,
-	OP_STATE_PENDING_COOL,
-	OP_STATE_PENDING_HEAT,
-	OP_STATE_VENT_ECONOMIZER,
-	OP_STATE_MAX_NUM,
-} thermostat_op_state_t;
-
-const char *thermostat_op_state_str[MODE_MAX_NUM] = {
-	[OP_STATE_COOLING] = "cooling",
-	[OP_STATE_FAN_ONLY] = "fan only",
-	[OP_STATE_HEATING] = "heating",
-	[OP_STATE_IDLE] = "idle",
-	[OP_STATE_PENDING_COOL] = "pending cool",
-	[OP_STATE_PENDING_HEAT] = "pending heat",
-	[OP_STATE_VENT_ECONOMIZER] = "vent economizer",
-	NULL
-};
-
-extern const uint8_t onboarding_cfg_start[] asm("_binary_onboarding_config_json_start");
-extern const uint8_t onboarding_cfg_end[] asm("_binary_onboarding_config_json_end");
-
-extern const uint8_t device_info_start[] asm("_binary_device_info_json_start");
-extern const uint8_t device_info_end[] asm("_binary_device_info_json_end");
+// device_info_start is null-terminated string
+extern const uint8_t device_info_start[]	asm("_binary_device_info_json_start");
+extern const uint8_t device_info_end[]		asm("_binary_device_info_json_end");
 
 static iot_status_t g_iot_status;
 static iot_stat_lv_t g_iot_stat_lv;
+
 static IOT_CTX *ctx = NULL;
-static IOT_CAP_HANDLE *gh_temperature = NULL;
 
-static double temperature;
-static double cooling_point;
-static double heating_point;
-static thermostat_mode_t thermo_mode;
-static thermostat_fan_mode_t thermo_fan_mode;
-static thermostat_op_state_t thermo_op_state;
+struct caps_temperatureMeasurement_data *cap_temperature_handle;
+struct caps_thermostatCoolingSetpoint_data *cap_coolingsetpoint_handle;
+struct caps_thermostatHeatingSetpoint_data *cap_heatingsetpoint_handle;
+struct caps_thermostatFanMode_data *cap_fanmode_handle;
+struct caps_thermostatMode_data *cap_mode_handle;
+struct caps_thermostatOperatingState_data *cap_opstate_handle;
 
-static char strbuf[16] = {0};
+const char *supported_fan_mode[] = { "auto", "on" };
+const char *supported_mode[] = { "auto", "cool", "eco" };
 
-static double thermostat_get_temperature(void);
-static void temperature_send_cap_measurement(IOT_CAP_HANDLE *handle, double point);
-
-static char *util_double2str(double val)
-{
-	memset(strbuf, 0, sizeof(strbuf));
-
-	/* support up to one decimal point (e.g., 36.5) */
-	snprintf(strbuf, sizeof(strbuf), "%d.%d", (int)val, ((int)(val * 10) % 10));
-
-	return strbuf;
-}
-
-static double temperature_simul(void)
-{
-	static double delta = 2;
-
-	if (temperature < heating_point) {
-		delta = 2;
-		printf("[Turn on Heater]\n");
-	} else if (temperature > cooling_point) {
-		printf("[Turn on Cooler]\n");
-		delta = -2;
-	}
-
-	temperature += delta;
-
-	return temperature;
-}
-
-static void temperature_update(void)
-{
-	double temp;
-
-#if TEMPERATURE_SIMUL
-	temp = temperature_simul();
-#else
-	temp = thermostat_get_temperature();
-	temperature = temp;
-#endif
-	if ((g_iot_status == IOT_STATUS_CONNECTING) &&
-	    (g_iot_stat_lv == IOT_STAT_LV_DONE)) {
-		temperature_send_cap_measurement(gh_temperature, temp);
-	}
-}
-
-static void temperature_show(void)
-{
-	char buf[64];
-	char *str;
-	int c = 0;
-
-	str = util_double2str(temperature);
-	c = sprintf(buf + c, "temperature: %s ", str);
-
-	str = util_double2str(cooling_point);
-	c += sprintf(buf + c, "cooling: %s ", str);
-
-	str = util_double2str(heating_point);
-	c += sprintf(buf + c, "heating: %s ", str);
-
-	printf("%s\n", buf);
-}
-
-static int thermostat_mode_str2idx(char *mode)
+static int thermostat_fan_mode_str2idx(const char *mode)
 {
 	int i;
 
-	for (i = 0; i < MODE_MAX_NUM; i++) {
-		if (!strcmp(mode, thermostat_mode_str[i]))
+	for (i = 0; i < CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_MAX; i++) {
+		if (!strcmp(mode, caps_helper_thermostatFanMode.attr_thermostatFanMode.values[i]))
 			return i;
 	}
 
@@ -185,40 +71,56 @@ static int thermostat_mode_str2idx(char *mode)
 	return -1;
 }
 
-static int thermostat_fan_mode_str2idx(char *mode)
+static int thermostat_mode_str2idx(const char *mode)
 {
 	int i;
 
-	for (i = 0; i < FAN_MODE_MAX_NUM; i++) {
-		if (!strcmp(mode, thermostat_fan_mode_str[i]))
+	for (i = 0; i < CAPS_HELPER_THERMOSTAT_MODE_VALUE_MAX; i++) {
+		if (!strcmp(mode, caps_helper_thermostatMode.attr_thermostatMode.values[i]))
 			return i;
 	}
 
-	printf("%s: '%s' is not supported mode\n", __func__, mode);
+	printf("%s: '%s' is not supported mode\n\n", __func__, mode);
 
 	return -1;
 }
 
-static void thermostat_set_mode(thermostat_mode_t mode)
+static void thermostat_set_mode(int mode)
 {
 	/*
 	 * YOUR CODE:
 	 * implement a ability to control the mode of thermostat
 	 */
-
-	printf("%s: changed mode = %s", __func__,
-				thermostat_mode_str[mode]);
+	printf("%s: changed mode = %s\n", __func__,
+				caps_helper_thermostatMode.attr_thermostatMode.values[mode]);
 }
 
-static void thermostat_set_fan_mode(thermostat_fan_mode_t mode)
+static void thermostat_set_fan_mode(int mode)
 {
 	/*
 	 * YOUR CODE:
 	 * implement a ability to control the fan mode of thermostat
 	 */
+	printf("%s: changed fan mode = %s\n", __func__,
+				caps_helper_thermostatFanMode.attr_thermostatFanMode.values[mode]);
+}
 
-	printf("%s: changed fan mode = %s", __func__,
-				thermostat_fan_mode_str[mode]);
+static void thermostat_set_cooling_point(double point)
+{
+	/*
+	 * YOUR CODE:
+	 * implement a ability to set cooling point
+	 */
+	printf("%s: changed cooling point = %d\n", __func__, (int)point);
+}
+
+static void thermostat_set_heating_point(double point)
+{
+	/*
+	 * YOUR CODE:
+	 * implement a ability to set heating point
+	 */
+	printf("%s: changed heating point = %d\n", __func__, (int)point);
 }
 
 static double thermostat_get_temperature(void)
@@ -227,616 +129,60 @@ static double thermostat_get_temperature(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain the temperature
 	 */
-
 	return 18.5;
 }
 
-static thermostat_mode_t thermostat_get_mode(void)
+static int thermostat_get_operating_state(void)
 {
 	/*
 	 * YOUR CODE:
-	 * implement a ability to obtain the mode of thermostat
+	 * implement a ability to obtain operating state
 	 */
-
-	return MODE_AUTO;
+	return CAPS_HELPER_THERMOSTAT_OPERATING_STATE_VALUE_IDLE;
 }
 
-static thermostat_fan_mode_t thermostat_get_fan_mode(void)
+static void cap_temperatureMeasurement_init_cb(struct caps_temperatureMeasurement_data *caps_data)
 {
-	/*
-	 * YOUR CODE:
-	 * implement a ability to obtain the fan mode of thermostat
-	 */
+	int initial_temperature_value = thermostat_get_temperature();
+	const char *temperature_unit =
+		caps_helper_temperatureMeasurement.attr_temperature.units[CAPS_HELPER_TEMPERATURE_MEASUREMENT_UNIT_C];
 
-	return FAN_MODE_AUTO;
+	caps_data->set_temperature_value(caps_data, initial_temperature_value);
+	caps_data->set_temperature_unit(caps_data, temperature_unit);
 }
 
-static double thermostat_get_cooling_point(void)
+static void cap_thermostatOperatingState_init_cb(struct caps_thermostatOperatingState_data *caps_data)
 {
-	/*
-	 * YOUR CODE:
-	 * implement a ability to obtain the temperature for cooling
-	 */
-
-	return 29.5;
+	int initial_op_state = thermostat_get_operating_state();
+	caps_data->set_thermostatOperatingState_value(caps_data, caps_helper_thermostatOperatingState.attr_thermostatOperatingState.values[initial_op_state]);
 }
 
-static double thermostat_get_heating_point(void)
+static void cap_thermostatCoolingSetpoint_cmd_cb(struct caps_thermostatCoolingSetpoint_data *caps_data)
 {
-	/*
-	 * YOUR CODE:
-	 * implement a ability to obtain the temperature for heating
-	 */
-
-	return 13.5;
+	int point = caps_data->get_coolingSetpoint_value(caps_data);
+	thermostat_set_cooling_point(point);
 }
 
-static thermostat_op_state_t thermostat_get_op_state(void)
+static void cap_thermostatHeatingSetpoint_cmd_cb(struct caps_thermostatHeatingSetpoint_data *caps_data)
 {
-	/*
-	 * YOUR CODE:
-	 * implement a ability to obtain the operating state of thermostat
-	 */
-
-	return OP_STATE_IDLE;
+	int point = caps_data->get_heatingSetpoint_value(caps_data);
+	thermostat_set_heating_point(point);
 }
 
-static void temperature_send_cap_measurement(IOT_CAP_HANDLE *handle, double point)
+static void cap_thermostatFanMode_cmd_cb(struct caps_thermostatFanMode_data *caps_data)
 {
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-	char *str;
-
-	str = util_double2str(point);
-
-	if ((point < -460) || (point > 10000)) {
-		printf("%s: '%s' is out of range\n", __func__, str);
-		return;
-	}
-
-	//printf("%s: point = %s\n", __func__, str);
-
-	evt = st_cap_attr_create_number("temperature", point, POINT_UNIT);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
+	const char *fan_mode = caps_data->get_thermostatFanMode_value(caps_data);
+	thermostat_set_fan_mode( thermostat_fan_mode_str2idx(fan_mode)) ;
 }
 
-static void thermostat_send_cap_mode(IOT_CAP_HANDLE *handle, thermostat_mode_t mode)
+static void cap_thermostatMode_cmd_cb(struct caps_thermostatMode_data *caps_data)
 {
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-
-	if (mode > MODE_MAX_NUM) {
-		printf("%s: '%d' is not supported mode\n", __func__, mode);
-		return;
-	}
-
-	printf("%s: %s\n", __func__, (char *)thermostat_mode_str[mode]);
-
-	evt = st_cap_attr_create_string("thermostatMode",
-				(char *)thermostat_mode_str[mode], NULL);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
+	const char *mode = caps_data->get_thermostatMode_value(caps_data);
+	thermostat_set_mode( thermostat_mode_str2idx(mode) );
 }
 
-static void thermostat_send_cap_supported_mode(IOT_CAP_HANDLE *handle)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
 
-	printf("%s\n", __func__);
-
-	evt = st_cap_attr_create_string_array("supportedThermostatModes",
-				MODE_MAX_NUM, (char **)thermostat_mode_str, NULL);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void thermostat_send_cap_fan_mode(IOT_CAP_HANDLE *handle, thermostat_fan_mode_t mode)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-
-	if (mode > FAN_MODE_MAX_NUM) {
-		printf("%s: '%d' is not supported mode\n", __func__, mode);
-		return;
-	}
-
-	printf("%s: %s\n", __func__, (char *)thermostat_fan_mode_str[mode]);
-
-	evt = st_cap_attr_create_string("thermostatFanMode",
-				(char *)thermostat_fan_mode_str[mode], NULL);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void thermostat_send_cap_supported_fan_mode(IOT_CAP_HANDLE *handle)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-
-	printf("%s\n", __func__);
-
-	evt = st_cap_attr_create_string_array("supportedThermostatFanModes",
-				FAN_MODE_MAX_NUM, (char **)thermostat_fan_mode_str, NULL);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void thermostat_send_cap_cooling(IOT_CAP_HANDLE *handle, double point)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-	char *str;
-
-	str = util_double2str(point);
-
-	if ((point < -460) || (point > 10000)) {
-		printf("%s: '%s' is out of range\n", __func__, str);
-		return;
-	}
-
-	printf("%s: point = %s\n", __func__, str);
-
-	evt = st_cap_attr_create_number("coolingSetpoint", point, POINT_UNIT);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void thermostat_send_cap_heating(IOT_CAP_HANDLE *handle, double point)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-	char *str;
-
-	str = util_double2str(point);
-
-	if ((point < -460) || (point > 10000)) {
-		printf("%s: '%s' is out of range\n", __func__, str);
-		return;
-	}
-
-	printf("%s: point = %s\n", __func__, str);
-
-	evt = st_cap_attr_create_number("heatingSetpoint", point, POINT_UNIT);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void thermostat_send_cap_op_state(IOT_CAP_HANDLE *handle, thermostat_op_state_t state)
-{
-	IOT_EVENT *evt;
-	uint8_t evt_num = 1;
-	int32_t seq_no;
-
-	if (state > OP_STATE_MAX_NUM) {
-		printf("%s: '%d' is not supported state\n", __func__, state);
-		return;
-	}
-
-	printf("%s: state = %s\n", __func__, (char *)thermostat_op_state_str[state]);
-
-	evt = st_cap_attr_create_string("thermostatOperatingState",
-				(char *)thermostat_op_state_str[state], NULL);
-
-	seq_no = st_cap_attr_send(handle, evt_num, &evt);
-	if (seq_no < 0) {
-		printf("%s: st_cap_attr_send is failed\n", __func__);
-	}
-
-	st_cap_attr_free(evt);
-}
-
-static void temperature_init_cb_measurement(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	temperature = thermostat_get_temperature();
-
-	temperature_send_cap_measurement(handle, temperature);
-}
-
-static void thermostat_init_cb_mode(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	thermostat_send_cap_supported_mode(handle);
-
-	thermo_mode = thermostat_get_mode();
-
-	thermostat_send_cap_mode(handle, thermo_mode);
-}
-
-static void thermostat_init_cb_fan_mode(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	thermostat_send_cap_supported_fan_mode(handle);
-
-	thermo_fan_mode = thermostat_get_fan_mode();
-
-	thermostat_send_cap_fan_mode(handle, thermo_fan_mode);
-}
-
-static void thermostat_init_cb_cooling(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	cooling_point = thermostat_get_cooling_point();
-
-	thermostat_send_cap_cooling(handle, cooling_point);
-}
-
-static void thermostat_init_cb_heating(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	heating_point = thermostat_get_heating_point();
-
-	thermostat_send_cap_heating(handle, heating_point);
-}
-
-static void thermostat_init_cb_op_state(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-	thermo_op_state = thermostat_get_op_state();
-
-	thermostat_send_cap_op_state(handle, thermo_op_state);
-}
-
-static void thermostat_cmd_cb_mode_auto(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_mode_t mode = MODE_AUTO;
-
-	thermostat_set_mode(mode);
-
-	thermostat_send_cap_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_mode_cool(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_mode_t mode = MODE_COOL;
-
-	thermostat_set_mode(mode);
-
-	thermostat_send_cap_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_mode_emergencyheat(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_mode_t mode = MODE_EMERGENCY_HEAT;
-
-	thermostat_set_mode(mode);
-
-	thermostat_send_cap_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_mode_heat(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_mode_t mode = MODE_HEAT;
-
-	thermostat_set_mode(mode);
-
-	thermostat_send_cap_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_mode_off(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_mode_t mode = MODE_OFF;
-
-	thermostat_set_mode(mode);
-
-	thermostat_send_cap_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_mode_set(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	char *mode_str;
-	int mode_num;
-
-	if (cmd_data->num_args != 1) {
-		printf("%s: invalid args (%d)\n", __func__,
-				cmd_data->num_args);
-	}
-
-	mode_str = cmd_data->cmd_data[0].string;
-	mode_num = thermostat_mode_str2idx(mode_str);
-	if (mode_num < 0) {
-		printf("%s: '%s' is not supported mode\n",
-				__func__, mode_str);
-	} else {
-		thermo_mode = mode_num;
-		thermostat_set_mode(thermo_mode);
-	}
-
-	thermostat_send_cap_mode(handle, thermo_mode);
-}
-
-static void thermostat_cmd_cb_fan_mode_auto(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_fan_mode_t mode = FAN_MODE_AUTO;
-
-	thermostat_set_fan_mode(mode);
-
-	thermostat_send_cap_fan_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_fan_mode_circulate(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_fan_mode_t mode = FAN_MODE_CIRCULATE;
-
-	thermostat_set_fan_mode(mode);
-
-	thermostat_send_cap_fan_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_fan_mode_on(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	thermostat_fan_mode_t mode = FAN_MODE_ON;
-
-	thermostat_set_fan_mode(mode);
-
-	thermostat_send_cap_fan_mode(handle, mode);
-}
-
-static void thermostat_cmd_cb_fan_mode_set(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	char *mode_str;
-	int mode_num;
-
-	if (cmd_data->num_args != 1) {
-		printf("%s: invalid args (%d)\n", __func__,
-				cmd_data->num_args);
-	}
-
-	mode_str = cmd_data->cmd_data[0].string;
-	mode_num = thermostat_fan_mode_str2idx(mode_str);
-	if (mode_num < 0) {
-		printf("%s: not supported mode\n", __func__);
-	} else {
-		thermo_fan_mode = mode_num;
-		thermostat_set_mode(thermo_fan_mode);
-	}
-
-	thermostat_send_cap_fan_mode(handle, thermo_fan_mode);
-}
-
-static void thermostat_cmd_cb_cooling(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	double point;
-	char *str;
-
-	if (cmd_data->num_args != 1) {
-		printf("%s: invalid args (%d)\n", __func__,
-				cmd_data->num_args);
-	}
-
-	point = cmd_data->cmd_data[0].number;
-
-	if (point > heating_point) {
-		cooling_point = point;
-		str = util_double2str(cooling_point);
-		printf("%s: changed to %s\n", __func__, str);
-	} else {
-		str = util_double2str(point);
-		printf("%s: '%s' is invalid\n", __func__, str);
-	}
-
-	thermostat_send_cap_cooling(handle, cooling_point);
-}
-
-static void thermostat_cmd_cb_heating(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
-{
-	double point;
-	char *str;
-
-	if (cmd_data->num_args != 1) {
-		printf("%s: invalid args (%d)\n", __func__,
-				cmd_data->num_args);
-	}
-
-	point = cmd_data->cmd_data[0].number;
-
-	if (point < cooling_point) {
-		heating_point = point;
-		str = util_double2str(heating_point);
-		printf("%s: changed to %s\n", __func__, str);
-	} else {
-		str = util_double2str(point);
-		printf("%s: '%s' is invalid\n", __func__, str);
-	}
-
-	thermostat_send_cap_heating(handle, heating_point);
-}
-
-static void temperature_init_cap_measurement(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-
-	handle = st_cap_handle_init(ctx, "main", "temperatureMeasurement",
-				temperature_init_cb_measurement, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-
-	gh_temperature = handle;
-}
-
-static void thermostat_init_cap_mode(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-	int st_err;
-
-	handle = st_cap_handle_init(ctx, "main", "thermostatMode",
-				thermostat_init_cb_mode, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "auto",
-				thermostat_cmd_cb_mode_auto, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "cool",
-				thermostat_cmd_cb_mode_cool, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "emergencyHeat",
-				thermostat_cmd_cb_mode_emergencyheat, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "heat",
-				thermostat_cmd_cb_mode_heat, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "off",
-				thermostat_cmd_cb_mode_off, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "setThermostatMode",
-				thermostat_cmd_cb_mode_set, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-}
-
-static void thermostat_init_cap_fan_mode(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-	int st_err;
-
-	handle = st_cap_handle_init(ctx, "main", "thermostatFanMode",
-				thermostat_init_cb_fan_mode, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "fanAuto",
-				thermostat_cmd_cb_fan_mode_auto, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "fanCirculate",
-				thermostat_cmd_cb_fan_mode_circulate, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "fanOn",
-				thermostat_cmd_cb_fan_mode_on, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "setThermostatFanMode",
-				thermostat_cmd_cb_fan_mode_set, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed\n", __func__);
-	}
-}
-
-static void thermostat_init_cap_cooling(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-	int st_err;
-
-	handle = st_cap_handle_init(ctx, "main", "thermostatCoolingSetpoint",
-				thermostat_init_cb_cooling, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "setCoolingSetpoint",
-				thermostat_cmd_cb_cooling, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed\n", __func__);
-	}
-}
-
-static void thermostat_init_cap_heating(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-	int st_err;
-
-	handle = st_cap_handle_init(ctx, "main", "thermostatHeatingSetpoint",
-				thermostat_init_cb_heating, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-
-	st_err = st_cap_cmd_set_cb(handle, "setHeatingSetpoint",
-				thermostat_cmd_cb_heating, NULL);
-	if (st_err) {
-		printf("%s: st_cap_cmd_set_cb is failed\n", __func__);
-	}
-}
-
-static void thermostat_init_cap_op_state(IOT_CTX *ctx)
-{
-	IOT_CAP_HANDLE *handle;
-
-	handle = st_cap_handle_init(ctx, "main", "thermostatOperatingState",
-				thermostat_init_cb_op_state, NULL);
-	if (handle == NULL) {
-		printf("%s: st_cap_handle_init is failed\n", __func__);
-	}
-}
-
-static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
+void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 {
 	printf("Notification message received\n");
 
@@ -844,47 +190,25 @@ static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 		printf("[device deleted]\n");
 	} else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT) {
 		printf("[rate limit] Remaining time:%d, sequence number:%d\n",
-		       noti_data->raw.rate_limit.remainingTime,
-		       noti_data->raw.rate_limit.sequenceNumber);
+			noti_data->raw.rate_limit.remainingTime, noti_data->raw.rate_limit.sequenceNumber);
 	}
 }
 
 static void iot_status_cb(iot_status_t status,
 			iot_stat_lv_t stat_lv, void *usr_data)
 {
-	const char *status_str[] = {
-		[IOT_STATUS_IDLE] = "idle",
-		[IOT_STATUS_PROVISIONING] = "provisioning",
-		[IOT_STATUS_NEED_INTERACT] = "need interact",
-		[IOT_STATUS_CONNECTING] = "connecting",
-	};
-
-	const char *stat_lv_str[] = {
-		[IOT_STAT_LV_STAY] = "stay",
-		[IOT_STAT_LV_START] = "start",
-		[IOT_STAT_LV_DONE] = "done",
-		[IOT_STAT_LV_FAIL] = "fail",
-	};
-
 	g_iot_status = status;
 	g_iot_stat_lv = stat_lv;
 
-	printf("status: %s, stat: %s\n",
-			(char *)status_str[g_iot_status],
-			(char *)stat_lv_str[g_iot_stat_lv]);
-}
-
-static unsigned int task_get_current_ms(void)
-{
-	return (xTaskGetTickCountFromISR() * portTICK_PERIOD_MS);
+	printf("status: %d, stat: %d\n", g_iot_status, g_iot_stat_lv);
 }
 
 static void thermostat_task(void *arg)
 {
 	TimeOut_t temperature_timeout;
 	TickType_t temperature_period_tick = pdMS_TO_TICKS(TEMPERATURE_PERIOD_MS);
-	
-	vTaskDelay(20000 / portTICK_PERIOD_MS);
+	int temperature;
+	vTaskDelay(TEMPERATURE_PERIOD_MS / portTICK_PERIOD_MS);
 
 	vTaskSetTimeOutState(&temperature_timeout);
 
@@ -893,45 +217,109 @@ static void thermostat_task(void *arg)
 			vTaskSetTimeOutState(&temperature_timeout);
 			temperature_period_tick = pdMS_TO_TICKS(TEMPERATURE_PERIOD_MS);
 
-			temperature_update();
-			temperature_show();
+			temperature = thermostat_get_temperature();
+			cap_temperature_handle->set_temperature_value(cap_temperature_handle, temperature);
+			cap_temperature_handle->attr_temperature_send(cap_temperature_handle);
 		}
 
-		vTaskDelay(10 / portTICK_PERIOD_MS);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
+}
+
+static void device_init()
+{
+	const int initial_cooling_point_value = 30.5;
+	const int initial_heating_point_value = 13.5;
+
+	const char *cooling_point_unit =
+		caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAPS_HELPER_THERMOSTAT_COOLING_SETPOINT_UNIT_C];
+	const char *heating_point_unit =
+		caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAPS_HELPER_THERMOSTAT_HEATING_SETPOINT_UNIT_C];
+
+	const int initial_fan_mode = CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_AUTO;
+	const int initial_mode = CAPS_HELPER_THERMOSTAT_MODE_VALUE_AUTO;
+
+	cap_coolingsetpoint_handle->set_coolingSetpoint_value(cap_coolingsetpoint_handle, initial_cooling_point_value);
+	cap_coolingsetpoint_handle->set_coolingSetpoint_unit(cap_coolingsetpoint_handle, cooling_point_unit);
+	thermostat_set_cooling_point(initial_cooling_point_value);
+
+	cap_heatingsetpoint_handle->set_heatingSetpoint_value(cap_heatingsetpoint_handle, initial_heating_point_value);
+	cap_heatingsetpoint_handle->set_heatingSetpoint_unit(cap_heatingsetpoint_handle, heating_point_unit);
+	thermostat_set_heating_point(initial_heating_point_value);
+
+	cap_fanmode_handle->set_thermostatFanMode_value(cap_fanmode_handle, caps_helper_thermostatFanMode.attr_thermostatFanMode.values[initial_fan_mode]);
+	cap_fanmode_handle->set_supportedThermostatFanModes_value(cap_fanmode_handle, supported_fan_mode, sizeof(supported_fan_mode)/sizeof(char *));
+	thermostat_set_fan_mode(initial_fan_mode);
+
+	cap_mode_handle->set_thermostatMode_value(cap_mode_handle, caps_helper_thermostatMode.attr_thermostatMode.values[initial_mode]);
+	cap_mode_handle->set_supportedThermostatModes_value(cap_mode_handle, supported_mode, sizeof(supported_mode)/sizeof(char *));
+	thermostat_set_mode(initial_mode);
 }
 
 void app_main(void)
 {
-	unsigned char *onboarding_cfg = (unsigned char *)onboarding_cfg_start;
-	unsigned int onboarding_cfg_len = onboarding_cfg_end - onboarding_cfg_start;
-	unsigned char *device_info = (unsigned char *)device_info_start;
+	/**
+	  SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
+	  additional st_iot_core layer to the existing chip vendor SW Architecture.
+
+	  That is, you can simply develop a basic application by just calling the APIs provided by st_iot_core layer
+	  like below. st_iot_core currently offers 14 API.
+
+	  //create a iot context
+	  1. st_conn_init();
+
+	  //create a handle to process capability
+	  2. st_cap_handle_init();
+
+	  //register a callback function to process capability command when it comes from the SmartThings Server.
+	  3. st_cap_cmd_set_cb();
+
+	  //needed when it is necessary to keep monitoring the device status
+	  4. user_defined_task()
+
+	  //process on-boarding procedure. There is nothing more to do on the app side than call the API.
+	  5. st_conn_start();
+	 */
+
+	unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
+	unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
+	unsigned char *device_info = (unsigned char *) device_info_start;
 	unsigned int device_info_len = device_info_end - device_info_start;
-	int st_err;
 
-	ctx = st_conn_init(onboarding_cfg, onboarding_cfg_len, device_info, device_info_len);
+	int iot_err;
+
+	// 1. create a iot context
+	ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
 	if (ctx != NULL) {
-		st_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
-		if (st_err) {
-			printf("st_conn_set_noti_cb is failed\n");
-		}
+		iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
+		if (iot_err)
+			printf("fail to set notification callback function\n");
 
-		temperature_init_cap_measurement(ctx);
-
-		thermostat_init_cap_mode(ctx);
-
-		thermostat_init_cap_fan_mode(ctx);
-
-		thermostat_init_cap_cooling(ctx);
-
-		thermostat_init_cap_heating(ctx);
-
-		thermostat_init_cap_op_state(ctx);
 	} else {
-		printf("st_conn_init is failed\n");
+		printf("fail to create the iot_context\n");
 	}
 
+	// 2. create a handle to process capability
+	//	implement init_callback function
+	cap_temperature_handle = caps_temperatureMeasurement_initialize(ctx, "main", cap_temperatureMeasurement_init_cb, NULL);
+	cap_coolingsetpoint_handle = caps_thermostatCoolingSetpoint_initialize(ctx, "main", NULL, NULL);
+	cap_heatingsetpoint_handle = caps_thermostatHeatingSetpoint_initialize(ctx, "main", NULL, NULL);
+	cap_fanmode_handle = caps_thermostatFanMode_initialize(ctx, "main", NULL, NULL);
+	cap_mode_handle = caps_thermostatMode_initialize(ctx, "main", NULL, NULL);
+	cap_opstate_handle = caps_thermostatOperatingState_initialize(ctx, "main", cap_thermostatOperatingState_init_cb, NULL);
+
+	// 3. register a callback function to process capability command when it comes from the SmartThings Server
+	//	implement callback function
+	cap_coolingsetpoint_handle->cmd_setCoolingSetpoint_usr_cb = cap_thermostatCoolingSetpoint_cmd_cb;
+	cap_heatingsetpoint_handle->cmd_setHeatingSetpoint_usr_cb = cap_thermostatHeatingSetpoint_cmd_cb;
+	cap_fanmode_handle->cmd_setThermostatFanMode_usr_cb = cap_thermostatFanMode_cmd_cb;
+	cap_mode_handle->cmd_setThermostatMode_usr_cb = cap_thermostatMode_cmd_cb;
+
+	device_init();
+
+	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(thermostat_task, "thermostat_task", 2048, NULL, 10, NULL);
 
+	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
 }

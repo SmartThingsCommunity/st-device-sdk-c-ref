@@ -68,8 +68,6 @@ enum notification_led_gpio_state {
 
 #endif
 
-
-
 enum main_led_gpio_state {
 	MAINLED_GPIO_ON = 1,
 	MAINLED_GPIO_OFF = 0,
