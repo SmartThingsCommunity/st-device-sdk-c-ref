@@ -1,0 +1,31 @@
+From 699444310708af5ed0dd9a4a4e1695815bd4cd05 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=E2=80=9CKYUWOOK?= <kyuwook.lim@samsung.com>
+Date: Tue, 21 Apr 2020 09:19:51 +0900
+Subject: [PATCH] esp32: mbedtls: Add MBEDTLS_DEBUG_LEVEl config for log
+
+---
+ components/mbedtls/Kconfig | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/components/mbedtls/Kconfig b/components/mbedtls/Kconfig
+index 4ba0180..1d9f93d 100644
+--- a/components/mbedtls/Kconfig
++++ b/components/mbedtls/Kconfig
+@@ -92,6 +92,14 @@ menu "mbedTLS"
+             at runtime in order to enable mbedTLS debug output via the ESP
+             log mechanism.
+ 
++    config MBEDTLS_DEBUG_LEVEL
++        int "Mbedtls debugging level"
++        default 4
++        range 0 4
++        depends on MBEDTLS_DEBUG
++        help
++            Mbedtls debugging level.
++
+     config MBEDTLS_HARDWARE_AES
+         bool "Enable hardware AES acceleration"
+         default y
+-- 
+2.7.4
+
