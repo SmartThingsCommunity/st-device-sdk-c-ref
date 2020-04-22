@@ -26,6 +26,7 @@
 #include "queue.h"
 #include "task.h"
 #include "timer_api.h"
+#include "JSON.h"
 
 enum led_animation_mode_list {
      LED_ANIMATION_MODE_IDLE = 0,
@@ -397,12 +398,26 @@ void cap_color_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 void cap_color_cmd_cb(IOT_CAP_HANDLE *handle,
 			iot_cap_cmd_data_t *cmd_data, void *usr_data)
 {
+	JSON_H* json_object;
+	JSON_H* item;
 	int tmp_state;
 	printf("called [%s] func with : num_args:%u\n",
 		__func__, cmd_data->num_args);
 
-	smartlamp_color_saturation = cmd_data->cmd_data[0].number;
-	smartlamp_color_hue = cmd_data->cmd_data[1].number;
+	json_object = JSON_PARSE(cmd_data->cmd_data[0].json_object);
+	if (!json_object) {
+		printf("fail to parse json object\n");
+		return;
+	}
+	item = JSON_GET_OBJECT_ITEM(json_object, "hue");
+	if (JSON_IS_NUMBER(item)) {
+		smartlamp_color_hue = item->valuedouble;
+	}
+	item = JSON_GET_OBJECT_ITEM(json_object, "saturation");
+	if (JSON_IS_NUMBER(item)) {
+		smartlamp_color_saturation = item->valuedouble;
+	}
+	JSON_DELETE(json_object);
 
 	update_rgb_from_hsl(smartlamp_color_hue, smartlamp_color_saturation, smartlamp_color_level,
 					&smartlamp_color_red, &smartlamp_color_green, &smartlamp_color_blue);
