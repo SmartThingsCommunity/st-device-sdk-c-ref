@@ -6,7 +6,7 @@ This article demonstrates how to integrate a direct-connected device with SmartT
 
 ## Workflow
 
-When developing a new direct-connected device application with SmartThings Device SDK (STDK for short), you will progress through the following steps. You can also refer to the [Code Lab data of the 2019 Samsung Developer Conference](https://developer.samsung.com/codelab/smartThings/device/overview). It will be more practical for you to understand the STDK.
+When developing a new direct-connected device application with SmartThings Device SDK (STDK for short), you will progress through the following steps. You can also refer to the [Code Lab data of the 2019 Samsung Developer Conference](https://developer.samsung.com/codelab/smartthings/smartthings-device-sdk/overview.html). It will be more practical for you to understand the STDK.
 
 - [Setup Environment](#Setup Environment)
 
