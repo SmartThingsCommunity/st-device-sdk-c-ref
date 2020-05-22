@@ -87,8 +87,8 @@ class message_info:
     def get_arg_text(self):
         arg1_string = ""
         arg2_string = ""
-        return arg1_string + format(self.arg1, "10d")+" (0x"+format(self.arg1 & (2**32-1), "08x") +") | " + \
-               arg2_string + format(self.arg2, "10d")+" (0x"+format(self.arg2 & (2**32-1), "08x")+")"
+        return arg1_string + format(self.arg1, "10d")+" (0x"+format(self.arg1 & (2**32-1), "08X") +") | " + \
+               arg2_string + format(self.arg2, "10d")+" (0x"+format(self.arg2 & (2**32-1), "08X")+")"
     def get_time_text(self):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.time))
     def printMessage(self):
@@ -140,7 +140,6 @@ if isEncoded:
     binary_file = open(file_name+"_d", 'wb')
     input_file.seek(0)
     binary_file.write(base64.b64decode(input_file.read()))
-    base64.b64encode()
     binary_file.close()
     log_file_path = file_name+"_d"
 else:
@@ -171,3 +170,4 @@ while True:
     if not message_line: break
     message = message_info(message_line)
     message.printMessage()
+
