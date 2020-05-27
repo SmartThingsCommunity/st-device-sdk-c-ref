@@ -54,6 +54,9 @@ class dumpState_info:
         self.os_version = dumpState_line[32:48].decode().replace("\x00", "")
         self.bsp_name = dumpState_line[48:64].decode().replace("\x00", "")
         self.bsp_version = dumpState_line[64:80].decode().replace("\x00", "")
+        self.firmware_version = dumpState_line[80:96].decode().replace("\x00", "")
+        self.model_number = dumpState_line[96:112].decode().replace("\x00", "")
+        self.manufacture_name = dumpState_line[112:128].decode().replace("\x00", "")
     def printInfo(self):
         output = ""
         output += "stdk_version_code : " + hex(self.stdk_version_code) + "\n"
@@ -63,6 +66,9 @@ class dumpState_info:
         output += "os_version : " + self.os_version + "\n"
         output += "bsp_name : " + self.bsp_name + "\n"
         output += "bsp_version : " + self.bsp_version + "\n"
+        output += "firmware_version : " + self.firmware_version + "\n"
+        output += "model_number : " + self.firmware_version + "\n"
+        output += "manufacture_name : " + self.firmware_version + "\n"
         print(output)
         output_file.write(output)
 
