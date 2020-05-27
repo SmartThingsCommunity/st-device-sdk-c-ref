@@ -12,6 +12,8 @@ log_version = 0
 endian = ""
 output_file = None
 
+default_log_file = "all_log_dump"
+
 def printAndWrite(*args, **kwargs):
     print(*args, **kwargs)
     if output_file:
@@ -109,7 +111,14 @@ def printErrorAndExit():
 if len(sys.argv) <= 1:
     printErrorAndExit()
 
-file_name = sys.argv[1]
+if (not os.path.isfile(sys.argv[1])) and (sys.argv[1].startswith("CcH") or sys.argv[1].startswith("V9H")):
+    print("Save input log to " + default_log_file)
+    output_file = open(default_log_file, 'w')
+    output_file.write(sys.argv[1])
+    output_file.close()
+    file_name = default_log_file
+else:
+    file_name = sys.argv[1]
 input_file = open(file_name, 'rb')
 if not input_file:
     printErrorAndExit()
