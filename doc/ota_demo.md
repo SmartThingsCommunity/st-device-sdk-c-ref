@@ -315,11 +315,11 @@ If you prepare all the things in document, you already have OTA server and OTA s
 3. On-board demo device with SmartThings mobile application
 4. Select device card from SmartThings mobile application
 
-<img src="./res/ota_plugins.jpg" width=200>   <img src="./res/ota_tip_card.jpg" width=200>
+   <img src="./res/ota_plugins.jpg" width=200>   <img src="./res/ota_tip_card.jpg" width=200>
 
 5. Select _more_ > _Information_ then you can find _Firmware update_ button enabled
 6. Press _Firmware update_ button 
 
-<img src="./res/ota_information_menu.jpg" width=200>   <img src="./res/ota_updating.jpg" width=200>
+   <img src="./res/ota_information_menu.jpg" width=200>   <img src="./res/ota_updating.jpg" width=200>
 
 ***
