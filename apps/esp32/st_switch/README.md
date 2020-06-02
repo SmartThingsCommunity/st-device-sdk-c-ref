@@ -87,13 +87,12 @@ If you create a device identity with a command with an option like above,  You c
 
 ### 2.3. Setup toolchain
 
-You must setup a toolchain according to each chipset you selected.
+You need to setup a esp32-idf.
 
-ESP32-IDF supports multiple host environments including Windows, Linux, and macOS. This document will uses Linux environment.
+ESP32-IDF supports multiple host environments including Windows, Linux, and macOS. This document will uses Linux environment.   
+Please refer _Example for ESP32_ section from below link
 
-- [Standard Setup of Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html)
-
-- [Get ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#get-started-get-esp-idf)
+- [Quick start for Linux](../../../README.md#prerequisites)
 
 ## 3. Register a Device
 
