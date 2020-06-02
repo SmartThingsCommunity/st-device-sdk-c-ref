@@ -432,9 +432,10 @@ void app_main(void)
 	// 4. needed when it is necessary to keep monitoring the device status
 	xTaskCreate(smartswitch_task, "smartswitch_task", 2048, (void *)handle, 10, NULL);
 
+	// 5. needed to check whether firmware update is available
 	xTaskCreate(ota_polling_task_func, "ota_polling_task_func", 8096, (void *)handle, 5, NULL);
 
-	// 5. process on-boarding procedure. There is nothing more to do on the app side than call the API.
+	// 6. process on-boarding procedure. There is nothing more to do on the app side than call the API.
 	st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, NULL);
 
 }
