@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019 Samsung Electronics All Rights Reserved.
+ * Copyright (c) 2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,24 @@
  *
  ****************************************************************************/
 
+//#define CONFIG_TARGET_WITTY_CLOUD
+#if defined(CONFIG_TARGET_WITTY_CLOUD)
+
+#define GPIO_OUTPUT_NOTIFICATION_LED 2
+#define GPIO_INPUT_BUTTON 4
+
+#define GPIO_OUTPUT_MAINLED 15
+#define GPIO_OUTPUT_MAINLED_0 16 /* use as ground */
+
+#define GPIO_OUTPUT_NOUSE1 12
+#define GPIO_OUTPUT_NOUSE2 13
+
+enum notification_led_gpio_state {
+	NOTIFICATION_LED_GPIO_ON = 0,
+	NOTIFICATION_LED_GPIO_OFF = 1,
+};
+#else //default
+
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
 #define GPIO_INPUT_BUTTON 0
 
@@ -29,6 +47,9 @@ enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 1,
 	NOTIFICATION_LED_GPIO_OFF = 0,
 };
+
+
+#endif
 
 
 
