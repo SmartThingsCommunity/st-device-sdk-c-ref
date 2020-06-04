@@ -6,13 +6,14 @@ import sys
 import base64
 import time
 
+default_log_file = "all_log_dump"
+tz_offset_sec = time.mktime(time.localtime()) - time.mktime(time.gmtime())
 header_path = os.path.dirname(os.path.abspath(__file__)) + "/../../iot-core/src/include/"
-print(header_path)
+
 log_version = 0
 endian = ""
 output_file = None
 
-default_log_file = "all_log_dump"
 
 def printAndWrite(*args, **kwargs):
     print(*args, **kwargs)
@@ -56,19 +57,19 @@ class dumpState_info:
         self.bsp_version = dumpState_line[64:80].decode().replace("\x00", "")
         self.firmware_version = dumpState_line[80:96].decode().replace("\x00", "")
         self.model_number = dumpState_line[96:112].decode().replace("\x00", "")
-        self.manufacture_name = dumpState_line[112:128].decode().replace("\x00", "")
+        self.manufacturer_name = dumpState_line[112:128].decode().replace("\x00", "")
     def printInfo(self):
         output = ""
         output += "stdk_version_code : " + hex(self.stdk_version_code) + "\n"
-        output += "clock_time : " + str(self.clock_time) + "\n"
+        output += "uptime : " + str(self.clock_time) + "\n"
         output += "sequence_number : " + str(self.sequence_number) + "\n"
         output += "os_name : " + self.os_name.strip() + "\n"
         output += "os_version : " + self.os_version + "\n"
         output += "bsp_name : " + self.bsp_name + "\n"
         output += "bsp_version : " + self.bsp_version + "\n"
         output += "firmware_version : " + self.firmware_version + "\n"
-        output += "model_number : " + self.firmware_version + "\n"
-        output += "manufacture_name : " + self.firmware_version + "\n"
+        output += "model_number : " + self.model_number + "\n"
+        output += "manufacturer_name : " + self.manufacturer_name + "\n"
         print(output)
         output_file.write(output)
 
@@ -98,7 +99,7 @@ class message_info:
         return arg1_string + format(self.arg1, "10d")+" (0x"+format(self.arg1 & (2**32-1), "08X") +") | " + \
                arg2_string + format(self.arg2, "10d")+" (0x"+format(self.arg2 & (2**32-1), "08X")+")"
     def get_time_text(self):
-        return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.time))
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.time + tz_offset_sec))
     def printMessage(self):
         if (self.log_level == 1) : log_level_char = 'E'
         elif (self.log_level == 2): log_level_char = 'W'
