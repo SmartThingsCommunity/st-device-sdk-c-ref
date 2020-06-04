@@ -4,13 +4,13 @@ OTA demo
 This document describes how the **Firmware Update** capability could works with SmartThings Platform and SmartThings Device SDK enabled device to help building device manufacturer own OTA (over-the-air) firmware update service.
 
 This document contains
-* [Adding **Firmware Update** capability to project](./ota_demo.md#adding-firmwareupdate-capability-to-project)
+* [Adding **Firmware Update** capability to project](./ota_demo.md#adding-firmware-update-capability-to-project)
 * [OTA demo sequence](./ota_demo.md#ota-demo-sequence)
 * [OTA demo network environment](./ota_demo.md#ota-demo-network-environment)
 * [Preparing OTA Server](./ota_demo.md#preparing-ota-server)
 * [Preparing Certificate](./ota_demo.md#preparing-certificate)
 * [Preparing Server Contents](./ota_demo.md#preparing-server-contents)
-* [Running web server with python3](./ota_demo.md#runnig-web-server-with-python3)
+* [Running web server with python3](./ota_demo.md#running-web-server-with-python3)
 * [OTA demo device application](./ota_demo.md#ota-demo-device-application)
 * [How to run OTA demo](./ota_demo.md#how-to-run-ota-demo)
 
@@ -310,8 +310,8 @@ If you prepare all the things in document, you already have OTA server and OTA s
 
 <img src="./res/ota_flow.png" width=513>
 
-1. Run OTA server - refer [_Running web server with python3_](./ota-demo.md#running-web-server-with-python3)
-2. Power on demo device - refer [_OTA demo device application_](./ota-demo.md#ota-demo-device-application)
+1. Run OTA server - refer [_Running web server with python3_](./ota_demo.md#running-web-server-with-python3)
+2. Power on demo device - refer [_OTA demo device application_](./ota_demo.md#ota-demo-device-application)
 3. On-board demo device with SmartThings mobile application
 4. Select device card from SmartThings mobile application
 
