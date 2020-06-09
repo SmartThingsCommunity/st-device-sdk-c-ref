@@ -7,13 +7,21 @@ import base64
 import time
 
 default_log_file = "all_log_dump"
-tz_offset_sec = time.mktime(time.localtime()) - time.mktime(time.gmtime())
+tz_offset_sec = int(time.mktime(time.localtime()) - time.mktime(time.gmtime()))
 header_path = os.path.dirname(os.path.abspath(__file__)) + "/../../iot-core/src/include/"
 
 log_version = 0
 endian = ""
 output_file = None
 
+
+def get_timezone_string(timezone_sec):
+    tz_min, tz_sec = divmod(abs(timezone_sec), 60)
+    tz_hour, tz_min = divmod(tz_min, 60)
+    if (timezone_sec >= 0):
+        return "+" + format(tz_hour, "02d") + ":" + format(tz_min, "02d")
+    else:
+        return "-" + format(tz_hour, "02d") + ":" + format(tz_min, "02d")
 
 def printAndWrite(*args, **kwargs):
     print(*args, **kwargs)
@@ -174,12 +182,21 @@ header = header_info(header_line)
 header.checkMagicnumber()
 
 print("--------------------")
+
 header.printInfo()
 log_version = header.log_version
 
-dumpState_line = log_file.read(header.dumpState_size)
-dumpState = dumpState_info(dumpState_line)
-dumpState.printInfo()
+if header.dumpState_size > 0:
+    dumpState_line = log_file.read(header.dumpState_size)
+    dumpState = dumpState_info(dumpState_line)
+    dumpState.printInfo()
+else:
+    print("No dumpState info")
+    output_file.write("No dumpState info\n")
+
+timezone_info = "timezone : " + format(tz_offset_sec, "+d") + " (" + get_timezone_string(tz_offset_sec) + ")\n"
+print(timezone_info)
+output_file.write(timezone_info)
 
 while True:
     message_line = log_file.read(16)
