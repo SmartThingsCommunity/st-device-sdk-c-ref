@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,30 @@
  ****************************************************************************/
 
 #include "caps/iot_caps_helper_thermostatFanMode.h"
+#include "JSON.h"
 
 typedef struct caps_thermostatFanMode_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
     char *thermostatFanMode_value;
-    const char *(*get_thermostatFanMode_value)(struct caps_thermostatFanMode_data *caps_data);
-    void (*set_thermostatFanMode_value)(struct caps_thermostatFanMode_data *caps_data, const char* value);
-    void (*attr_thermostatFanMode_send)(struct caps_thermostatFanMode_data *caps_data);
+    char **supportedThermostatFanModes_value;
+    int supportedThermostatFanModes_arraySize;
 
-    char** supportedThermostatFanModes_value;
-    int supportedThermostatFanModes_array_size;
-    const char** (*get_supportedThermostatFanModes_value)(struct caps_thermostatFanMode_data *caps_data);
-    void (*set_supportedThermostatFanModes_value)(struct caps_thermostatFanMode_data *caps_data, const char** value, int array_size);
+    const char *(*get_thermostatFanMode_value)(struct caps_thermostatFanMode_data *caps_data);
+    void (*set_thermostatFanMode_value)(struct caps_thermostatFanMode_data *caps_data, const char *value);
+    int (*attr_thermostatFanMode_str2idx)(const char *value);
+    void (*attr_thermostatFanMode_send)(struct caps_thermostatFanMode_data *caps_data);
+    const char **(*get_supportedThermostatFanModes_value)(struct caps_thermostatFanMode_data *caps_data);
+    void (*set_supportedThermostatFanModes_value)(struct caps_thermostatFanMode_data *caps_data, const char **value, int arraySize);
     void (*attr_supportedThermostatFanModes_send)(struct caps_thermostatFanMode_data *caps_data);
 
     void (*init_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
 
-    void (*cmd_fanAuto_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
-    void (*cmd_fanCirculate_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
     void (*cmd_fanOn_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
+    void (*cmd_fanCirculate_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
+    void (*cmd_fanAuto_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
     void (*cmd_setThermostatFanMode_usr_cb)(struct caps_thermostatFanMode_data *caps_data);
 } caps_thermostatFanMode_data_t;
 

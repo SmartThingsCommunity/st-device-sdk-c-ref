@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@
 typedef struct caps_formaldehydeMeasurement_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
-    int formaldehydeLevel_value;
-    int (*get_formaldehydeLevel_value)(struct caps_formaldehydeMeasurement_data *caps_data);
-    void (*set_formaldehydeLevel_value)(struct caps_formaldehydeMeasurement_data *caps_data, int value);
+    double formaldehydeLevel_value;
     char *formaldehydeLevel_unit;
+
+    double (*get_formaldehydeLevel_value)(struct caps_formaldehydeMeasurement_data *caps_data);
+    void (*set_formaldehydeLevel_value)(struct caps_formaldehydeMeasurement_data *caps_data, double value);
     const char *(*get_formaldehydeLevel_unit)(struct caps_formaldehydeMeasurement_data *caps_data);
     void (*set_formaldehydeLevel_unit)(struct caps_formaldehydeMeasurement_data *caps_data, const char *unit);
     void (*attr_formaldehydeLevel_send)(struct caps_formaldehydeMeasurement_data *caps_data);

@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@
 typedef struct caps_thermostatCoolingSetpoint_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
-    int coolingSetpoint_value;
-    int (*get_coolingSetpoint_value)(struct caps_thermostatCoolingSetpoint_data *caps_data);
-    void (*set_coolingSetpoint_value)(struct caps_thermostatCoolingSetpoint_data *caps_data, int value);
+    double coolingSetpoint_value;
     char *coolingSetpoint_unit;
+
+    double (*get_coolingSetpoint_value)(struct caps_thermostatCoolingSetpoint_data *caps_data);
+    void (*set_coolingSetpoint_value)(struct caps_thermostatCoolingSetpoint_data *caps_data, double value);
     const char *(*get_coolingSetpoint_unit)(struct caps_thermostatCoolingSetpoint_data *caps_data);
     void (*set_coolingSetpoint_unit)(struct caps_thermostatCoolingSetpoint_data *caps_data, const char *unit);
     void (*attr_coolingSetpoint_send)(struct caps_thermostatCoolingSetpoint_data *caps_data);

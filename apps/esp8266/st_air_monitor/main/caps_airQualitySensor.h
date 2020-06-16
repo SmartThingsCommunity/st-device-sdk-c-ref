@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@
 typedef struct caps_airQualitySensor_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
     int airQuality_value;
+    char *airQuality_unit;
+
     int (*get_airQuality_value)(struct caps_airQualitySensor_data *caps_data);
     void (*set_airQuality_value)(struct caps_airQualitySensor_data *caps_data, int value);
-    char *airQuality_unit;
     const char *(*get_airQuality_unit)(struct caps_airQualitySensor_data *caps_data);
     void (*set_airQuality_unit)(struct caps_airQualitySensor_data *caps_data, const char *unit);
     void (*attr_airQuality_send)(struct caps_airQualitySensor_data *caps_data);

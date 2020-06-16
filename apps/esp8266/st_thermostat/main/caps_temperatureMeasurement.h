@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@
 typedef struct caps_temperatureMeasurement_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
-    int temperature_value;
-    int (*get_temperature_value)(struct caps_temperatureMeasurement_data *caps_data);
-    void (*set_temperature_value)(struct caps_temperatureMeasurement_data *caps_data, int value);
+    double temperature_value;
     char *temperature_unit;
+
+    double (*get_temperature_value)(struct caps_temperatureMeasurement_data *caps_data);
+    void (*set_temperature_value)(struct caps_temperatureMeasurement_data *caps_data, double value);
     const char *(*get_temperature_unit)(struct caps_temperatureMeasurement_data *caps_data);
     void (*set_temperature_unit)(struct caps_temperatureMeasurement_data *caps_data, const char *unit);
     void (*attr_temperature_send)(struct caps_temperatureMeasurement_data *caps_data);

@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@
 typedef struct caps_carbonDioxideMeasurement_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
     int carbonDioxide_value;
+    char *carbonDioxide_unit;
+
     int (*get_carbonDioxide_value)(struct caps_carbonDioxideMeasurement_data *caps_data);
     void (*set_carbonDioxide_value)(struct caps_carbonDioxideMeasurement_data *caps_data, int value);
-    char *carbonDioxide_unit;
     const char *(*get_carbonDioxide_unit)(struct caps_carbonDioxideMeasurement_data *caps_data);
     void (*set_carbonDioxide_unit)(struct caps_carbonDioxideMeasurement_data *caps_data, const char *unit);
     void (*attr_carbonDioxide_send)(struct caps_carbonDioxideMeasurement_data *caps_data);
