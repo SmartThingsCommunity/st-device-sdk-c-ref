@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_contactSensor_attr_contact_str2idx(const char *value)
 {
     int index;
@@ -123,3 +127,7 @@ caps_contactSensor_data_t *caps_contactSensor_initialize(IOT_CTX *ctx, const cha
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

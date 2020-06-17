@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const JSON_H *caps_threeAxis_get_threeAxis_value(caps_threeAxis_data_t *caps_data)
 {
     if (!caps_data) {
@@ -130,3 +134,7 @@ caps_threeAxis_data_t *caps_threeAxis_initialize(IOT_CTX *ctx, const char *compo
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

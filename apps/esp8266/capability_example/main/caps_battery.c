@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_battery_get_battery_value(caps_battery_data_t *caps_data)
 {
     if (!caps_data) {
@@ -123,3 +127,7 @@ caps_battery_data_t *caps_battery_initialize(IOT_CTX *ctx, const char *component
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

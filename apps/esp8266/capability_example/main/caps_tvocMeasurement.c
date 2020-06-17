@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static double caps_tvocMeasurement_get_tvocLevel_value(caps_tvocMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -123,3 +127,7 @@ caps_tvocMeasurement_data_t *caps_tvocMeasurement_initialize(IOT_CTX *ctx, const
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

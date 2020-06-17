@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static double caps_voltageMeasurement_get_voltage_value(caps_voltageMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -123,3 +127,7 @@ caps_voltageMeasurement_data_t *caps_voltageMeasurement_initialize(IOT_CTX *ctx,
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

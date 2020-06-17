@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_samsungTV_get_volume_value(caps_samsungTV_data_t *caps_data)
 {
     if (!caps_data) {
@@ -622,3 +626,7 @@ caps_samsungTV_data_t *caps_samsungTV_initialize(IOT_CTX *ctx, const char *compo
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

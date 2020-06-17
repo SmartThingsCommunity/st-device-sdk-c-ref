@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static double caps_signalStrength_get_rssi_value(caps_signalStrength_data_t *caps_data)
 {
     if (!caps_data) {
@@ -172,3 +176,7 @@ caps_signalStrength_data_t *caps_signalStrength_initialize(IOT_CTX *ctx, const c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

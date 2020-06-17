@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_ovenSetpoint_get_ovenSetpoint_value(caps_ovenSetpoint_data_t *caps_data)
 {
     if (!caps_data) {
@@ -124,3 +128,7 @@ caps_ovenSetpoint_data_t *caps_ovenSetpoint_initialize(IOT_CTX *ctx, const char 
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

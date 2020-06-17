@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const char **caps_button_get_supportedButtonValues_value(caps_button_data_t *caps_data)
 {
     if (!caps_data) {
@@ -242,3 +246,7 @@ caps_button_data_t *caps_button_initialize(IOT_CTX *ctx, const char *component, 
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

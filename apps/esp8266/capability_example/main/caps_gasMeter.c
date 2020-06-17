@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const char *caps_gasMeter_get_gasMeterTime_value(caps_gasMeter_data_t *caps_data)
 {
     if (!caps_data) {
@@ -406,3 +410,7 @@ caps_gasMeter_data_t *caps_gasMeter_initialize(IOT_CTX *ctx, const char *compone
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

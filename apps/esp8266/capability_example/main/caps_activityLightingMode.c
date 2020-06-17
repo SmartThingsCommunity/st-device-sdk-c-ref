@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_activityLightingMode_attr_lightingMode_str2idx(const char *value)
 {
     int index;
@@ -150,3 +154,7 @@ caps_activityLightingMode_data_t *caps_activityLightingMode_initialize(IOT_CTX *
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

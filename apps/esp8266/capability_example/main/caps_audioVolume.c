@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_audioVolume_get_volume_value(caps_audioVolume_data_t *caps_data)
 {
     if (!caps_data) {
@@ -172,3 +176,7 @@ caps_audioVolume_data_t *caps_audioVolume_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

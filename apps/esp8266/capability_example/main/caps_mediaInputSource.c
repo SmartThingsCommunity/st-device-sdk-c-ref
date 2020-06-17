@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_mediaInputSource_attr_inputSource_str2idx(const char *value)
 {
     int index;
@@ -220,3 +224,7 @@ caps_mediaInputSource_data_t *caps_mediaInputSource_initialize(IOT_CTX *ctx, con
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

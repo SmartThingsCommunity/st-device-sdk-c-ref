@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_windowShade_attr_windowShade_str2idx(const char *value)
 {
     int index;
@@ -243,3 +247,7 @@ caps_windowShade_data_t *caps_windowShade_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

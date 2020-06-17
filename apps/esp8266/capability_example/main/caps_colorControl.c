@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static void caps_colorControl_set_color_value(caps_colorControl_data_t *caps_data, double hue, double saturation)
 {
     if (!caps_data) {
@@ -272,3 +276,7 @@ caps_colorControl_data_t *caps_colorControl_initialize(IOT_CTX *ctx, const char 
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

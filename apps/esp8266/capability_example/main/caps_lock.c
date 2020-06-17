@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_lock_attr_lock_str2idx(const char *value)
 {
     int index;
@@ -159,3 +163,7 @@ caps_lock_data_t *caps_lock_initialize(IOT_CTX *ctx, const char *component, void
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

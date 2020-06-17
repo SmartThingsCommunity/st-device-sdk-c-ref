@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_robotCleanerTurboMode_attr_robotCleanerTurboMode_str2idx(const char *value)
 {
     int index;
@@ -150,3 +154,7 @@ caps_robotCleanerTurboMode_data_t *caps_robotCleanerTurboMode_initialize(IOT_CTX
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

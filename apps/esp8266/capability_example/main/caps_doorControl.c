@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_doorControl_attr_door_str2idx(const char *value)
 {
     int index;
@@ -159,3 +163,7 @@ caps_doorControl_data_t *caps_doorControl_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

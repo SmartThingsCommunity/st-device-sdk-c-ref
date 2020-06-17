@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_filterStatus_attr_filterStatus_str2idx(const char *value)
 {
     int index;
@@ -123,3 +127,7 @@ caps_filterStatus_data_t *caps_filterStatus_initialize(IOT_CTX *ctx, const char 
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

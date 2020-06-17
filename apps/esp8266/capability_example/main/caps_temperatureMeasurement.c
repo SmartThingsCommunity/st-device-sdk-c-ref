@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static double caps_temperatureMeasurement_get_temperature_value(caps_temperatureMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -123,3 +127,7 @@ caps_temperatureMeasurement_data_t *caps_temperatureMeasurement_initialize(IOT_C
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

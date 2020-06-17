@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_valve_attr_valve_str2idx(const char *value)
 {
     int index;
@@ -159,3 +163,7 @@ caps_valve_data_t *caps_valve_initialize(IOT_CTX *ctx, const char *component, vo
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

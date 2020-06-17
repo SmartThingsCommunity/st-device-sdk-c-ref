@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const char **caps_mediaPlayback_get_supportedPlaybackCommands_value(caps_mediaPlayback_data_t *caps_data)
 {
     if (!caps_data) {
@@ -305,3 +309,7 @@ caps_mediaPlayback_data_t *caps_mediaPlayback_initialize(IOT_CTX *ctx, const cha
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const char *caps_dryerOperatingState_get_completionTime_value(caps_dryerOperatingState_data_t *caps_data)
 {
     if (!caps_data) {
@@ -345,3 +349,7 @@ caps_dryerOperatingState_data_t *caps_dryerOperatingState_initialize(IOT_CTX *ct
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

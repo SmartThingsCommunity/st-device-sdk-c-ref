@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const char *caps_securitySystem_get_alarm_value(caps_securitySystem_data_t *caps_data)
 {
     if (!caps_data) {
@@ -232,3 +236,7 @@ caps_securitySystem_data_t *caps_securitySystem_initialize(IOT_CTX *ctx, const c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

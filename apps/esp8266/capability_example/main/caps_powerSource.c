@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_powerSource_attr_powerSource_str2idx(const char *value)
 {
     int index;
@@ -123,3 +127,7 @@ caps_powerSource_data_t *caps_powerSource_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+
