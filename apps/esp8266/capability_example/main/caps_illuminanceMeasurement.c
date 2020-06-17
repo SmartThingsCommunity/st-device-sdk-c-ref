@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_illuminanceMeasurement_get_illuminance_value(caps_illuminanceMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_illuminanceMeasurement_data_t *caps_illuminanceMeasurement_initialize(IOT_C
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

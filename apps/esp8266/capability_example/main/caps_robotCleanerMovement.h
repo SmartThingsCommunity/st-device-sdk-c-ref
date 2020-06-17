@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_robotCleanerMovement.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_robotCleanerMovement_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -36,3 +40,7 @@ typedef struct caps_robotCleanerMovement_data {
 } caps_robotCleanerMovement_data_t;
 
 caps_robotCleanerMovement_data_t *caps_robotCleanerMovement_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

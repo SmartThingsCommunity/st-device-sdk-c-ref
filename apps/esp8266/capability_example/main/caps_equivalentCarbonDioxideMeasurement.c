@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_equivalentCarbonDioxideMeasurement_get_equivalentCarbonDioxideMeasurement_value(caps_equivalentCarbonDioxideMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_equivalentCarbonDioxideMeasurement_data_t *caps_equivalentCarbonDioxideMeas
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

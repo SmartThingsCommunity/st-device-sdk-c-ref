@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static const char *caps_dishwasherOperatingState_get_completionTime_value(caps_dishwasherOperatingState_data_t *caps_data)
 {
     if (!caps_data) {
@@ -349,7 +345,3 @@ caps_dishwasherOperatingState_data_t *caps_dishwasherOperatingState_initialize(I
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

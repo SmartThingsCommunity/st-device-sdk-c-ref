@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_mediaPlaybackShuffle_attr_playbackShuffle_str2idx(const char *value)
 {
     int index;
@@ -154,7 +150,3 @@ caps_mediaPlaybackShuffle_data_t *caps_mediaPlaybackShuffle_initialize(IOT_CTX *
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

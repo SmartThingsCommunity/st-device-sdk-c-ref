@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_sleepSensor_attr_sleeping_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_sleepSensor_data_t *caps_sleepSensor_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

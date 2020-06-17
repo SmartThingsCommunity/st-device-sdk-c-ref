@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_temperatureAlarm_attr_temperatureAlarm_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_temperatureAlarm_data_t *caps_temperatureAlarm_initialize(IOT_CTX *ctx, con
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_bodyWeightMeasurement_get_bodyWeightMeasurement_value(caps_bodyWeightMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_bodyWeightMeasurement_data_t *caps_bodyWeightMeasurement_initialize(IOT_CTX
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

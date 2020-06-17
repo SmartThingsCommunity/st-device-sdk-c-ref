@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_accelerationSensor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_accelerationSensor_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -34,3 +38,7 @@ typedef struct caps_accelerationSensor_data {
 } caps_accelerationSensor_data_t;
 
 caps_accelerationSensor_data_t *caps_accelerationSensor_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

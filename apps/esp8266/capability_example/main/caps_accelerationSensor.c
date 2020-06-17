@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_accelerationSensor_attr_acceleration_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_accelerationSensor_data_t *caps_accelerationSensor_initialize(IOT_CTX *ctx,
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

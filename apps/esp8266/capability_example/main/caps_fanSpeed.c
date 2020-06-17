@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_fanSpeed_get_fanSpeed_value(caps_fanSpeed_data_t *caps_data)
 {
     if (!caps_data) {
@@ -128,7 +124,3 @@ caps_fanSpeed_data_t *caps_fanSpeed_initialize(IOT_CTX *ctx, const char *compone
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

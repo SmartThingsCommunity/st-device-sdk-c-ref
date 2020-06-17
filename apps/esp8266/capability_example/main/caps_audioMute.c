@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_audioMute_attr_mute_str2idx(const char *value)
 {
     int index;
@@ -188,7 +184,3 @@ caps_audioMute_data_t *caps_audioMute_initialize(IOT_CTX *ctx, const char *compo
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

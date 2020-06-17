@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_mediaPlaybackRepeat_attr_playbackRepeatMode_str2idx(const char *value)
 {
     int index;
@@ -154,7 +150,3 @@ caps_mediaPlaybackRepeat_data_t *caps_mediaPlaybackRepeat_initialize(IOT_CTX *ct
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

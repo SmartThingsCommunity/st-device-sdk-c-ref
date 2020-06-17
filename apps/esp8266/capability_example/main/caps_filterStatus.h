@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_filterStatus.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_filterStatus_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -34,3 +38,7 @@ typedef struct caps_filterStatus_data {
 } caps_filterStatus_data_t;
 
 caps_filterStatus_data_t *caps_filterStatus_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

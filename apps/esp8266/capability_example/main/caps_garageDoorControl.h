@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_garageDoorControl.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_garageDoorControl_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -37,3 +41,7 @@ typedef struct caps_garageDoorControl_data {
 } caps_garageDoorControl_data_t;
 
 caps_garageDoorControl_data_t *caps_garageDoorControl_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

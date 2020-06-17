@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_thermostatMode_attr_thermostatMode_str2idx(const char *value)
 {
     int index;
@@ -309,7 +305,3 @@ caps_thermostatMode_data_t *caps_thermostatMode_initialize(IOT_CTX *ctx, const c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

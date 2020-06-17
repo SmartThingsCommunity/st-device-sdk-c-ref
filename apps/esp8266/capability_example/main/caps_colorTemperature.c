@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_colorTemperature_get_colorTemperature_value(caps_colorTemperature_data_t *caps_data)
 {
     if (!caps_data) {
@@ -148,7 +144,3 @@ caps_colorTemperature_data_t *caps_colorTemperature_initialize(IOT_CTX *ctx, con
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

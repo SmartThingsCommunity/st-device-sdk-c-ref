@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_soundSensor_attr_sound_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_soundSensor_data_t *caps_soundSensor_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

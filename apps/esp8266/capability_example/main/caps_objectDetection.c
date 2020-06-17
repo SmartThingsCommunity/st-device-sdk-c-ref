@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static const JSON_H *caps_objectDetection_get_detected_value(caps_objectDetection_data_t *caps_data)
 {
     if (!caps_data) {
@@ -188,7 +184,3 @@ caps_objectDetection_data_t *caps_objectDetection_initialize(IOT_CTX *ctx, const
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_smokeDetector_attr_smoke_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_smokeDetector_data_t *caps_smokeDetector_initialize(IOT_CTX *ctx, const cha
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

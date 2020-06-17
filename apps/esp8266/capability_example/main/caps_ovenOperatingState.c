@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_ovenOperatingState_attr_ovenJobState_str2idx(const char *value)
 {
     int index;
@@ -488,7 +484,3 @@ caps_ovenOperatingState_data_t *caps_ovenOperatingState_initialize(IOT_CTX *ctx,
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

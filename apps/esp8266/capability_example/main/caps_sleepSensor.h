@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_sleepSensor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_sleepSensor_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -34,3 +38,7 @@ typedef struct caps_sleepSensor_data {
 } caps_sleepSensor_data_t;
 
 caps_sleepSensor_data_t *caps_sleepSensor_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

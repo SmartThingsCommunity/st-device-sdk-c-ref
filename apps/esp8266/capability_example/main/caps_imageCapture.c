@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static const char *caps_imageCapture_get_image_value(caps_imageCapture_data_t *caps_data)
 {
     if (!caps_data) {
@@ -188,7 +184,3 @@ caps_imageCapture_data_t *caps_imageCapture_initialize(IOT_CTX *ctx, const char 
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

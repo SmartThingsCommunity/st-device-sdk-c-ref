@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static const JSON_H *caps_execute_get_data_value(caps_execute_data_t *caps_data)
 {
     if (!caps_data) {
@@ -136,7 +132,3 @@ caps_execute_data_t *caps_execute_initialize(IOT_CTX *ctx, const char *component
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_securitySystem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_securitySystem_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -42,3 +46,7 @@ typedef struct caps_securitySystem_data {
 } caps_securitySystem_data_t;
 
 caps_securitySystem_data_t *caps_securitySystem_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

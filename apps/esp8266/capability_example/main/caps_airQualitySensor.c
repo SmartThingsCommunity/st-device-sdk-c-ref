@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_airQualitySensor_get_airQuality_value(caps_airQualitySensor_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_airQualitySensor_data_t *caps_airQualitySensor_initialize(IOT_CTX *ctx, con
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

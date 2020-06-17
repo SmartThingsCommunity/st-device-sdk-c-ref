@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_presenceSensor_attr_presence_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_presenceSensor_data_t *caps_presenceSensor_initialize(IOT_CTX *ctx, const c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_fanOscillationMode_attr_fanOscillationMode_str2idx(const char *value)
 {
     int index;
@@ -154,7 +150,3 @@ caps_fanOscillationMode_data_t *caps_fanOscillationMode_initialize(IOT_CTX *ctx,
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

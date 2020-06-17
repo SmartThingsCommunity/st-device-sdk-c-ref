@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_ultravioletIndex_get_ultravioletIndex_value(caps_ultravioletIndex_data_t *caps_data)
 {
     if (!caps_data) {
@@ -107,7 +103,3 @@ caps_ultravioletIndex_data_t *caps_ultravioletIndex_initialize(IOT_CTX *ctx, con
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static void caps_momentary_cmd_push_cb(IOT_CAP_HANDLE *handle, iot_cap_cmd_data_t *cmd_data, void *usr_data)
 {
     caps_momentary_data_t *caps_data = (caps_momentary_data_t *)usr_data;
@@ -74,7 +70,3 @@ caps_momentary_data_t *caps_momentary_initialize(IOT_CTX *ctx, const char *compo
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

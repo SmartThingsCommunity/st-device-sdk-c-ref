@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_fineDustSensor_get_fineDustLevel_value(caps_fineDustSensor_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_fineDustSensor_data_t *caps_fineDustSensor_initialize(IOT_CTX *ctx, const c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

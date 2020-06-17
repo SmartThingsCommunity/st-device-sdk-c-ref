@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_odorSensor_get_odorLevel_value(caps_odorSensor_data_t *caps_data)
 {
     if (!caps_data) {
@@ -107,7 +103,3 @@ caps_odorSensor_data_t *caps_odorSensor_initialize(IOT_CTX *ctx, const char *com
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

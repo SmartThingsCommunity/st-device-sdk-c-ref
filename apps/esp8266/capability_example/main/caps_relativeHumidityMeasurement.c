@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_relativeHumidityMeasurement_get_humidity_value(caps_relativeHumidityMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_relativeHumidityMeasurement_data_t *caps_relativeHumidityMeasurement_initia
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

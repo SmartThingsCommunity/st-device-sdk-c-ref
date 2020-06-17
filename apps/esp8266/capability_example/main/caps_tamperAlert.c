@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_tamperAlert_attr_tamper_str2idx(const char *value)
 {
     int index;
@@ -127,7 +123,3 @@ caps_tamperAlert_data_t *caps_tamperAlert_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

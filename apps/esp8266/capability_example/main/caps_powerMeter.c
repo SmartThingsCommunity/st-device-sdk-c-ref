@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_powerMeter_get_power_value(caps_powerMeter_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_powerMeter_data_t *caps_powerMeter_initialize(IOT_CTX *ctx, const char *com
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

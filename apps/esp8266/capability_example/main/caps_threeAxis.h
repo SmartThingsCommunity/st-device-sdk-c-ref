@@ -19,6 +19,10 @@
 #include "caps/iot_caps_helper_threeAxis.h"
 #include "JSON.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_threeAxis_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -34,3 +38,7 @@ typedef struct caps_threeAxis_data {
 } caps_threeAxis_data_t;
 
 caps_threeAxis_data_t *caps_threeAxis_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+
