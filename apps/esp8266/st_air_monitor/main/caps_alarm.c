@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_alarm_attr_alarm_str2idx(const char *value)
 {
     int index;
@@ -193,3 +197,7 @@ caps_alarm_data_t *caps_alarm_initialize(IOT_CTX *ctx, const char *component, vo
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

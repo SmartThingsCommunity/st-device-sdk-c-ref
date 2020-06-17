@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_switch_attr_switch_str2idx(const char *value)
 {
     int index;
@@ -159,3 +163,7 @@ caps_switch_data_t *caps_switch_initialize(IOT_CTX *ctx, const char *component, 
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

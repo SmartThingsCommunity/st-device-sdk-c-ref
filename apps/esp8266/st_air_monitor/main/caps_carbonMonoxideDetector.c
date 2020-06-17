@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_carbonMonoxideDetector_attr_carbonMonoxide_str2idx(const char *value)
 {
     int index;
@@ -123,3 +127,7 @@ caps_carbonMonoxideDetector_data_t *caps_carbonMonoxideDetector_initialize(IOT_C
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+

@@ -23,6 +23,10 @@
 
 #include "freertos/FreeRTOS.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int caps_thermostatOperatingState_attr_thermostatOperatingState_str2idx(const char *value)
 {
     int index;
@@ -123,3 +127,7 @@ caps_thermostatOperatingState_data_t *caps_thermostatOperatingState_initialize(I
 
     return caps_data;
 }
+#ifdef __cplusplus
+}
+#endif
+
