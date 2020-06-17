@@ -18,6 +18,10 @@
 
 #include "caps/iot_caps_helper_airQualitySensor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_airQualitySensor_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -36,3 +40,7 @@ typedef struct caps_airQualitySensor_data {
 } caps_airQualitySensor_data_t;
 
 caps_airQualitySensor_data_t *caps_airQualitySensor_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

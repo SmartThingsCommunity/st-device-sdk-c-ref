@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_thermostatHeatingSetpoint_get_heatingSetpoint_value(caps_thermostatHeatingSetpoint_data_t *caps_data)
 {
     if (!caps_data) {
@@ -148,7 +144,3 @@ caps_thermostatHeatingSetpoint_data_t *caps_thermostatHeatingSetpoint_initialize
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

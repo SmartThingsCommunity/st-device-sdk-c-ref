@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static double caps_formaldehydeMeasurement_get_formaldehydeLevel_value(caps_formaldehydeMeasurement_data_t *caps_data)
 {
     if (!caps_data) {
@@ -127,7 +123,3 @@ caps_formaldehydeMeasurement_data_t *caps_formaldehydeMeasurement_initialize(IOT
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-

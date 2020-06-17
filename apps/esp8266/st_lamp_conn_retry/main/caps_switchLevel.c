@@ -23,10 +23,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int caps_switchLevel_get_level_value(caps_switchLevel_data_t *caps_data)
 {
     if (!caps_data) {
@@ -148,7 +144,3 @@ caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *c
 
     return caps_data;
 }
-#ifdef __cplusplus
-}
-#endif
-
