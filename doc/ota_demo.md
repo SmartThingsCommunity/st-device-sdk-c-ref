@@ -125,10 +125,10 @@ This demo server will provide two types of contents. because these contents are 
     OTA_FOOTER_SIZE=6
 
     def help():
-        text = colored('Usage: python ./tools/common/ota_gen.py FIRMWARE_PATH_NAME PRIVATE_KEY_PATH_NAME', 'green')
+        text = colored('Usage: python ./firmware_sign.py FIRMWARE_NAME PRIVATE_KEY_NAME', 'green')
         print(text)
         print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        print('ex) python ./tools/common/ota_gen.py ./ota_demo.bin ./root.key \n')
+        print('ex) python ./firmware_sign.py ota_demo.bin root.key \n')
         exit()
 
     def ota_update_signature(signature_name, firmware_name, out_file):
@@ -233,7 +233,7 @@ This demo server will provide two types of contents. because these contents are 
   - _firmware_sign.py_ will append encrypted hash of firmware as a signature at the end of firmware file. 
   - Sign firmware with `root.key` which is generated from [Preparing Certificate](./ota_demo.md#preparing-certificate)
     ```sh
-    $ python ./firmware_sign.py [unsigned firmware location]/ota_demo.bin [certificate location]/root.key
+    $ python ./firmware_sign.py ota_demo.bin root.key
     ```
 
 ***

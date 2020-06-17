@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,38 @@
  ****************************************************************************/
 
 #include "caps/iot_caps_helper_colorControl.h"
+#include "JSON.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct caps_colorControl_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
     double hue_value;
     double saturation_value;
 
-    double (*get_hue_value)(struct caps_colorControl_data *caps_data);
-    double (*get_saturation_value)(struct caps_colorControl_data *caps_data);
-    void (*set_color_value)(struct caps_colorControl_data *caps_data, double hue, double saturation);
-    void (*set_hue_value)(struct caps_colorControl_data *caps_data, double hue);
-    void (*set_saturation_value)(struct caps_colorControl_data *caps_data, double saturation);
+    void (*set_color_value)(struct caps_colorControl_data *caps_data, double hue, double saturaiton);
     void (*attr_color_send)(struct caps_colorControl_data *caps_data);
+    double (*get_hue_value)(struct caps_colorControl_data *caps_data);
+    void (*set_hue_value)(struct caps_colorControl_data *caps_data, double value);
+    void (*attr_hue_send)(struct caps_colorControl_data *caps_data);
+    double (*get_saturation_value)(struct caps_colorControl_data *caps_data);
+    void (*set_saturation_value)(struct caps_colorControl_data *caps_data, double value);
+    void (*attr_saturation_send)(struct caps_colorControl_data *caps_data);
 
     void (*init_usr_cb)(struct caps_colorControl_data *caps_data);
 
-    void (*cmd_setColor_usr_cb)(struct caps_colorControl_data *caps_data);
     void (*cmd_setHue_usr_cb)(struct caps_colorControl_data *caps_data);
+    void (*cmd_setColor_usr_cb)(struct caps_colorControl_data *caps_data);
     void (*cmd_setSaturation_usr_cb)(struct caps_colorControl_data *caps_data);
 } caps_colorControl_data_t;
 
 caps_colorControl_data_t *caps_colorControl_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+
