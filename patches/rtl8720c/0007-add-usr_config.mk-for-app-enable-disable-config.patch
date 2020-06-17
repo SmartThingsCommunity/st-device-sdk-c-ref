@@ -1,0 +1,28 @@
+From 542899a747e2e5479426dfe3b455367d57bedc60 Mon Sep 17 00:00:00 2001
+From: Feng Song <56996751+hisongfeng@users.noreply.github.com>
+Date: Fri, 12 Jun 2020 17:00:37 +0900
+Subject: [PATCH] add usr_config.mk for app enable/disable config
+
+add usr_config.mk for app can contrl config freely
+
+Signed-off-by: feng.song <56996751+hisongfeng@users.noreply.github.com>
+---
+ project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk b/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
+index c384f8c..98b8a99 100644
+--- a/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
++++ b/project/realtek_amebaz2_v0_example/GCC-RELEASE/config.mk
+@@ -2,6 +2,8 @@
+ # Config
+ ########################################
+ 
++include $(PROJECT_PATH)/usr_config.mk
++
+ #/* For STDK */
+ CONFIG_STDK_IOT_CORE=y
+ CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
+-- 
+2.17.1
+

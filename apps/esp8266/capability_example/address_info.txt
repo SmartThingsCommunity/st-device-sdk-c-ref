@@ -1,0 +1,4 @@
+ota_data_initial.bin : 0x11000
+bootloader.bin : 0x0000
+capability_example.bin : 0x14000
+partition.bin : 0x8000

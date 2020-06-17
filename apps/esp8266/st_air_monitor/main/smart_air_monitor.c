@@ -69,19 +69,19 @@ void change_alarm_state(int state)
 {
 	switch(state)
 	{
-		case CAPS_HELPER_ALARM_VALUE_BOTH:
+		case CAP_ENUM_ALARM_ALARM_VALUE_BOTH:
 			change_siren_state(1);
 			change_strobe_state(1);
 			break;
-		case CAPS_HELPER_ALARM_VALUE_SIREN:
+		case CAP_ENUM_ALARM_ALARM_VALUE_SIREN:
 			change_siren_state(1);
 			change_strobe_state(0);
 			break;
-		case CAPS_HELPER_ALARM_VALUE_STROBE:
+		case CAP_ENUM_ALARM_ALARM_VALUE_STROBE:
 			change_siren_state(0);
 			change_strobe_state(1);
 			break;
-		case CAPS_HELPER_ALARM_VALUE_OFF:
+		case CAP_ENUM_ALARM_ALARM_VALUE_OFF:
 			change_siren_state(0);
 			change_strobe_state(0);
 			break;
@@ -133,9 +133,9 @@ int get_carbon_monoxide(void)
 const char* get_carbon_monoxide_state(void)
 {
 	if (get_carbon_monoxide() > CARBON_MONOXIDE_THRESHOLD) {
-		return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_DETECTED];
+		return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAP_ENUM_CARBONMONOXIDEDETECTOR_CARBONMONOXIDE_VALUE_DETECTED];
 	}
-	return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_CLEAR];
+	return caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAP_ENUM_CARBONMONOXIDEDETECTOR_CARBONMONOXIDE_VALUE_CLEAR];
 }
 
 int get_formaldehyde(void)
@@ -155,10 +155,10 @@ int get_alarm_state(void)
 	if ( (AIR_QUALITY_THRESHOLD > cap_airQualitySensor_data->get_airQuality_value(cap_airQualitySensor_data))
 		|| (CARBON_DIOXIDE_THRESHOLD < cap_carbonDioxideMeasurement_data->get_carbonDioxide_value(cap_carbonDioxideMeasurement_data))
 		|| (FORMALDEHYDE_THRESHOLD < cap_formaldehydeMeasurement_data->get_formaldehydeLevel_value(cap_formaldehydeMeasurement_data))
-		|| (!strcmp(cap_carbonMonoxideDetector_data->get_carbonMonoxide_value(cap_carbonMonoxideDetector_data), caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAPS_HELPER_CARBON_MONOXIDE_DETECTOR_VALUE_DETECTED]))) {
-		alarm_state = CAPS_HELPER_ALARM_VALUE_BOTH;
+		|| (!strcmp(cap_carbonMonoxideDetector_data->get_carbonMonoxide_value(cap_carbonMonoxideDetector_data), caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[CAP_ENUM_CARBONMONOXIDEDETECTOR_CARBONMONOXIDE_VALUE_DETECTED]))) {
+		alarm_state = CAP_ENUM_ALARM_ALARM_VALUE_BOTH;
 	} else {
-		alarm_state = CAPS_HELPER_ALARM_VALUE_OFF;
+		alarm_state = CAP_ENUM_ALARM_ALARM_VALUE_OFF;
 	}
 
 	return alarm_state;
@@ -167,13 +167,13 @@ int get_alarm_state(void)
 void cap_airQualitySensor_init_cb(struct caps_airQualitySensor_data *caps_data)
 {
 	caps_data->set_airQuality_value(caps_data, get_air_quality());
-	caps_data->set_airQuality_unit(caps_data, caps_helper_airQualitySensor.attr_airQuality.units[CAPS_HELPER_AIR_QUALITY_SENSOR_UNIT_CAQI]);
+	caps_data->set_airQuality_unit(caps_data, caps_helper_airQualitySensor.attr_airQuality.units[CAP_ENUM_AIRQUALITYSENSOR_AIRQUALITY_UNIT_CAQI]);
 }
 
 void cap_carbonDioxideMeasurement_init_cb(struct caps_carbonDioxideMeasurement_data *caps_data)
 {
 	caps_data->set_carbonDioxide_value(caps_data, get_carbon_dioxide());
-	caps_data->set_carbonDioxide_unit(caps_data, caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.units[CAPS_HELPER_CARBON_DIOXIDE_MEASUREMENT_UNIT_PPM]);
+	caps_data->set_carbonDioxide_unit(caps_data, caps_helper_carbonDioxideMeasurement.attr_carbonDioxide.units[CAP_ENUM_CARBONDIOXIDEMEASUREMENT_CARBONDIOXIDE_UNIT_PPM]);
 }
 
 void cap_carbonMonoxideDetector_init_cb(struct caps_carbonMonoxideDetector_data *caps_data)
@@ -184,7 +184,7 @@ void cap_carbonMonoxideDetector_init_cb(struct caps_carbonMonoxideDetector_data 
 void cap_formaldehydeMeasurement_init_cb(struct caps_formaldehydeMeasurement_data *caps_data)
 {
 	caps_data->set_formaldehydeLevel_value(caps_data, get_formaldehyde());
-	caps_data->set_formaldehydeLevel_unit(caps_data, caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.units[CAPS_HELPER_FORMALDEHYDE_MEASUREMENT_UNIT_PPM]);
+	caps_data->set_formaldehydeLevel_unit(caps_data, caps_helper_formaldehydeMeasurement.attr_formaldehydeLevel.units[CAP_ENUM_FORMALDEHYDEMEASUREMENT_FORMALDEHYDELEVEL_UNIT_PPM]);
 }
 
 void cap_alarm_cmd_cb(struct caps_alarm_data *caps_data)
@@ -192,7 +192,7 @@ void cap_alarm_cmd_cb(struct caps_alarm_data *caps_data)
 	const char *alarm_value = caps_data->get_alarm_value(caps_data);
 	int alarm_state;
 
-	for (alarm_state = 0; alarm_state < CAPS_HELPER_ALARM_VALUE_MAX; alarm_state++) {
+	for (alarm_state = 0; alarm_state < CAP_ENUM_ALARM_ALARM_VALUE_MAX; alarm_state++) {
 		if (!strcmp(alarm_value, caps_helper_alarm.attr_alarm.values[alarm_state])) {
 			change_alarm_state(alarm_state);
 			return;
@@ -270,7 +270,7 @@ static void app_task(void *arg)
 
 static void device_init(void)
 {
-	int alarm_init_state = CAPS_HELPER_ALARM_VALUE_OFF;
+	int alarm_init_state = CAP_ENUM_ALARM_ALARM_VALUE_OFF;
 	cap_alarm_data->set_alarm_value(cap_alarm_data, caps_helper_alarm.attr_alarm.values[alarm_init_state]);
 
 	change_alarm_state(alarm_init_state);

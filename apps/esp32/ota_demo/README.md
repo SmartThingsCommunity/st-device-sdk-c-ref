@@ -8,6 +8,13 @@ This OTA demo device application is part of [OTA demo](../../../doc/ota_demo.md)
 Because this application is based on _st_switch_ example. you could find more detailed information which isn't described here from _st_switch_'s [README.md](../st_switch/README.md).
 ***
 
+Change configuration
+-------------------
+Open a new terminal and run command to enable HTTPS feature. (-> component config -> ESP HTTP client -> [*]Enable https)
+```sh
+$ [st-device-sdk-c-ref path]/build.sh esp32 ota_demo menuconfig  
+```
+
 Import certificate
 -------------------
 This application requires _root.pem_, _public_key.pem_ which is used for https connection and firmware signature validation.   
