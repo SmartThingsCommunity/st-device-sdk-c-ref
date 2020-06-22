@@ -234,7 +234,7 @@ In order to properly connect to the SmartThings cloud, you must equally update t
 
 ### 4.3. Setup GPIO pins
 
-This device application uses single switch and LED like below schematics with ESP32-WROOM-32D.
+This device application uses single switch and LED like below schematics with ESP32 DEVKITC V4.
 
 If you uses another schemtics, you can modify GPIO pin settings in `~/st-device-sdk-c-ref/apps/esp32/st_switch/main/device_control.h`. 
 

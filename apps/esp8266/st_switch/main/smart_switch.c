@@ -55,9 +55,9 @@ static int get_switch_state(void)
 {
 	const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
 	int switch_state = SWITCH_OFF;
-	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON])) {
+	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON])) {
 		switch_state = SWITCH_ON;
-	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF])) {
+	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF])) {
 		switch_state = SWITCH_OFF;
 	}
 	return switch_state;
@@ -89,7 +89,7 @@ static void change_switch_state(int state)
 
 void cap_switch_init_cb(struct caps_switch_data *caps_data)
 {
-	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_OFF;
+	int switch_init_state = CAP_ENUM_SWITCH_SWITCH_VALUE_OFF;
 	caps_data->set_switch_value(caps_data, caps_helper_switch.attr_switch.values[switch_init_state]);
 }
 
@@ -112,11 +112,11 @@ static void button_event(IOT_CAP_HANDLE *handle, int type, int count)
 				} else {
 					if (get_switch_state() == SWITCH_ON) {
 						change_switch_state(SWITCH_OFF);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					} else {
 						change_switch_state(SWITCH_ON);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					}
 				}

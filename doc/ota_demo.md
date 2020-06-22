@@ -4,13 +4,13 @@ OTA demo
 This document describes how the **Firmware Update** capability could works with SmartThings Platform and SmartThings Device SDK enabled device to help building device manufacturer own OTA (over-the-air) firmware update service.
 
 This document contains
-* [Adding **Firmware Update** capability to project](./ota_demo.md#adding-firmwareupdate-capability-to-project)
+* [Adding **Firmware Update** capability to project](./ota_demo.md#adding-firmware-update-capability-to-project)
 * [OTA demo sequence](./ota_demo.md#ota-demo-sequence)
 * [OTA demo network environment](./ota_demo.md#ota-demo-network-environment)
 * [Preparing OTA Server](./ota_demo.md#preparing-ota-server)
 * [Preparing Certificate](./ota_demo.md#preparing-certificate)
 * [Preparing Server Contents](./ota_demo.md#preparing-server-contents)
-* [Running web server with python3](./ota_demo.md#runnig-web-server-with-python3)
+* [Running web server with python3](./ota_demo.md#running-web-server-with-python3)
 * [OTA demo device application](./ota_demo.md#ota-demo-device-application)
 * [How to run OTA demo](./ota_demo.md#how-to-run-ota-demo)
 
@@ -125,10 +125,10 @@ This demo server will provide two types of contents. because these contents are 
     OTA_FOOTER_SIZE=6
 
     def help():
-        text = colored('Usage: python ./tools/common/ota_gen.py FIRMWARE_PATH_NAME PRIVATE_KEY_PATH_NAME', 'green')
+        text = colored('Usage: python ./firmware_sign.py FIRMWARE_NAME PRIVATE_KEY_NAME', 'green')
         print(text)
         print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        print('ex) python ./tools/common/ota_gen.py ./ota_demo.bin ./root.key \n')
+        print('ex) python ./firmware_sign.py ota_demo.bin root.key \n')
         exit()
 
     def ota_update_signature(signature_name, firmware_name, out_file):
@@ -233,7 +233,7 @@ This demo server will provide two types of contents. because these contents are 
   - _firmware_sign.py_ will append encrypted hash of firmware as a signature at the end of firmware file. 
   - Sign firmware with `root.key` which is generated from [Preparing Certificate](./ota_demo.md#preparing-certificate)
     ```sh
-    $ python ./firmware_sign.py [unsigned firmware location]/ota_demo.bin [certificate location]/root.key
+    $ python ./firmware_sign.py ota_demo.bin root.key
     ```
 
 ***
@@ -310,8 +310,8 @@ If you prepare all the things in document, you already have OTA server and OTA s
 
 <img src="./res/ota_flow.png" width=513>
 
-1. Run OTA server - refer [_Running web server with python3_](./ota-demo.md#running-web-server-with-python3)
-2. Power on demo device - refer [_OTA demo device application_](./ota-demo.md#ota-demo-device-application)
+1. Run OTA server - refer [_Running web server with python3_](./ota_demo.md#running-web-server-with-python3)
+2. Power on demo device - refer [_OTA demo device application_](./ota_demo.md#ota-demo-device-application)
 3. On-board demo device with SmartThings mobile application
 4. Select device card from SmartThings mobile application
 

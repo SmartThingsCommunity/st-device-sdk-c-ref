@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,31 @@
 
 #include "caps/iot_caps_helper_switchLevel.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct caps_switchLevel_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
+    void *cmd_data;
 
     int level_value;
+    char *level_unit;
+
     int (*get_level_value)(struct caps_switchLevel_data *caps_data);
     void (*set_level_value)(struct caps_switchLevel_data *caps_data, int value);
-    char *level_unit;
     const char *(*get_level_unit)(struct caps_switchLevel_data *caps_data);
     void (*set_level_unit)(struct caps_switchLevel_data *caps_data, const char *unit);
     void (*attr_level_send)(struct caps_switchLevel_data *caps_data);
 
     void (*init_usr_cb)(struct caps_switchLevel_data *caps_data);
 
-    void (*cmd_set_level_usr_cb)(struct caps_switchLevel_data *caps_data);
+    void (*cmd_setLevel_usr_cb)(struct caps_switchLevel_data *caps_data);
 } caps_switchLevel_data_t;
 
 caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+#ifdef __cplusplus
+}
+#endif
+

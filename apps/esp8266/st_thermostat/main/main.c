@@ -61,7 +61,7 @@ static int thermostat_fan_mode_str2idx(const char *mode)
 {
 	int i;
 
-	for (i = 0; i < CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_MAX; i++) {
+	for (i = 0; i < CAP_ENUM_THERMOSTATFANMODE_THERMOSTATFANMODE_VALUE_MAX; i++) {
 		if (!strcmp(mode, caps_helper_thermostatFanMode.attr_thermostatFanMode.values[i]))
 			return i;
 	}
@@ -75,7 +75,7 @@ static int thermostat_mode_str2idx(const char *mode)
 {
 	int i;
 
-	for (i = 0; i < CAPS_HELPER_THERMOSTAT_MODE_VALUE_MAX; i++) {
+	for (i = 0; i < CAP_ENUM_THERMOSTATMODE_THERMOSTATMODE_VALUE_MAX; i++) {
 		if (!strcmp(mode, caps_helper_thermostatMode.attr_thermostatMode.values[i]))
 			return i;
 	}
@@ -138,14 +138,14 @@ static int thermostat_get_operating_state(void)
 	 * YOUR CODE:
 	 * implement a ability to obtain operating state
 	 */
-	return CAPS_HELPER_THERMOSTAT_OPERATING_STATE_VALUE_IDLE;
+	return CAP_ENUM_THERMOSTATOPERATINGSTATE_THERMOSTATOPERATINGSTATE_VALUE_IDLE;
 }
 
 static void cap_temperatureMeasurement_init_cb(struct caps_temperatureMeasurement_data *caps_data)
 {
 	int initial_temperature_value = thermostat_get_temperature();
 	const char *temperature_unit =
-		caps_helper_temperatureMeasurement.attr_temperature.units[CAPS_HELPER_TEMPERATURE_MEASUREMENT_UNIT_C];
+		caps_helper_temperatureMeasurement.attr_temperature.units[CAP_ENUM_TEMPERATUREMEASUREMENT_TEMPERATURE_UNIT_C];
 
 	caps_data->set_temperature_value(caps_data, initial_temperature_value);
 	caps_data->set_temperature_unit(caps_data, temperature_unit);
@@ -232,12 +232,12 @@ static void device_init()
 	const int initial_heating_point_value = 13.5;
 
 	const char *cooling_point_unit =
-		caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAPS_HELPER_THERMOSTAT_COOLING_SETPOINT_UNIT_C];
+		caps_helper_thermostatCoolingSetpoint.attr_coolingSetpoint.units[CAP_ENUM_THERMOSTATCOOLINGSETPOINT_COOLINGSETPOINT_UNIT_C];
 	const char *heating_point_unit =
-		caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAPS_HELPER_THERMOSTAT_HEATING_SETPOINT_UNIT_C];
+		caps_helper_thermostatHeatingSetpoint.attr_heatingSetpoint.units[CAP_ENUM_THERMOSTATHEATINGSETPOINT_HEATINGSETPOINT_UNIT_C];
 
-	const int initial_fan_mode = CAPS_HELPER_THERMOSTAT_FAN_MODE_VALUE_AUTO;
-	const int initial_mode = CAPS_HELPER_THERMOSTAT_MODE_VALUE_AUTO;
+	const int initial_fan_mode = CAP_ENUM_THERMOSTATFANMODE_THERMOSTATFANMODE_VALUE_AUTO;
+	const int initial_mode = CAP_ENUM_THERMOSTATMODE_THERMOSTATMODE_VALUE_AUTO;
 
 	cap_coolingsetpoint_handle->set_coolingSetpoint_value(cap_coolingsetpoint_handle, initial_cooling_point_value);
 	cap_coolingsetpoint_handle->set_coolingSetpoint_unit(cap_coolingsetpoint_handle, cooling_point_unit);

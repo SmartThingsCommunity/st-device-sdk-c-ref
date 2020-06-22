@@ -1,0 +1,48 @@
+From 29b43351c29260960f3bb80779a120777afed973 Mon Sep 17 00:00:00 2001
+From: Feng Song <56996751+hisongfeng@users.noreply.github.com>
+Date: Fri, 12 Jun 2020 16:32:58 +0900
+Subject: [PATCH] add usr_config.mk for in app can enable/disable config
+
+1, add user_config.mk
+2, solve conflict with ctype.h
+
+Signed-off-by: feng.song <56996751+hisongfeng@users.noreply.github.com>
+---
+ component/common/api/platform/platform_stdlib.h          | 7 +++++++
+ project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk | 2 ++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/component/common/api/platform/platform_stdlib.h b/component/common/api/platform/platform_stdlib.h
+index c1b1eca..cc07f40 100644
+--- a/component/common/api/platform/platform_stdlib.h
++++ b/component/common/api/platform/platform_stdlib.h
+@@ -65,6 +65,13 @@
+   #endif
+ 	#undef strdup
+ 	#undef strtod
++//undef below for conflict with ctype.h
++	#undef in_range
++	#undef isprint
++	#undef isdigit
++	#undef isxdigit
++	#undef islower
++	#undef isspace
+ 
+   #if USE_RTL_ROM_CLIB
+ #if BUFFERED_PRINTF
+diff --git a/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk b/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
+index a46af8f..5d21b9c 100644
+--- a/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
++++ b/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
+@@ -2,6 +2,8 @@
+ # Config
+ ########################################
+ 
++include $(PROJECT_PATH)/usr_config.mk
++
+ #/* For STDK */
+ CONFIG_STDK_IOT_CORE=y
+ CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
+-- 
+2.17.1
+

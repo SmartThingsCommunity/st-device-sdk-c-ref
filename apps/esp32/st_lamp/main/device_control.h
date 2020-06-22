@@ -17,22 +17,18 @@
  ****************************************************************************/
 
 
-//#define CONFIG_TARGET_WITTY_CLOUD
-#ifdef CONFIG_TARGET_WITTY_CLOUD
+//#define CONFIG_TARGET_WEMOS_D1_R32
+#ifdef CONFIG_TARGET_WEMOS_D1_R32
 
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
-#define GPIO_INPUT_BUTTON 4
+#define GPIO_INPUT_BUTTON 18
 
-#define GPIO_OUTPUT_COLORLED_R 15
-#define GPIO_OUTPUT_COLORLED_G 12
-#define GPIO_OUTPUT_COLORLED_B 13
-#define GPIO_OUTPUT_COLORLED_0 16
+#define GPIO_OUTPUT_COLORLED_R 16
+#define GPIO_OUTPUT_COLORLED_G 26
+#define GPIO_OUTPUT_COLORLED_B 17
+#define GPIO_OUTPUT_COLORLED_0 25
 
-enum notification_led_gpio_state {
-	NOTIFICATION_LED_GPIO_ON = 0,
-	NOTIFICATION_LED_GPIO_OFF = 1,
-};
-#else //default
+#else // ESP32_DEVKITC_V4
 
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
 #define GPIO_INPUT_BUTTON 0
@@ -42,12 +38,12 @@ enum notification_led_gpio_state {
 #define GPIO_OUTPUT_COLORLED_B 27
 #define GPIO_OUTPUT_COLORLED_0 26
 
+#endif
+
 enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 1,
 	NOTIFICATION_LED_GPIO_OFF = 0,
 };
-
-#endif
 
 #define LED_BLINK_TIME 50
 
