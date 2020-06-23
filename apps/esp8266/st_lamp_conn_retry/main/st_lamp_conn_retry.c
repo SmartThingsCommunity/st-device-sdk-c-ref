@@ -68,6 +68,11 @@ static int get_switch_state(void)
 {
 	const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
 	int switch_state = SWITCH_OFF;
+
+	if(!switch_value) {
+		return -1;
+	}
+
 	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON])) {
 		switch_state = SWITCH_ON;
 	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF])) {
