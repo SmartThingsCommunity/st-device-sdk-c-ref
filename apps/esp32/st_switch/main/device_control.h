@@ -16,6 +16,19 @@
  *
  ****************************************************************************/
 
+//#define CONFIG_TARGET_WEMOS_D1_R32
+#if defined(CONFIG_TARGET_WEMOS_D1_R32)
+
+#define GPIO_OUTPUT_NOTIFICATION_LED 2 //embeded blue led
+#define GPIO_INPUT_BUTTON 18
+
+#define GPIO_OUTPUT_MAINLED 16
+#define GPIO_OUTPUT_MAINLED_0 26 /* use as ground */
+
+#define GPIO_OUTPUT_NOUSE1 17
+#define GPIO_OUTPUT_NOUSE2 25
+#else // ESP32_DEVKITC_V4
+
 #define GPIO_OUTPUT_NOTIFICATION_LED 2
 #define GPIO_INPUT_BUTTON 0
 
@@ -24,13 +37,12 @@
 
 #define GPIO_OUTPUT_NOUSE1 14
 #define GPIO_OUTPUT_NOUSE2 27
+#endif
 
 enum notification_led_gpio_state {
 	NOTIFICATION_LED_GPIO_ON = 1,
 	NOTIFICATION_LED_GPIO_OFF = 0,
 };
-
-
 
 enum main_led_gpio_state {
 	MAINLED_GPIO_ON = 1,

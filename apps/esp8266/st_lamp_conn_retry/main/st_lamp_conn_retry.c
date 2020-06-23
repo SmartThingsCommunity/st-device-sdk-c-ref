@@ -68,9 +68,14 @@ static int get_switch_state(void)
 {
 	const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
 	int switch_state = SWITCH_OFF;
-	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON])) {
+
+	if(!switch_value) {
+		return -1;
+	}
+
+	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON])) {
 		switch_state = SWITCH_ON;
-	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF])) {
+	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF])) {
 		switch_state = SWITCH_OFF;
 	}
 	return switch_state;
@@ -161,11 +166,11 @@ static void button_event(IOT_CAP_HANDLE *handle, int type, int count)
 				} else {
 					if (get_switch_state() == SWITCH_ON) {
 						change_switch_state(SWITCH_OFF);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					} else {
 						change_switch_state(SWITCH_ON);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					}
 				}
@@ -303,14 +308,14 @@ void* pin_num_memcpy(void *dest, const void *src, unsigned int count)
 
 void device_init()
 {
-	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_ON;
+	int switch_init_state = CAP_ENUM_SWITCH_SWITCH_VALUE_ON;
 	int switch_init_level = 50;
 	int hue_init_value = 0;
 	int saturation_init_value = 100;
 
 	cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[switch_init_state]);
 	cap_switchLevel_data->set_level_value(cap_switchLevel_data, switch_init_level);
-	cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.units[CAPS_HELPER_SWITCH_LEVEL_UNIT_PERCENT]);
+	cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.units[CAP_ENUM_SWITCHLEVEL_LEVEL_UNIT_PERCENT]);
 	cap_colorControl_data->set_color_value(cap_colorControl_data, hue_init_value, saturation_init_value);
 
 	noti_led_onoff(switch_init_state);
@@ -369,7 +374,7 @@ void app_main(void)
 	//	implement callback function
 	cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
 	cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
-	cap_switchLevel_data->cmd_set_level_usr_cb = cap_switchLevel_cmd_cb;
+	cap_switchLevel_data->cmd_setLevel_usr_cb = cap_switchLevel_cmd_cb;
 	cap_colorControl_data->cmd_setColor_usr_cb = cap_colorControl_cmd_cb;
 	cap_colorControl_data->cmd_setHue_usr_cb = cap_colorControl_cmd_cb;
 	cap_colorControl_data->cmd_setSaturation_usr_cb = cap_colorControl_cmd_cb;

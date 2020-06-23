@@ -55,9 +55,14 @@ static int get_switch_state(void)
 {
 	const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
 	int switch_state = SWITCH_OFF;
-	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON])) {
+
+	if (!switch_value) {
+		return -1;
+	}
+
+	if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON])) {
 		switch_state = SWITCH_ON;
-	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF])) {
+	} else if(!strcmp(switch_value, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF])) {
 		switch_state = SWITCH_OFF;
 	}
 	return switch_state;
@@ -87,12 +92,6 @@ static void change_switch_state(int state)
 	main_led_onoff(state);
 }
 
-void cap_switch_init_cb(struct caps_switch_data *caps_data)
-{
-	int switch_init_state = CAPS_HELPER_SWITCH_VALUE_OFF;
-	caps_data->set_switch_value(caps_data, caps_helper_switch.attr_switch.values[switch_init_state]);
-}
-
 void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
 {
 	int switch_state = get_switch_state();
@@ -112,11 +111,11 @@ static void button_event(IOT_CAP_HANDLE *handle, int type, int count)
 				} else {
 					if (get_switch_state() == SWITCH_ON) {
 						change_switch_state(SWITCH_OFF);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_OFF]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					} else {
 						change_switch_state(SWITCH_ON);
-						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAPS_HELPER_SWITCH_VALUE_ON]);
+						cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_ON]);
 						cap_switch_data->attr_switch_send(cap_switch_data);
 					}
 				}
@@ -232,13 +231,13 @@ void app_main(void)
 	}
 
 	// 2. create a handle to process capability
-	//	implement init_callback function (cap_switch_init_cb)
-	cap_switch_data = caps_switch_initialize(ctx, "main", cap_switch_init_cb, NULL);
+	cap_switch_data = caps_switch_initialize(ctx, "main", NULL, NULL);
 
 	// 3. register a callback function to process capability command when it comes from the SmartThings Server
 	//	implement callback function (cap_switch_cmd_off_cb)
 	cap_switch_data->cmd_on_usr_cb = cap_switch_cmd_cb;
 	cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
+	cap_switch_data->set_switch_value(cap_switch_data, caps_helper_switch.attr_switch.values[CAP_ENUM_SWITCH_SWITCH_VALUE_OFF]);
 
 	gpio_init();
 
