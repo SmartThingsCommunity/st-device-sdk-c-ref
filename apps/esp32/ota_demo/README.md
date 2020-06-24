@@ -10,10 +10,19 @@ Because this application is based on _st_switch_ example. you could find more de
 
 Change configuration
 -------------------
-Open a new terminal and run command to enable HTTPS feature. (-> component config -> ESP HTTP client -> [*]Enable https)
-```sh
-$ [st-device-sdk-c-ref path]/build.sh esp32 ota_demo menuconfig  
+These compile options will enable HTTPS and MBEDTLS feature to connect OTA server.   
+`stdkconfig`
+```c
+// Enable option for HTTPS
+# ESP HTTP client
+CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS=y
+
+// Enable option for MBEDTLS
+# Network
+CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
 ```
+
+***
 
 Import certificate
 -------------------
