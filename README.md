@@ -97,10 +97,10 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 Serial port needs to be matched to the computer environment for serial port flashing and monitoring.
 
 - Example for ESP8266/ESP32
-  - Baud rate 115200 for flashing or 74880 for monitoring, Date bit 8, Parity None, Stop bits 1
+  - Baud rate 115200 for flashing or 74880 for monitoring, Data bit 8, Parity None, Stop bits 1
   - These data are described in the build configuration file(e.g.  sdkconfig)
 - Example for RTL8195
-  - Baud rate 115200, Date bit 8, Parity None, Stop bits 1
+  - Baud rate 115200, Data bit 8, Parity None, Stop bits 1
 
 Flashing can be done according to the method supported by chipset SDK.
 
