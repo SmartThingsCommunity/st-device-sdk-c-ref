@@ -6,9 +6,6 @@ git submodule status bsp/${CHIP_NAME} &> /dev/null
 if [ "$?" == "0" ]; then
 	cd bsp/${CHIP_NAME}
 	git am ../../patches/${CHIP_NAME}/*.patch
-	for patch in ../../patches/${CHIP_NAME}/*.manual
-		do patch -f -p1 < ${patch}
-	done
 else
 	if [ "$(ls bsp/${CHIP_NAME})" == "" ]; then
 		echo "Failed to find source code in bsp/${CHIP_NAME}"
