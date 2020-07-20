@@ -28,6 +28,7 @@ print_usage () {
     echo "    ex) ./build.sh rtl8195 st_switch"
     echo "    ex) ./build.sh rtl8720c st_switch"
     echo "    ex) ./build.sh rtl8721c st_switch"
+    echo "    ex) ./build.sh emw3166 st_switch"
     echo
 }
 

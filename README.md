@@ -58,6 +58,12 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
       >
       > You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
 
+  - Example for EMW3166
+
+    - Setup [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the available MXCHIP website.
+    - Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA)
+      In order to use the pre-supplied build script(e.g. `build.sh`), please set `mico config --global MICODER /path_of_the_toolchain`
+
 ### Build
 
 1. Download the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
@@ -76,6 +82,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
          ex) ./setup.sh rtl8195
          ex) ./setup.sh rtl8720c
          ex) ./setup.sh rtl8721c
+         ex) ./setup.sh emw3166
 
      $ ./setup.sh esp8266
      ```
@@ -107,6 +114,8 @@ Serial port needs to be matched to the computer environment for serial port flas
   - These data are described in the build configuration file(e.g.  sdkconfig)
 - Example for RTL8195
   - Baud rate 115200, Data bit 8, Parity None, Stop bits 1
+- Example for EMW3166
+  - Baud rate 9600 for flashing(user uart) and 115200 for monitoring(USB uart), Data bit 8, Parity None, Stop bits 1
 
 Flashing can be done according to the method supported by chipset SDK.
 
@@ -133,6 +142,14 @@ Flashing can be done according to the method supported by chipset SDK.
   - Connect Ameba RTL8195 to Windows PC, you can find removable disk named MBED.
   - Just copy `ram_all.bin` in `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
   - After copy successfully, please reset Ameba RTL8195 target and monitor
+
+- Example for EMW3166
+
+  In order to flash the MXCHIP emw3166 chipset binary, you have to proceed steps below at Windows PC, with a terminal support Ymodem transmission.
+  - Connect user uart(PB7-tx, PB6-rx) of emw3166 to Windows PC with a USB-TTL convertor, and connect USB uart for power.
+  - Create serial session with flashing config (Baud rate 9600) to connect user uart port, then hold 'BOOT' and press 'RESET' to enable flashing
+  - Tansfer binary file in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` with Ymodem on terminal
+  - After sending successfully, press 'RESET' on MiCOKit-3166 target and monitor with USB uart
 
 ## License
 
