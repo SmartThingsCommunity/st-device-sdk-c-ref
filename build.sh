@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export STDK_CORE_PATH=`readlink -e -n "./iot-core"`
+
 CHIP_NAME=${1}
 APP_NAME=${2}
 ARGUMENTS=$@
