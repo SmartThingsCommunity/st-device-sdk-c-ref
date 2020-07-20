@@ -77,7 +77,7 @@ fi
 PARTITION_NAME=${PARTITION_NAME%.*}
 PARTITION_TABLE=${PARTITION_TABLE}/${PARTITION_NAME}.csv
 
-GET_PART_INFO="${STDK_PATH}/bsp/esp32/components/partition_table/parttool.py -q"
+GET_PART_INFO="${STDK_PATH}/bsp/${CHIP_NAME}/components/partition_table/parttool.py -q"
 
 BOOTLOADER_OFFSET=`cat ${IDF_PATH}/components/bootloader/Makefile.projbuild | grep  -E "BOOTLOADER_OFFSET" | awk -F ':= ' '{print $2}'`
 APP_OFFSET=`${GET_PART_INFO} --partition-boot-default --partition-table-file ${PROJECT_PATH}/build/${PARTITION_NAME}.bin get_partition_info --info offset`

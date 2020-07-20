@@ -1,8 +1,9 @@
 #!/bin/bash
 
-CHIP_LIST=("esp8266" "esp32" "rtl8195" "rtl8720c" "rtl8721c")
 CORE_PATH="iot-core"
 CHIP_NAME=${1}
+ARGUMENTS=$@
+
 print_usage () {
 	echo "    Usage: ./setup.sh CHIP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
@@ -13,6 +14,11 @@ print_usage () {
 	echo "    ex) ./setup.sh rtl8721c"
 	echo
 }
+
+if [ "${CHIP_NAME}" == "esp32" ]; then
+    CHIP_NAME="esp32_v3.3"
+    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
+fi
 
 if [ "${CHIP_NAME}" == "" ]; then
 	print_usage
@@ -45,4 +51,4 @@ if [ "$?" == "0" ]; then
 	cd ../..
 fi
 
-tools/${CHIP_NAME}/setup_${CHIP_NAME}.sh $@
+tools/${CHIP_NAME}/setup_${CHIP_NAME}.sh ${ARGUMENTS}

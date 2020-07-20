@@ -11,6 +11,11 @@ if [[ "${1}" == "apps/"*"/"?* ]]; then
     ARGUMENTS="${CHIP_NAME} ${APP_NAME} $@"
 fi
 
+if [ ${CHIP_NAME} == "esp32" ]; then
+    CHIP_NAME="esp32_v3.3"
+    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
+fi
+
 print_usage () {
     echo "    Usage: ./build.sh CHIP_NAME APP_NAME"
     echo "                     or "
