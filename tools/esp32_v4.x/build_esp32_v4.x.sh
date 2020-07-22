@@ -1,17 +1,17 @@
 #!/bin/bash
 
-export CHIP_NAME=${1}
+export BSP_NAME=${1}
 export PROJECT_TITLE=${2}
 
 export STDK_PATH="${PWD}"
 export CORE_PATH="${PWD}/iot-core"
 
-IOT_APPS_PATH="${PWD}/apps/${CHIP_NAME}"
+IOT_APPS_PATH="${PWD}/apps/${BSP_NAME}"
 PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 
 XTENSA_PATH=`dirname ~/esp/xtensa-esp32-elf/bin/.`
 export PATH=${XTENSA_PATH}:${PATH}
-export IDF_PATH="${PWD}/bsp/${CHIP_NAME}"
+export IDF_PATH="${PWD}/bsp/${BSP_NAME}"
 
 MAKE_OPTION_ARRAY=("menuconfig" "defconfig" "all" "flash" "clean" "size" "size-components" "size-symbols" "erase_flash" "monitor" "simple_monitor" "list-components" "app" "app-flash" "app-clean" "print_flash_cmd" "help" "bootloader" "bootloader-flash" "bootloader-clean" "partition_table")
 OUTPUT_OPTION_ARRAY=("all" "flash" "app" "app-flash" "bootloader" "bootloader-flash" "partition_table")
@@ -19,13 +19,13 @@ OUTPUT_OPTION_ARRAY=("all" "flash" "app" "app-flash" "bootloader" "bootloader-fl
 MAKE_OPTION=build
 
 print_usage () {
-  echo "    Usage: ./build.sh CHIP_NAME PROJECT_NAME [make_option]"
+  echo "    Usage: ./build.sh BSP_NAME PROJECT_NAME [make_option]"
   echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  echo "    ex) ./build.sh ${CHIP_NAME} st_switch"
-  echo "    ex) ./build.sh ${CHIP_NAME} st_lamp clean"
-  echo "    ex) ./build.sh ${CHIP_NAME} st_switch flash"
-  echo "    ex) ./build.sh ${CHIP_NAME} st_lamp monitor"
-  echo "    ex) ./build.sh ${CHIP_NAME} st_switch flash monitor"
+  echo "    ex) ./build.sh ${BSP_NAME} st_switch"
+  echo "    ex) ./build.sh ${BSP_NAME} st_lamp clean"
+  echo "    ex) ./build.sh ${BSP_NAME} st_switch flash"
+  echo "    ex) ./build.sh ${BSP_NAME} st_lamp monitor"
+  echo "    ex) ./build.sh ${BSP_NAME} st_switch flash monitor"
   echo
 }
 
@@ -80,7 +80,7 @@ fi
 PARTITION_NAME=${PARTITION_NAME%.*}
 PARTITION_TABLE=${PARTITION_TABLE}/${PARTITION_NAME}.csv
 
-GET_PART_INFO="${STDK_PATH}/bsp/${CHIP_NAME}/components/partition_table/parttool.py -q"
+GET_PART_INFO="${STDK_PATH}/bsp/${BSP_NAME}/components/partition_table/parttool.py -q"
 
 BOOTLOADER_OFFSET=`cat ${IDF_PATH}/components/bootloader/Makefile.projbuild | grep  -E "BOOTLOADER_OFFSET" | awk -F ':= ' '{print $2}'`
 APP_OFFSET=`${GET_PART_INFO} --partition-boot-default --partition-table-file ${PROJECT_PATH}/build/${PARTITION_NAME}.bin get_partition_info --info offset`
