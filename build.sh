@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export STDK_CORE_PATH=`readlink -e -n "./iot-core"`
+
 CHIP_NAME=${1}
 APP_NAME=${2}
 ARGUMENTS=$@
@@ -9,6 +11,11 @@ if [[ "${1}" == "apps/"*"/"?* ]]; then
     APP_NAME=`echo ${1} | awk -F'/' '{print $3}'`
     shift 1
     ARGUMENTS="${CHIP_NAME} ${APP_NAME} $@"
+fi
+
+if [ ${CHIP_NAME} == "esp32" ]; then
+    CHIP_NAME="esp32_v3.3"
+    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
 fi
 
 print_usage () {
