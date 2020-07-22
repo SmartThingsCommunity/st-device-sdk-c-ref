@@ -16,7 +16,7 @@ export IDF_PATH="${PWD}/bsp/${CHIP_NAME}"
 MAKE_OPTION_ARRAY=("menuconfig" "defconfig" "all" "flash" "clean" "size" "size-components" "size-symbols" "erase_flash" "monitor" "simple_monitor" "list-components" "app" "app-flash" "app-clean" "print_flash_cmd" "help" "bootloader" "bootloader-flash" "bootloader-clean" "partition_table")
 OUTPUT_OPTION_ARRAY=("all" "flash" "app" "app-flash" "bootloader" "bootloader-flash" "partition_table")
 
-MAKE_OPTION=all
+MAKE_OPTION=build
 
 print_usage () {
   echo "    Usage: ./build.sh CHIP_NAME PROJECT_NAME [make_option]"
@@ -48,14 +48,17 @@ if [ ! "${3}" = "" ]; then
   MAKE_OPTION=$@
 fi
 
-make ${MAKE_OPTION}
+pushd ${IDF_PATH}
+. ./export.sh
+popd
+idf.py ${MAKE_OPTION}
 
 if [ ! "${?}" = "0" ]; then
   exit ${?}
 fi
 
 for value in "${OUTPUT_OPTION_ARRAY[@]}"; do
-  if [[ "${MAKE_OPTION}" == *"${value}"* ]]; then
+  if [ "${value}" = "${MAKE_OPTION}" ]; then
    OUTPUT_BUILD=y
   fi
 done
@@ -77,7 +80,7 @@ fi
 PARTITION_NAME=${PARTITION_NAME%.*}
 PARTITION_TABLE=${PARTITION_TABLE}/${PARTITION_NAME}.csv
 
-GET_PART_INFO="${STDK_PATH}/bsp/esp32/components/partition_table/parttool.py -q"
+GET_PART_INFO="${STDK_PATH}/bsp/${CHIP_NAME}/components/partition_table/parttool.py -q"
 
 BOOTLOADER_OFFSET=`cat ${IDF_PATH}/components/bootloader/Makefile.projbuild | grep  -E "BOOTLOADER_OFFSET" | awk -F ':= ' '{print $2}'`
 APP_OFFSET=`${GET_PART_INFO} --partition-boot-default --partition-table-file ${PROJECT_PATH}/build/${PARTITION_NAME}.bin get_partition_info --info offset`
