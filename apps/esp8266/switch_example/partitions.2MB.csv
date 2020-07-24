@@ -1,0 +1,7 @@
+# Name,   Type, SubType, Offset,   Size,   Flags
+stnv,     data, nvs,     0x9000,   0x4000
+nvs,      data, nvs,     0xd000,   0x4000
+otadata,  data, ota,     0x11000,  0x2000
+phy_init, data, phy,     0x13000,  0x1000
+ota_0,    app,  ota_0,   0x14000,  0xe0000
+ota_1,    app,  ota_1,   0x114000, 0xe0000
