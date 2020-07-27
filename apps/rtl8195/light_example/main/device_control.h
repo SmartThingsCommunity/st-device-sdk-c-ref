@@ -15,7 +15,15 @@
  * language governing permissions and limitations under the License.
  *
  ****************************************************************************/
-#define GPIO_OUTPUT_NOTIFICATION_LED PB_4
+#include <stdbool.h>
+#include <string.h>
+#include "st_dev.h"
+#include "PinNames.h"
+#include <gpio_api.h>
+#include "gpio_irq_api.h"
+#include "gpio_irq_ex_api.h"
+
+
 #define GPIO_INPUT_BUTTON PC_1
 
 #define GPIO_OUTPUT_COLORLED_R PC_2
@@ -24,12 +32,15 @@
 
 #define GPIO_OUTPUT_COLORLED_0 PC_4
 
-enum notification_led_gpio_state {
-	NOTIFICATION_LED_GPIO_ON = 0,
-	NOTIFICATION_LED_GPIO_OFF = 1,
+enum switch_onoff_state {
+    SWITCH_OFF = 0,
+    SWITCH_ON = 1,
 };
 
-#define LED_BLINK_TIME 50
+enum color_led_gpio_state {
+	COLOR_LED_OFF = 0,
+	COLOR_LED_ON = 1,
+};
 
 enum led_animation_mode_list {
 	LED_ANIMATION_MODE_IDLE = 0,
@@ -51,13 +62,11 @@ enum button_event_type {
 	BUTTON_SHORT_PRESS = 1,
 };
 
-#define true	1
-#define false	0
-
-void update_rgb_from_hsl(double hue, double saturation, int level,
-				int *red, int *green, int *blue);
+void change_switch_state(int switch_state);
+void update_color_info(int color_temp);
+void change_switch_level(int level);
 void button_isr_handler(void *arg);
-bool get_button_event(int* button_event_type, int* button_event_count);
-void led_blink(int gpio, int delay, int count);
-void change_led_state(int noti_led_mode);
-void led_button_init(void);
+int get_button_event(int* button_event_type, int* button_event_count);
+void led_blink(int switch_state, int delay, int count);
+void change_led_mode(int noti_led_mode);
+void iot_gpio_init(void);

@@ -25,9 +25,9 @@ print_usage () {
     echo "- - - - - - - - - - - - - - - - - - -"
     echo "    ex) ./build.sh apps/esp8266/switch_example"
     echo "    ex) ./build.sh apps/esp32/switch_example"
-    echo "    ex) ./build.sh rtl8195 st_switch"
-    echo "    ex) ./build.sh rtl8720c st_switch"
-    echo "    ex) ./build.sh rtl8721c st_switch"
+    echo "    ex) ./build.sh rtl8195 switch_example"
+    echo "    ex) ./build.sh rtl8720c switch_example"
+    echo "    ex) ./build.sh rtl8721c switch_example"
     echo "    ex) ./build.sh emw3166 st_switch"
     echo
 }
