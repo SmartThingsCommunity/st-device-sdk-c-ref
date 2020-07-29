@@ -1,0 +1,32 @@
+From 15fd0ab76e07c7f25092ad5e2425d7a5569abe1c Mon Sep 17 00:00:00 2001
+From: Baojun Luo <43360374+baojunluo@users.noreply.github.com>
+Date: Wed, 29 Jul 2020 15:25:42 +0800
+Subject: [PATCH] Rename _tolower to prevent unpredictable problem
+
+Signed-off-by: baojun.luo <43360374+baojunluo@users.noreply.github.com>
+---
+ component/soc/realtek/amebad/swlib/string/strproc.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/component/soc/realtek/amebad/swlib/string/strproc.h b/component/soc/realtek/amebad/swlib/string/strproc.h
+index 6276a98..0d5b401 100644
+--- a/component/soc/realtek/amebad/swlib/string/strproc.h
++++ b/component/soc/realtek/amebad/swlib/string/strproc.h
+@@ -64,11 +64,13 @@ extern _LONG_CALL_ u8 _2char2hex(u8 hch, u8 lch);
+  * Fast implementation of tolower() for internal usage. Do not use in your
+  * code.
+  */
+-static inline char _tolower(const char c)
++static inline char rtl_tolower(const char c)
+ {
+     return c | 0x20;
+ }
+
++#define _tolower(x) rtl_tolower(x)
++
+ /* Fast check for octal digit */
+ static inline int isodigit(const char c)
+ {
+--
+2.7.4
+
