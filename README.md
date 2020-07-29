@@ -94,15 +94,15 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
      > Note :
      > The `menuconfig` option is just supported on the Espressif chipset.
      ```sh
-     # ./build.sh {chip_name} {app_name} {option}
+     # ./build.sh {app_path} {option}
      $ cd ~/st-device-sdk-c-ref
-     $ ./build.sh esp8266 st_switch menuconfig
+     $ ./build.sh apps/esp32/switch_example menuconfig
      ```
 
 3. Run `build.sh` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
 
    ```sh
-   $ ./build.sh esp8266 st_switch          # ./build.sh {chip_name} {app_name}
+   $ ./build.sh apps/esp32/switch_exmaple          # ./build.sh {app_path}
    ```
 
 ### flash & monitor
@@ -126,14 +126,14 @@ Flashing can be done according to the method supported by chipset SDK.
   - options
     - clean : clean previous build outputs
       ```sh
-      # ./build.sh {chip_name} {app_name} {options}
-      $ ./build.sh esp8266 st_switch clean
+      # ./build.sh {app_path} {options}
+      $ ./build.sh apps/esp32/switch_example clean
       ```
     - flash : download executable binaries to the device
     - monitor : monitor the serial output of device. this option can be used with flash option.
       ```sh
-      # ./build.sh {chip_name} {app_name} {options}
-      $ ./build.sh esp8266 st_switch flash monitor
+      # ./build.sh {app_path} {options}
+      $ ./build.sh apps/esp32/switch_example flash monitor
       ```
 
 - Example for RTL8195
