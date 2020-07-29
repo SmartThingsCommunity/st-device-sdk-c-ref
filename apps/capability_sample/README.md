@@ -1,9 +1,10 @@
-# capability example
+# Capability sample
 
 ## 1. Introduction
 
-Capability example app contain capability sample files.
+capability_sample contain capability sample files.
 Each capability sample file consists of basic functionality by using capability helper file.
+You can use sample files by copying them to your app path.
 
 ## 2. Details
 
@@ -17,7 +18,7 @@ capability sample file : caps_{CAPABILITY}.h, caps_{CAPABILITY}.c
 - exist in app path
 - function and variable for attribute and command of capability.
 - initialize caps_data by using caps_{CAPABILITY}_initialize
-- set/get attribute value by using set_{ATTRIBUTE}_value / get_{ATTRIBUTE_VALUE}
+- set/get attribute value by using set_{ATTRIBUTE}_value / get_{ATTRIBUTE}_value
 - send attribute value by using attr_{ATTRIBUTE}_send
 - when command is called, set attribute value and call cmd_{COMMAND}_usr_cb, and send attrivute value.
 
@@ -46,8 +47,8 @@ command callback function
 - after callback function call, attribute value will be sent to server.
 ```
 static void cap_switchLevel_cmd_cb(struct caps_switchLevel_data *caps_data){
-	    int value = caps_data->get_level_value(caps_data);
-		    control_switch_level(value);
+        int value = caps_data->get_level_value(caps_data);
+        control_switch_level(value);
 }
 ```
 
