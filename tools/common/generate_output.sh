@@ -38,7 +38,7 @@ generate_output() {
     OUTPUT_DIR_NAME=${OUTPUT_DIR_NAME}_DEBUG
   fi
 
-  OUTPUT_PATH=${STDK_PATH}/output/${CHIP_NAME}/${OUTPUT_DIR_NAME}
+  OUTPUT_PATH=${STDK_PATH}/output/${BSP_NAME}/${OUTPUT_DIR_NAME}
 
   if [ ! -d ${OUTPUT_PATH} ]; then
     mkdir -p ${OUTPUT_PATH}
@@ -73,7 +73,7 @@ generate_output() {
     popd > /dev/null
   fi
 
-  pushd ${STDK_PATH}/output/${CHIP_NAME}/
+  pushd ${STDK_PATH}/output/${BSP_NAME}/
   ln -Tfs ${OUTPUT_DIR_NAME} iotcore_${PROJECT_TITLE}_latest
   popd
 
