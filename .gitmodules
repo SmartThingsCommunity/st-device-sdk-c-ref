@@ -22,3 +22,6 @@
 [submodule "bsp/rtl8721c"]
 	path = bsp/rtl8721c
 	url = https://github.com/ambiot/ambd_sdk.git
+[submodule "bsp/emw3166/mico-os"]
+	path = bsp/emw3166/mico-os
+	url = https://github.com/MXCHIP/mico-os
