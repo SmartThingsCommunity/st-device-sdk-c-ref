@@ -102,7 +102,8 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 3. Run `build.sh` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
 
    ```sh
-   $ ./build.sh apps/esp32/switch_exmaple          # ./build.sh {app_path}
+   $ ./build.sh apps/esp32/switch_example          # ./build.sh {app_path}
+
    ```
 
 ### flash & monitor
