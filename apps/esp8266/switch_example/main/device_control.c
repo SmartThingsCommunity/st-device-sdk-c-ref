@@ -24,8 +24,6 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-static xQueueHandle button_event_queue = NULL;
-
 void change_switch_state(int switch_state)
 {
     if (switch_state == SWITCH_OFF) {
@@ -158,8 +156,6 @@ void iot_gpio_init(void)
 	gpio_config(&io_conf);
 
 	gpio_set_intr_type(GPIO_INPUT_BUTTON, GPIO_INTR_ANYEDGE);
-
-	button_event_queue = xQueueCreate(10, sizeof(uint32_t));
 
 	gpio_install_isr_service(0);
 
