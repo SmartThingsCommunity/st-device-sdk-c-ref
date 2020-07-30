@@ -263,7 +263,7 @@ void app_main(void)
     // create a handle to process capability and initialize capability info
     capability_init();
 
-    gpio_init();
+    iot_gpio_init();
     register_iot_cli_cmd();
     uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_dustSensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_dustSensor_get_fineDustLevel_value(caps_dustSensor_data_t *caps_data)
 {

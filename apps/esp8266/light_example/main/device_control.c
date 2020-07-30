@@ -186,7 +186,7 @@ void change_led_mode(int noti_led_mode)
     }
 }
 
-void gpio_init(void)
+void iot_gpio_init(void)
 {
     gpio_config_t io_conf;
 
