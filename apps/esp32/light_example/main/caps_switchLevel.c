@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_switchLevel.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_switchLevel_get_level_value(caps_switchLevel_data_t *caps_data)
 {

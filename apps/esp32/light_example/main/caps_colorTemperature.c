@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_colorTemperature.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_colorTemperature_get_colorTemperature_value(caps_colorTemperature_data_t *caps_data)
 {
