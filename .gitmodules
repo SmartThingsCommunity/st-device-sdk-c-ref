@@ -25,3 +25,6 @@
 [submodule "bsp/emw3166/mico-os"]
 	path = bsp/emw3166/mico-os
 	url = https://github.com/MXCHIP/mico-os
+[submodule "bsp/emw3080/mico-os"]
+	path = bsp/emw3080/mico-os
+	url = https://github.com/MXCHIP/mico-os
