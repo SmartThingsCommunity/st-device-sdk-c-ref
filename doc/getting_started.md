@@ -256,7 +256,7 @@ import qrcode
 
 mnid = 'FFFF' # "FFFF" is an example. you should replace it with yours
 onboardingId = '111' # "111" is an example. you should replace it with yours
-serialNumber = 'STDKtest0001' # "STDKtest0001" is an exmaple. you should replace it with yours
+serialNumber = 'STDKtest0001' # "STDKtest0001" is an example. you should replace it with yours
 qrUrl = 'https://qr.samsungiots.com/?m=' + mnid + '&s=' + onboardingId + '&r=' + serialNumber
 img = qrcode.make(qrUrl)
 img.save(serialNumber + '.png')
