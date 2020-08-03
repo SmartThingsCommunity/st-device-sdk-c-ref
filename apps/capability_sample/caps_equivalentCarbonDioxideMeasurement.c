@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_equivalentCarbonDioxideMeasurement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_equivalentCarbonDioxideMeasurement_get_equivalentCarbonDioxideMeasurement_value(caps_equivalentCarbonDioxideMeasurement_data_t *caps_data)
 {

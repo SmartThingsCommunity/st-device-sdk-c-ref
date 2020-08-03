@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_powerMeter.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_powerMeter_get_power_value(caps_powerMeter_data_t *caps_data)
 {

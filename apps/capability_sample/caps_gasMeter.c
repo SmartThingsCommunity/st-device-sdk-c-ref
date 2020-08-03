@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_gasMeter.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char *caps_gasMeter_get_gasMeterTime_value(caps_gasMeter_data_t *caps_data)
 {

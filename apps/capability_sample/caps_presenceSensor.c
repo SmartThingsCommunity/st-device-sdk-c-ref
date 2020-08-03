@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_presenceSensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_presenceSensor_attr_presence_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_presenceSensor_attr_presence_str2idx(const char *value)
         if (!strcmp(value, caps_helper_presenceSensor.attr_presence.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_presenceSensor_get_presence_value(caps_presenceSensor_data_t *caps_data)

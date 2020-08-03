@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_samsungTV.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_samsungTV_get_volume_value(caps_samsungTV_data_t *caps_data)
 {
@@ -131,8 +131,8 @@ static int caps_samsungTV_attr_switch_str2idx(const char *value)
         if (!strcmp(value, caps_helper_samsungTV.attr_switch.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_samsungTV_get_switch_value(caps_samsungTV_data_t *caps_data)
@@ -195,8 +195,8 @@ static int caps_samsungTV_attr_mute_str2idx(const char *value)
         if (!strcmp(value, caps_helper_samsungTV.attr_mute.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_samsungTV_get_mute_value(caps_samsungTV_data_t *caps_data)
@@ -259,8 +259,8 @@ static int caps_samsungTV_attr_pictureMode_str2idx(const char *value)
         if (!strcmp(value, caps_helper_samsungTV.attr_pictureMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_samsungTV_get_pictureMode_value(caps_samsungTV_data_t *caps_data)
@@ -323,8 +323,8 @@ static int caps_samsungTV_attr_soundMode_str2idx(const char *value)
         if (!strcmp(value, caps_helper_samsungTV.attr_soundMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_samsungTV_get_soundMode_value(caps_samsungTV_data_t *caps_data)

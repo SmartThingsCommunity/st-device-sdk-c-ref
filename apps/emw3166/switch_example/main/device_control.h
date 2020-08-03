@@ -19,30 +19,29 @@
 #include "mico.h"
 
 #define GPIO_OUTPUT_NOTIFICATION_LED MICO_GPIO_6  //PB13
-#define GPIO_INPUT_BUTTON            MICO_GPIO_5  //PB12
+#define GPIO_INPUT_BUTTON MICO_GPIO_5  //PB12
 
-#define GPIO_OUTPUT_MAINLED          MICO_GPIO_7  //PB14
+#define GPIO_OUTPUT_MAINLED MICO_GPIO_7  //PB14
 
-
-enum notification_led_gpio_state {
-	NOTIFICATION_LED_GPIO_ON = 1,
-	NOTIFICATION_LED_GPIO_OFF = 0,
+enum switch_onoff_state {
+    SWITCH_OFF = 0,
+    SWITCH_ON = 1,
 };
 
 enum main_led_gpio_state {
-	MAINLED_GPIO_ON = 1,
-	MAINLED_GPIO_OFF = 0,
+    MAINLED_GPIO_ON = 1,
+    MAINLED_GPIO_OFF = 0,
 };
 
 enum led_animation_mode_list {
-	LED_ANIMATION_MODE_IDLE = 0,
-	LED_ANIMATION_MODE_FAST,
-	LED_ANIMATION_MODE_SLOW,
+    LED_ANIMATION_MODE_IDLE = 0,
+    LED_ANIMATION_MODE_FAST,
+    LED_ANIMATION_MODE_SLOW,
 };
 
 enum button_gpio_state {
-	BUTTON_GPIO_RELEASED = 1,
-	BUTTON_GPIO_PRESSED = 0,
+    BUTTON_GPIO_RELEASED = 1,
+    BUTTON_GPIO_PRESSED = 0,
 };
 
 #define BUTTON_DEBOUNCE_TIME_MS 20
@@ -50,12 +49,13 @@ enum button_gpio_state {
 #define BUTTON_DELAY_MS 300
 
 enum button_event_type {
-	BUTTON_LONG_PRESS = 0,
-	BUTTON_SHORT_PRESS = 1,
+    BUTTON_LONG_PRESS = 0,
+    BUTTON_SHORT_PRESS = 1,
 };
 
+void change_switch_state(int switch_state);
 void button_isr_handler(void *arg);
 int get_button_event(int* button_event_type, int* button_event_count);
-void led_blink(int gpio, int delay, int count);
-void change_led_state(int noti_led_mode);
-void gpio_init(void);
+void led_blink(int switch_state, int delay, int count);
+void change_led_mode(int noti_led_mode);
+void iot_gpio_init(void);

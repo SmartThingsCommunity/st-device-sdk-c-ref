@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_dishwasherOperatingState.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char *caps_dishwasherOperatingState_get_completionTime_value(caps_dishwasherOperatingState_data_t *caps_data)
 {
@@ -149,8 +149,8 @@ static int caps_dishwasherOperatingState_attr_machineState_str2idx(const char *v
         if (!strcmp(value, caps_helper_dishwasherOperatingState.attr_machineState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_dishwasherOperatingState_get_machineState_value(caps_dishwasherOperatingState_data_t *caps_data)
@@ -213,8 +213,8 @@ static int caps_dishwasherOperatingState_attr_dishwasherJobState_str2idx(const c
         if (!strcmp(value, caps_helper_dishwasherOperatingState.attr_dishwasherJobState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_dishwasherOperatingState_get_dishwasherJobState_value(caps_dishwasherOperatingState_data_t *caps_data)

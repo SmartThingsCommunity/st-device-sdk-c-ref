@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_filterStatus.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_filterStatus_attr_filterStatus_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_filterStatus_attr_filterStatus_str2idx(const char *value)
         if (!strcmp(value, caps_helper_filterStatus.attr_filterStatus.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_filterStatus_get_filterStatus_value(caps_filterStatus_data_t *caps_data)

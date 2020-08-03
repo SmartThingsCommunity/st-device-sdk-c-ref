@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_accelerationSensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_accelerationSensor_attr_acceleration_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_accelerationSensor_attr_acceleration_str2idx(const char *value)
         if (!strcmp(value, caps_helper_accelerationSensor.attr_acceleration.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_accelerationSensor_get_acceleration_value(caps_accelerationSensor_data_t *caps_data)

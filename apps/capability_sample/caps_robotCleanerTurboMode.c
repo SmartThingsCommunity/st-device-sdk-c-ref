@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_robotCleanerTurboMode.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_robotCleanerTurboMode_attr_robotCleanerTurboMode_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_robotCleanerTurboMode_attr_robotCleanerTurboMode_str2idx(const c
         if (!strcmp(value, caps_helper_robotCleanerTurboMode.attr_robotCleanerTurboMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_robotCleanerTurboMode_get_robotCleanerTurboMode_value(caps_robotCleanerTurboMode_data_t *caps_data)

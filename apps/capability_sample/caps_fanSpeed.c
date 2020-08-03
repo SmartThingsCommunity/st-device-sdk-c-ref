@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_fanSpeed.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_fanSpeed_get_fanSpeed_value(caps_fanSpeed_data_t *caps_data)
 {

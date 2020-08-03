@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_alarm.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_alarm_attr_alarm_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_alarm_attr_alarm_str2idx(const char *value)
         if (!strcmp(value, caps_helper_alarm.attr_alarm.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_alarm_get_alarm_value(caps_alarm_data_t *caps_data)

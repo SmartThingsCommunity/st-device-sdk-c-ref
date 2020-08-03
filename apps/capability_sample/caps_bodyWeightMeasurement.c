@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_bodyWeightMeasurement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_bodyWeightMeasurement_get_bodyWeightMeasurement_value(caps_bodyWeightMeasurement_data_t *caps_data)
 {

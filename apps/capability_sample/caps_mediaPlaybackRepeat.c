@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_mediaPlaybackRepeat.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_mediaPlaybackRepeat_attr_playbackRepeatMode_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_mediaPlaybackRepeat_attr_playbackRepeatMode_str2idx(const char *
         if (!strcmp(value, caps_helper_mediaPlaybackRepeat.attr_playbackRepeatMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_mediaPlaybackRepeat_get_playbackRepeatMode_value(caps_mediaPlaybackRepeat_data_t *caps_data)

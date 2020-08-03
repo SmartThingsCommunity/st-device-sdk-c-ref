@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_imageCapture.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char *caps_imageCapture_get_image_value(caps_imageCapture_data_t *caps_data)
 {
