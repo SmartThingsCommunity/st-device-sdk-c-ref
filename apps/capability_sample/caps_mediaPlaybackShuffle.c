@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_mediaPlaybackShuffle.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_mediaPlaybackShuffle_attr_playbackShuffle_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_mediaPlaybackShuffle_attr_playbackShuffle_str2idx(const char *va
         if (!strcmp(value, caps_helper_mediaPlaybackShuffle.attr_playbackShuffle.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_mediaPlaybackShuffle_get_playbackShuffle_value(caps_mediaPlaybackShuffle_data_t *caps_data)

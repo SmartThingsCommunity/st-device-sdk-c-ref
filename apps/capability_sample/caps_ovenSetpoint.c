@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_ovenSetpoint.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_ovenSetpoint_get_ovenSetpoint_value(caps_ovenSetpoint_data_t *caps_data)
 {

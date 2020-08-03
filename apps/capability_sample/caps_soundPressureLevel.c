@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_soundPressureLevel.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_soundPressureLevel_get_soundPressureLevel_value(caps_soundPressureLevel_data_t *caps_data)
 {

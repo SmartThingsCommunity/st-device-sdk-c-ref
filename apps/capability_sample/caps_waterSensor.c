@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_waterSensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_waterSensor_attr_water_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_waterSensor_attr_water_str2idx(const char *value)
         if (!strcmp(value, caps_helper_waterSensor.attr_water.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_waterSensor_get_water_value(caps_waterSensor_data_t *caps_data)

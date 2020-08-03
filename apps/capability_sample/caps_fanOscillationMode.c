@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_fanOscillationMode.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_fanOscillationMode_attr_fanOscillationMode_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_fanOscillationMode_attr_fanOscillationMode_str2idx(const char *v
         if (!strcmp(value, caps_helper_fanOscillationMode.attr_fanOscillationMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_fanOscillationMode_get_fanOscillationMode_value(caps_fanOscillationMode_data_t *caps_data)

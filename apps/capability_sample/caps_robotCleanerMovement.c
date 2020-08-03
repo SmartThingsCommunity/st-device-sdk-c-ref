@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_robotCleanerMovement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_robotCleanerMovement_attr_robotCleanerMovement_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_robotCleanerMovement_attr_robotCleanerMovement_str2idx(const cha
         if (!strcmp(value, caps_helper_robotCleanerMovement.attr_robotCleanerMovement.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_robotCleanerMovement_get_robotCleanerMovement_value(caps_robotCleanerMovement_data_t *caps_data)

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_smokeDetector.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_smokeDetector_attr_smoke_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_smokeDetector_attr_smoke_str2idx(const char *value)
         if (!strcmp(value, caps_helper_smokeDetector.attr_smoke.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_smokeDetector_get_smoke_value(caps_smokeDetector_data_t *caps_data)

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_odorSensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_odorSensor_get_odorLevel_value(caps_odorSensor_data_t *caps_data)
 {

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_airQualitySensor.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_airQualitySensor_get_airQuality_value(caps_airQualitySensor_data_t *caps_data)
 {

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_voltageMeasurement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_voltageMeasurement_get_voltage_value(caps_voltageMeasurement_data_t *caps_data)
 {

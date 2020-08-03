@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_carbonMonoxideDetector.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_carbonMonoxideDetector_attr_carbonMonoxide_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_carbonMonoxideDetector_attr_carbonMonoxide_str2idx(const char *v
         if (!strcmp(value, caps_helper_carbonMonoxideDetector.attr_carbonMonoxide.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_carbonMonoxideDetector_get_carbonMonoxide_value(caps_carbonMonoxideDetector_data_t *caps_data)

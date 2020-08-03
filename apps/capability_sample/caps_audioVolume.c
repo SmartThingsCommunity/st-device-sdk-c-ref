@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_audioVolume.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_audioVolume_get_volume_value(caps_audioVolume_data_t *caps_data)
 {

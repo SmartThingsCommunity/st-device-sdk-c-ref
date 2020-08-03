@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_button.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char **caps_button_get_supportedButtonValues_value(caps_button_data_t *caps_data)
 {
@@ -97,8 +97,8 @@ static int caps_button_attr_button_str2idx(const char *value)
         if (!strcmp(value, caps_helper_button.attr_button.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_button_get_button_value(caps_button_data_t *caps_data)
