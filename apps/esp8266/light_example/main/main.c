@@ -66,56 +66,56 @@ static int get_switch_state(void)
     const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
     int switch_state = SWITCH_OFF;
 
-    if(!switch_value) {
+    if (!switch_value) {
         return -1;
     }
 
-    if(!strcmp(switch_value, caps_helper_switch.attr_switch.value_on)) {
+    if (!strcmp(switch_value, caps_helper_switch.attr_switch.value_on)) {
         switch_state = SWITCH_ON;
-    } else if(!strcmp(switch_value, caps_helper_switch.attr_switch.value_off)) {
+    } else if (!strcmp(switch_value, caps_helper_switch.attr_switch.value_off)) {
         switch_state = SWITCH_OFF;
     }
     return switch_state;
 }
 
-void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
+static void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
 {
     int switch_state = get_switch_state();
     change_switch_state(switch_state);
 }
 
-void cap_switchLevel_cmd_cb(struct caps_switchLevel_data *caps_data)
+static void cap_switchLevel_cmd_cb(struct caps_switchLevel_data *caps_data)
 {
     int switch_level = caps_data->get_level_value(caps_data);
     change_switch_level(switch_level);
 }
 
-void cap_colorTemp_cmd_cb(struct caps_colorTemperature_data *caps_data)
+static void cap_colorTemp_cmd_cb(struct caps_colorTemperature_data *caps_data)
 {
     update_color_info(cap_colorTemp_data->get_colorTemperature_value(cap_colorTemp_data));
     change_switch_state(get_switch_state());
 }
 
-void cap_lightMode_cmd_cb(struct caps_activityLightingMode_data *caps_data)
+static void cap_lightMode_cmd_cb(struct caps_activityLightingMode_data *caps_data)
 {
     const char* lightMode = cap_lightMode_data->get_lightingMode_value(cap_lightMode_data);
 
     int colorTemp = 0;
-    if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_reading)) {
+    if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_reading)) {
         colorTemp = 4000;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_writing)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_writing)) {
         colorTemp = 5000;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_computer)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_computer)) {
         colorTemp = 6000;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_day)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_day)) {
         colorTemp = 5500;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_night)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_night)) {
         colorTemp = 6500;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_sleepPreparation)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_sleepPreparation)) {
         colorTemp = 3000;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_cozy)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_cozy)) {
         colorTemp = 2000;
-    } else if(!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_soft)) {
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_soft)) {
         colorTemp = 2500;
     }
     cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp);
@@ -213,7 +213,7 @@ static void connection_start(void)
 
 #if defined(SET_PIN_NUMBER_CONFRIM)
     pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
-    if(!pin_num)
+    if (!pin_num)
         printf("failed to malloc for iot_pin_t\n");
 
     // to decide the pin confirmation number(ex. "12345678"). It will use for easysetup.
@@ -237,7 +237,7 @@ static void connection_start_task(void *arg)
     vTaskDelete(NULL);
 }
 
-void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
+static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 {
     printf("Notification message received\n");
 
@@ -377,7 +377,7 @@ void app_main(void)
     // create a handle to process capability and initialize capability info
     capability_init();
 
-    gpio_init();
+    iot_gpio_init();
 
     register_iot_cli_cmd();
     uart_cli_main();

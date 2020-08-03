@@ -25,7 +25,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
 
 #include "iot_uart_cli.h"
 #include "iot_cli_cmd.h"
@@ -56,19 +55,19 @@ static int get_switch_state(void)
     const char* switch_value = cap_switch_data->get_switch_value(cap_switch_data);
     int switch_state = SWITCH_OFF;
 
-    if(!switch_value) {
+    if (!switch_value) {
         return -1;
     }
 
-    if(!strcmp(switch_value, caps_helper_switch.attr_switch.value_on)) {
+    if (!strcmp(switch_value, caps_helper_switch.attr_switch.value_on)) {
         switch_state = SWITCH_ON;
-    } else if(!strcmp(switch_value, caps_helper_switch.attr_switch.value_off)) {
+    } else if (!strcmp(switch_value, caps_helper_switch.attr_switch.value_off)) {
         switch_state = SWITCH_OFF;
     }
     return switch_state;
 }
 
-void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
+static void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
 {
     int switch_state = get_switch_state();
     change_switch_state(switch_state);
@@ -127,7 +126,7 @@ static void connection_start(void)
 
 #if defined(SET_PIN_NUMBER_CONFRIM)
     pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
-    if(!pin_num)
+    if (!pin_num)
         printf("failed to malloc for iot_pin_t\n");
 
     // to decide the pin confirmation number(ex. "12345678"). It will use for easysetup.
@@ -151,7 +150,7 @@ static void connection_start_task(void *arg)
     vTaskDelete(NULL);
 }
 
-void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
+static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
 {
     printf("Notification message received\n");
 
@@ -263,7 +262,7 @@ void app_main(void)
     // create a handle to process capability and initialize capability info
     capability_init();
 
-    gpio_init();
+    iot_gpio_init();
     register_iot_cli_cmd();
     uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);

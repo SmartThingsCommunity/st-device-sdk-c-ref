@@ -16,8 +16,8 @@ export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 print_usage () {
 	echo "    Usage: ./build.sh rtl8720c APP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
-	echo "    ex) ./build.sh rtl8720c smart_switch"
-	echo "    ex) ./build.sh rtl8720c st_switch"
+	echo "    ex) ./build.sh rtl8720c switch_example"
+	echo "    ex) ./build.sh rtl8720c light_example"
 	echo
 }
 

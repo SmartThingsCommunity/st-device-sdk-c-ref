@@ -28,8 +28,6 @@ static int rgb_color_red = 255;
 static int rgb_color_green = 0;
 static int rgb_color_blue = 0;
 
-static xQueueHandle button_event_queue = NULL;
-
 static void update_rgb_from_color_temp(int color_temp, int *red, int *green, int *blue)
 {
     int ct_table[10][3] = {
@@ -186,7 +184,7 @@ void change_led_mode(int noti_led_mode)
     }
 }
 
-void gpio_init(void)
+void iot_gpio_init(void)
 {
     gpio_config_t io_conf;
 
@@ -212,8 +210,6 @@ void gpio_init(void)
     gpio_config(&io_conf);
 
     gpio_set_intr_type(GPIO_INPUT_BUTTON, GPIO_INTR_ANYEDGE);
-
-    button_event_queue = xQueueCreate(10, sizeof(uint32_t));
 
     gpio_install_isr_service(0);
 

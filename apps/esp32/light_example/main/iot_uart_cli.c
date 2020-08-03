@@ -27,8 +27,6 @@
 #include "driver/uart.h"
 
 #include "iot_uart_cli.h"
-#include "iot_debug.h"
-#include "iot_os_util.h"
 
 #define UART_BUF_SIZE (20)
 
@@ -96,12 +94,12 @@ void cli_register_command(cli_cmd_t* cmd)
 
 
     if ( (!cmd) || (!cmd->command) ) {
-        IOT_ERROR("register fail : cmd is invalid.\n");
+        printf("register fail : cmd is invalid.\n");
         return;
     }
 
     if (cli_find_command(cmd->command)) {
-        IOT_ERROR("register fail : same cmd is already exists.\n");
+        printf("register fail : same cmd is already exists.\n");
         return;
     }
 
@@ -148,7 +146,7 @@ static void _cli_util_wait_for_user_input(unsigned int timeout_ms)
             break;
         }
         portEXIT_CRITICAL(&spinlock);
-        IOT_DELAY(100);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 
     portENTER_CRITICAL(&spinlock);
@@ -166,7 +164,7 @@ static void _cli_util_wait_for_user_input(unsigned int timeout_ms)
                 break;
             }
             portEXIT_CRITICAL(&spinlock);
-            IOT_DELAY(100);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
         }
     }
 }
