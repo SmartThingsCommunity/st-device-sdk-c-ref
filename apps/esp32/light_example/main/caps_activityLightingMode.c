@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_activityLightingMode.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_activityLightingMode_attr_lightingMode_str2idx(const char *value)
 {

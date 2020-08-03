@@ -74,4 +74,4 @@ void button_isr_handler(void *arg);
 int get_button_event(int* button_event_type, int* button_event_count);
 void led_blink(int switch_state, int delay, int count);
 void change_led_mode(int noti_led_mode);
-void gpio_init(void);
+void iot_gpio_init(void);
