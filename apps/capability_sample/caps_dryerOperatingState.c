@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_dryerOperatingState.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char *caps_dryerOperatingState_get_completionTime_value(caps_dryerOperatingState_data_t *caps_data)
 {
@@ -149,8 +149,8 @@ static int caps_dryerOperatingState_attr_machineState_str2idx(const char *value)
         if (!strcmp(value, caps_helper_dryerOperatingState.attr_machineState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_dryerOperatingState_get_machineState_value(caps_dryerOperatingState_data_t *caps_data)
@@ -213,8 +213,8 @@ static int caps_dryerOperatingState_attr_dryerJobState_str2idx(const char *value
         if (!strcmp(value, caps_helper_dryerOperatingState.attr_dryerJobState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_dryerOperatingState_get_dryerJobState_value(caps_dryerOperatingState_data_t *caps_data)

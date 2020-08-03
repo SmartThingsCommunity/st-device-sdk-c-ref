@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_securitySystem.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char *caps_securitySystem_get_alarm_value(caps_securitySystem_data_t *caps_data)
 {
@@ -83,8 +83,8 @@ static int caps_securitySystem_attr_securitySystemStatus_str2idx(const char *val
         if (!strcmp(value, caps_helper_securitySystem.attr_securitySystemStatus.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_securitySystem_get_securitySystemStatus_value(caps_securitySystem_data_t *caps_data)

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_execute.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const JSON_H *caps_execute_get_data_value(caps_execute_data_t *caps_data)
 {

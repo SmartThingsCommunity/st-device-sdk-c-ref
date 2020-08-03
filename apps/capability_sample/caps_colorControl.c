@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_colorControl.h"
-
-#include "freertos/FreeRTOS.h"
 
 static void caps_colorControl_set_color_value(caps_colorControl_data_t *caps_data, double hue, double saturation)
 {

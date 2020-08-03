@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_powerSource.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_powerSource_attr_powerSource_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_powerSource_attr_powerSource_str2idx(const char *value)
         if (!strcmp(value, caps_helper_powerSource.attr_powerSource.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_powerSource_get_powerSource_value(caps_powerSource_data_t *caps_data)

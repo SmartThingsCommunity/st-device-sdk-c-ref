@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_ovenOperatingState.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_ovenOperatingState_attr_ovenJobState_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_ovenOperatingState_attr_ovenJobState_str2idx(const char *value)
         if (!strcmp(value, caps_helper_ovenOperatingState.attr_ovenJobState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_ovenOperatingState_get_ovenJobState_value(caps_ovenOperatingState_data_t *caps_data)
@@ -319,8 +319,8 @@ static int caps_ovenOperatingState_attr_machineState_str2idx(const char *value)
         if (!strcmp(value, caps_helper_ovenOperatingState.attr_machineState.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_ovenOperatingState_get_machineState_value(caps_ovenOperatingState_data_t *caps_data)

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_illuminanceMeasurement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_illuminanceMeasurement_get_illuminance_value(caps_illuminanceMeasurement_data_t *caps_data)
 {

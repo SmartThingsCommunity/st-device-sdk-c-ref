@@ -31,8 +31,8 @@ static int caps_switch_attr_switch_str2idx(const char *value)
         if (!strcmp(value, caps_helper_switch.attr_switch.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_switch_get_switch_value(caps_switch_data_t *caps_data)

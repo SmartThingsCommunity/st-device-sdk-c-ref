@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_valve.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_valve_attr_valve_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_valve_attr_valve_str2idx(const char *value)
         if (!strcmp(value, caps_helper_valve.attr_valve.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_valve_get_valve_value(caps_valve_data_t *caps_data)

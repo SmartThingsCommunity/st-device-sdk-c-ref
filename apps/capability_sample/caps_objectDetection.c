@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_objectDetection.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const JSON_H *caps_objectDetection_get_detected_value(caps_objectDetection_data_t *caps_data)
 {

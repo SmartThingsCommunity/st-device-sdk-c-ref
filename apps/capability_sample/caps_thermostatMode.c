@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_thermostatMode.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_thermostatMode_attr_thermostatMode_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_thermostatMode_attr_thermostatMode_str2idx(const char *value)
         if (!strcmp(value, caps_helper_thermostatMode.attr_thermostatMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_thermostatMode_get_thermostatMode_value(caps_thermostatMode_data_t *caps_data)

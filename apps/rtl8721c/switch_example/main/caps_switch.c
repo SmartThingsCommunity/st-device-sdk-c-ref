@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_switch.h"
-
-#include "FreeRTOS.h"
 
 static int caps_switch_attr_switch_str2idx(const char *value)
 {

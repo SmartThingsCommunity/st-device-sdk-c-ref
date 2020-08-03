@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_threeAxis.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const JSON_H *caps_threeAxis_get_threeAxis_value(caps_threeAxis_data_t *caps_data)
 {
@@ -53,7 +53,7 @@ static void caps_threeAxis_set_threeAxis_value(caps_threeAxis_data_t *caps_data,
     JSON_ADD_ITEM_TO_ARRAY(array, array_obj);
     array_obj = JSON_CREATE_NUMBER((double) z);
     JSON_ADD_ITEM_TO_ARRAY(array, array_obj);
-    
+
     JSON_DELETE(caps_data->threeAxis_value);
     caps_data->threeAxis_value = array;
 }

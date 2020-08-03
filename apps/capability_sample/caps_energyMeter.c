@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_energyMeter.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_energyMeter_get_energy_value(caps_energyMeter_data_t *caps_data)
 {

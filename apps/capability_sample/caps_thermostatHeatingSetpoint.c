@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_thermostatHeatingSetpoint.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_thermostatHeatingSetpoint_get_heatingSetpoint_value(caps_thermostatHeatingSetpoint_data_t *caps_data)
 {

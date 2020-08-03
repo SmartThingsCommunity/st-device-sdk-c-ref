@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_doorControl.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_doorControl_attr_door_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_doorControl_attr_door_str2idx(const char *value)
         if (!strcmp(value, caps_helper_doorControl.attr_door.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_doorControl_get_door_value(caps_doorControl_data_t *caps_data)

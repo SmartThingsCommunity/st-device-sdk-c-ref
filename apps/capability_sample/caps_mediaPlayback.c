@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_mediaPlayback.h"
-
-#include "freertos/FreeRTOS.h"
 
 static const char **caps_mediaPlayback_get_supportedPlaybackCommands_value(caps_mediaPlayback_data_t *caps_data)
 {
@@ -97,8 +97,8 @@ static int caps_mediaPlayback_attr_playbackStatus_str2idx(const char *value)
         if (!strcmp(value, caps_helper_mediaPlayback.attr_playbackStatus.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_mediaPlayback_get_playbackStatus_value(caps_mediaPlayback_data_t *caps_data)

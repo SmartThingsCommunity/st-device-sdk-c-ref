@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_bodyMassIndexMeasurement.h"
-
-#include "freertos/FreeRTOS.h"
 
 static double caps_bodyMassIndexMeasurement_get_bmiMeasurement_value(caps_bodyMassIndexMeasurement_data_t *caps_data)
 {

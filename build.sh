@@ -28,7 +28,7 @@ print_usage () {
     echo "    ex) ./build.sh rtl8195 switch_example"
     echo "    ex) ./build.sh rtl8720c switch_example"
     echo "    ex) ./build.sh rtl8721c switch_example"
-    echo "    ex) ./build.sh emw3166 st_switch"
+    echo "    ex) ./build.sh emw3166 switch_example"
     echo
 }
 

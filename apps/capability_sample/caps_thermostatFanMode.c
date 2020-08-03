@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_thermostatFanMode.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_thermostatFanMode_attr_thermostatFanMode_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_thermostatFanMode_attr_thermostatFanMode_str2idx(const char *val
         if (!strcmp(value, caps_helper_thermostatFanMode.attr_thermostatFanMode.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_thermostatFanMode_get_thermostatFanMode_value(caps_thermostatFanMode_data_t *caps_data)

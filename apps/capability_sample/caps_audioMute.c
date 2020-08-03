@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_audioMute.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_audioMute_attr_mute_str2idx(const char *value)
 {
@@ -31,8 +31,8 @@ static int caps_audioMute_attr_mute_str2idx(const char *value)
         if (!strcmp(value, caps_helper_audioMute.attr_mute.values[index])) {
             return index;
         }
-    }   
-    return -1; 
+    }
+    return -1;
 }
 
 static const char *caps_audioMute_get_mute_value(caps_audioMute_data_t *caps_data)

@@ -17,11 +17,11 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "st_dev.h"
 #include "caps_battery.h"
-
-#include "freertos/FreeRTOS.h"
 
 static int caps_battery_get_battery_value(caps_battery_data_t *caps_data)
 {

@@ -15,8 +15,8 @@ export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 print_usage () {
 	echo "    Usage: ./build.sh emw3166 APP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
-	echo "    ex) ./build.sh emw3166 st_switch"
-	echo "    ex) ./build.sh emw3166 st_lamp"
+	echo "    ex) ./build.sh emw3166 switch_example"
+	echo "    ex) ./build.sh emw3166 light_example"
 	echo
 }
 
