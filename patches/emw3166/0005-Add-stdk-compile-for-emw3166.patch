@@ -1,4 +1,4 @@
-From ff859feba35a155fb499c42ee0a439a7291fc3e9 Mon Sep 17 00:00:00 2001
+From 8f32a00971818f46ce21e088c281ab01fcca2c52 Mon Sep 17 00:00:00 2001
 From: "baojun.luo" <baojun.luo@samsung.com>
 Date: Wed, 15 Jan 2020 19:16:52 +0900
 Subject: [PATCH] Add stdk compile for emw3166
@@ -7,14 +7,14 @@ Signed-off-by: baojun.luo <baojun.luo@samsung.com>
 Signed-off-by: qin.li <qin.li@samsung.com>
 ---
  MiCO/MiCO.mk                                      |  6 ++-
- MiCO/iot_main.c                                   | 22 +++++++++
+ MiCO/iot_main.c                                   | 23 +++++++++
  MiCO/mico_config.h                                | 16 ++++++
  MiCO/system/system.mk                             |  2 +-
  makefiles/config.mk                               | 60 +++++++++++++++++++++++
  makefiles/mico_target_config.mk                   | 44 ++++++++++++++---
  makefiles/micoder_host_cmd.mk                     |  2 +-
  platform/MCU/STM32F4xx/peripherals/platform_rng.c | 16 +++---
- 8 files changed, 152 insertions(+), 16 deletions(-)
+ 8 files changed, 153 insertions(+), 16 deletions(-)
  create mode 100644 MiCO/iot_main.c
  create mode 100644 MiCO/mico_config.h
  create mode 100644 makefiles/config.mk
@@ -46,13 +46,14 @@ index 28c4f83..877499a 100644
  $(NAME)_COMPONENTS += net/mbedtls
 diff --git a/MiCO/iot_main.c b/MiCO/iot_main.c
 new file mode 100644
-index 0000000..0d81b60
+index 0000000..e18a038
 --- /dev/null
 +++ b/MiCO/iot_main.c
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,23 @@
 +#include <stdio.h>
 +#include "iot_debug.h"
 +#include <sys/times.h>
++#include <task.h>
 +
 +extern void app_main(void);
 +

@@ -43,27 +43,25 @@ static void caps_odorSensor_set_odorLevel_value(caps_odorSensor_data_t *caps_dat
 
 static void caps_odorSensor_attr_odorLevel_send(caps_odorSensor_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_int((char *) caps_helper_odorSensor.attr_odorLevel.name, caps_data->odorLevel_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_odorSensor.attr_odorLevel.name,
+            caps_data->odorLevel_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send odorLevel value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 

@@ -61,27 +61,24 @@ static void caps_signalStrength_set_rssi_unit(caps_signalStrength_data_t *caps_d
 
 static void caps_signalStrength_attr_rssi_send(caps_signalStrength_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_number((char *) caps_helper_signalStrength.attr_rssi.name, caps_data->rssi_value, caps_data->rssi_unit);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_signalStrength.attr_rssi.name,
+            caps_data->rssi_value,
+            caps_data->rssi_unit,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send rssi value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -105,27 +102,25 @@ static void caps_signalStrength_set_lqi_value(caps_signalStrength_data_t *caps_d
 
 static void caps_signalStrength_attr_lqi_send(caps_signalStrength_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_int((char *) caps_helper_signalStrength.attr_lqi.name, caps_data->lqi_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_signalStrength.attr_lqi.name,
+            caps_data->lqi_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send lqi value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 

@@ -28,10 +28,5 @@ This example assumes the following components and capabilities are used. :
 ('healthCheck' capability is automatically added by Developer Workspace. It doesn't need handler at device side)
 
 ## SmartThings Device SDK config
-If you want to use specific SmartThings Device SDK build options, you can directly modify the build configuration file. For this example, SmartThings Device SDK config is saved in 'sdkconfig' file. If you want to change this, please execute the following :
-```sh
-# ./build.sh {app_path} {option}
-$ cd ~/st-device-sdk-c-ref/
-$ ./build.sh app/esp32/light_example menuconfig
-```
+If you want to use specific SmartThings Device SDK build options, you can directly modify the build configuration file. For this example, SmartThings Device SDK config is saved in 'sdkconfig.h' file.
 

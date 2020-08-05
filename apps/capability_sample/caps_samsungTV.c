@@ -43,27 +43,25 @@ static void caps_samsungTV_set_volume_value(caps_samsungTV_data_t *caps_data, in
 
 static void caps_samsungTV_attr_volume_send(caps_samsungTV_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_int((char *) caps_helper_samsungTV.attr_volume.name, caps_data->volume_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_samsungTV.attr_volume.name,
+            caps_data->volume_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send volume value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -92,7 +90,7 @@ static void caps_samsungTV_attr_messageButton_send(caps_samsungTV_data_t *caps_d
 {
     IOT_EVENT *cap_evt;
     uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
     iot_cap_val_t value;
 
     if (!caps_data || !caps_data->handle) {
@@ -107,19 +105,23 @@ static void caps_samsungTV_attr_messageButton_send(caps_samsungTV_data_t *caps_d
     value.type = IOT_CAP_VAL_TYPE_JSON_OBJECT;
     value.json_object = JSON_PRINT(caps_data->messageButton_value);
 
-    cap_evt = st_cap_attr_create((char *)caps_helper_samsungTV.attr_messageButton.name,
-        &value, NULL, NULL);
+    cap_evt = st_cap_create_attr(caps_data->handle,
+        (char *)caps_helper_samsungTV.attr_messageButton.name,
+        &value,
+        NULL,
+        NULL);
+
     if (!cap_evt) {
         printf("fail to create cap_evt\n");
         return;
     }
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
+    sequence_no = st_cap_send_attr(&cap_evt, evt_num);
     if (sequence_no < 0)
         printf("fail to send messageButton value\n");
 
     printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    st_cap_free_attr(cap_evt);
 }
 
 
@@ -158,9 +160,7 @@ static void caps_samsungTV_set_switch_value(caps_samsungTV_data_t *caps_data, co
 
 static void caps_samsungTV_attr_switch_send(caps_samsungTV_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -171,19 +171,18 @@ static void caps_samsungTV_attr_switch_send(caps_samsungTV_data_t *caps_data)
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_samsungTV.attr_switch.name,
-        caps_data->switch_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_samsungTV.attr_switch.name,
+            caps_data->switch_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send switch value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -222,9 +221,7 @@ static void caps_samsungTV_set_mute_value(caps_samsungTV_data_t *caps_data, cons
 
 static void caps_samsungTV_attr_mute_send(caps_samsungTV_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -235,19 +232,18 @@ static void caps_samsungTV_attr_mute_send(caps_samsungTV_data_t *caps_data)
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_samsungTV.attr_mute.name,
-        caps_data->mute_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_samsungTV.attr_mute.name,
+            caps_data->mute_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send mute value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -286,9 +282,7 @@ static void caps_samsungTV_set_pictureMode_value(caps_samsungTV_data_t *caps_dat
 
 static void caps_samsungTV_attr_pictureMode_send(caps_samsungTV_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -299,19 +293,18 @@ static void caps_samsungTV_attr_pictureMode_send(caps_samsungTV_data_t *caps_dat
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_samsungTV.attr_pictureMode.name,
-        caps_data->pictureMode_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_samsungTV.attr_pictureMode.name,
+            caps_data->pictureMode_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send pictureMode value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -350,9 +343,7 @@ static void caps_samsungTV_set_soundMode_value(caps_samsungTV_data_t *caps_data,
 
 static void caps_samsungTV_attr_soundMode_send(caps_samsungTV_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -363,19 +354,18 @@ static void caps_samsungTV_attr_soundMode_send(caps_samsungTV_data_t *caps_data)
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_samsungTV.attr_soundMode.name,
-        caps_data->soundMode_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_samsungTV.attr_soundMode.name,
+            caps_data->soundMode_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send soundMode value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 

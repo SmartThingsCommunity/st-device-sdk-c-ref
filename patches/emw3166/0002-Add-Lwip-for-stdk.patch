@@ -1,18 +1,19 @@
-From 7ba162d70792ae4d0a00dad39a8dde01b021596e Mon Sep 17 00:00:00 2001
+From b2e4031777d58c6181faccaf44b77fa6e36a4876 Mon Sep 17 00:00:00 2001
 From: "baojun.luo" <baojun.luo@samsung.com>
 Date: Wed, 15 Jan 2020 19:23:58 +0900
 Subject: [PATCH] Add Lwip for stdk
 
 Signed-off-by: baojun.luo <baojun.luo@samsung.com>
+Signed-off-by: qin.li <36225353+SRCN-LiQin@users.noreply.github.com>
 ---
  MiCO/net/LwIP/LwIP.mk                              |  1 +
  MiCO/net/LwIP/mico/arch/cc.h                       |  2 +-
  MiCO/net/LwIP/mico/lwipopts.h                      |  4 +--
- .../LwIP/ver1.4.0.rc1/src/include/posix/netdb.h    | 33 ++++++++++++++++++++++
- .../ver1.4.0.rc1/src/include/posix/sys/socket.h    | 33 ++++++++++++++++++++++
- 5 files changed, 70 insertions(+), 3 deletions(-)
+ .../LwIP/ver1.4.0.rc1/src/include/posix/netdb.h    | 33 +++++++++++++++++++++
+ .../ver1.4.0.rc1/src/include/posix/sys/socket.h    | 34 ++++++++++++++++++++++
+ 5 files changed, 71 insertions(+), 3 deletions(-)
  create mode 100644 MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/netdb.h
- create mode 100755 MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
+ create mode 100644 MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
 
 diff --git a/MiCO/net/LwIP/LwIP.mk b/MiCO/net/LwIP/LwIP.mk
 index c7c42a4..6c888dc 100644
@@ -94,11 +95,11 @@ index 0000000..12d4c7f
 +
 +#include "lwip/netdb.h"
 diff --git a/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
-new file mode 100755
-index 0000000..0ed9baf
+new file mode 100644
+index 0000000..9482c16
 --- /dev/null
 +++ b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,34 @@
 +/**
 + * @file
 + * This file is a posix wrapper for lwip/sockets.h.
@@ -131,7 +132,8 @@ index 0000000..0ed9baf
 + *
 + */
 +
-+#include "lwip/sockets.h"
++#include "mico_socket.h"
++#include "mico_common.h"
 -- 
 2.7.4
 
