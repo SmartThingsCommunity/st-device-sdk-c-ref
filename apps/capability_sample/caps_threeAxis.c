@@ -62,7 +62,7 @@ static void caps_threeAxis_attr_threeAxis_send(caps_threeAxis_data_t *caps_data)
 {
     IOT_EVENT *cap_evt;
     uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
     iot_cap_val_t value;
 
     if (!caps_data || !caps_data->handle) {
@@ -78,19 +78,23 @@ static void caps_threeAxis_attr_threeAxis_send(caps_threeAxis_data_t *caps_data)
     value.type = IOT_CAP_VAL_TYPE_JSON_OBJECT;
     value.json_object = JSON_PRINT(caps_data->threeAxis_value);
 
-    cap_evt = st_cap_attr_create((char *)caps_helper_threeAxis.attr_threeAxis.name,
-            &value, NULL, NULL);
+    cap_evt = st_cap_create_attr(caps_data->handle,
+            (char *)caps_helper_threeAxis.attr_threeAxis.name,
+            &value,
+            NULL,
+            NULL);
+
     if (!cap_evt) {
         printf("fail to create cap_evt\n");
         return;
     }
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
+    sequence_no = st_cap_send_attr(&cap_evt, evt_num);
     if (sequence_no < 0)
         printf("fail to send threeAxis value\n");
 
     printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    st_cap_free_attr(cap_evt);
 }
 
 
