@@ -39,27 +39,46 @@ static void caps_colorControl_attr_color_send(caps_colorControl_data_t *caps_dat
     IOT_EVENT *cap_evt[2];
     uint8_t evt_num = 2;
     int32_t sequence_no;
+    iot_cap_val_t value[2];
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt[0] = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_hue.name, caps_data->hue_value, NULL);
-    cap_evt[1] = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_saturation.name, caps_data->saturation_value, NULL);
+
+    value[0].type = IOT_CAP_VAL_TYPE_NUMBER;
+    value[0].number = caps_data->hue_value;
+
+    cap_evt[0] = st_cap_create_attr(caps_data->handle,
+            (char *) caps_helper_colorControl.attr_hue.name,
+            &value[0],
+            NULL,
+            NULL);
+
+    value[1].type = IOT_CAP_VAL_TYPE_NUMBER;
+    value[1].number = caps_data->hue_value;
+
+    cap_evt[1] = st_cap_create_attr(caps_data->handle,
+            (char *) caps_helper_colorControl.attr_saturation.name,
+            &value[1],
+            NULL,
+            NULL);
+
     if (!cap_evt[0] || !cap_evt[1]) {
         printf("fail to create cap_evt\n");
         free(cap_evt[0]);
+        free(cap_evt[1]);
         return;
     }
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, cap_evt);
+    sequence_no = st_cap_send_attr(cap_evt, evt_num);
     if (sequence_no < 0)
         printf("fail to send color data\n");
 
     printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt[0]);
-    st_cap_attr_free(cap_evt[1]);
+    st_cap_free_attr(cap_evt[0]);
+    st_cap_free_attr(cap_evt[1]);
 }
 
 
@@ -83,27 +102,24 @@ static void caps_colorControl_set_hue_value(caps_colorControl_data_t *caps_data,
 
 static void caps_colorControl_attr_hue_send(caps_colorControl_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_hue.name, caps_data->hue_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_colorControl.attr_hue.name,
+            caps_data->hue_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send hue value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -127,27 +143,24 @@ static void caps_colorControl_set_saturation_value(caps_colorControl_data_t *cap
 
 static void caps_colorControl_attr_saturation_send(caps_colorControl_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_number((char *) caps_helper_colorControl.attr_saturation.name, caps_data->saturation_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_colorControl.attr_saturation.name,
+            caps_data->saturation_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send saturation value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 

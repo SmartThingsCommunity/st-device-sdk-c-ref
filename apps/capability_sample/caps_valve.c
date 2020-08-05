@@ -58,9 +58,7 @@ static void caps_valve_set_valve_value(caps_valve_data_t *caps_data, const char 
 
 static void caps_valve_attr_valve_send(caps_valve_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -71,19 +69,18 @@ static void caps_valve_attr_valve_send(caps_valve_data_t *caps_data)
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_valve.attr_valve.name,
-        caps_data->valve_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_valve.attr_valve.name,
+            caps_data->valve_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send valve value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 

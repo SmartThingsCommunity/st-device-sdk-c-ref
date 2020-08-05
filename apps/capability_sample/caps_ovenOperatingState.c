@@ -58,9 +58,7 @@ static void caps_ovenOperatingState_set_ovenJobState_value(caps_ovenOperatingSta
 
 static void caps_ovenOperatingState_attr_ovenJobState_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -71,19 +69,18 @@ static void caps_ovenOperatingState_attr_ovenJobState_send(caps_ovenOperatingSta
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_ovenOperatingState.attr_ovenJobState.name,
-        caps_data->ovenJobState_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_ovenJobState.name,
+            caps_data->ovenJobState_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send ovenJobState value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -110,9 +107,7 @@ static void caps_ovenOperatingState_set_completionTime_value(caps_ovenOperatingS
 
 static void caps_ovenOperatingState_attr_completionTime_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -123,19 +118,17 @@ static void caps_ovenOperatingState_attr_completionTime_send(caps_ovenOperatingS
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_ovenOperatingState.attr_completionTime.name,
-        caps_data->completionTime_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_completionTime.name,
+            caps_data->completionTime_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send completionTime value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -176,9 +169,7 @@ static void caps_ovenOperatingState_set_supportedMachineStates_value(caps_ovenOp
 
 static void caps_ovenOperatingState_attr_supportedMachineStates_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -189,19 +180,18 @@ static void caps_ovenOperatingState_attr_supportedMachineStates_send(caps_ovenOp
         return;
     }
 
-    cap_evt = st_cap_attr_create_string_array((char *)caps_helper_ovenOperatingState.attr_supportedMachineStates.name,
-        caps_data->supportedMachineStates_arraySize, caps_data->supportedMachineStates_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRINGS_ARRAY(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_supportedMachineStates.name,
+            caps_data->supportedMachineStates_value,
+            caps_data->supportedMachineStates_arraySize,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send supportedMachineStates value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -243,27 +233,24 @@ static void caps_ovenOperatingState_set_progress_unit(caps_ovenOperatingState_da
 
 static void caps_ovenOperatingState_attr_progress_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_int((char *) caps_helper_ovenOperatingState.attr_progress.name, caps_data->progress_value, caps_data->progress_unit);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_progress.name,
+            caps_data->progress_value,
+            caps_data->progress_unit,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send progress value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -287,27 +274,25 @@ static void caps_ovenOperatingState_set_operationTime_value(caps_ovenOperatingSt
 
 static void caps_ovenOperatingState_attr_operationTime_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_int((char *) caps_helper_ovenOperatingState.attr_operationTime.name, caps_data->operationTime_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_operationTime.name,
+            caps_data->operationTime_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send operationTime value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 
@@ -346,9 +331,7 @@ static void caps_ovenOperatingState_set_machineState_value(caps_ovenOperatingSta
 
 static void caps_ovenOperatingState_attr_machineState_send(caps_ovenOperatingState_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -359,19 +342,18 @@ static void caps_ovenOperatingState_attr_machineState_send(caps_ovenOperatingSta
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_ovenOperatingState.attr_machineState.name,
-        caps_data->machineState_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_ovenOperatingState.attr_machineState.name,
+            caps_data->machineState_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send machineState value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
 }
 
 

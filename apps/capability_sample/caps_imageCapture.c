@@ -46,9 +46,7 @@ static void caps_imageCapture_set_image_value(caps_imageCapture_data_t *caps_dat
 
 static void caps_imageCapture_attr_image_send(caps_imageCapture_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -59,19 +57,17 @@ static void caps_imageCapture_attr_image_send(caps_imageCapture_data_t *caps_dat
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_imageCapture.attr_image.name,
-        caps_data->image_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_imageCapture.attr_image.name,
+            caps_data->image_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send image value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
@@ -98,9 +94,7 @@ static void caps_imageCapture_set_captureTime_value(caps_imageCapture_data_t *ca
 
 static void caps_imageCapture_attr_captureTime_send(caps_imageCapture_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -111,19 +105,17 @@ static void caps_imageCapture_attr_captureTime_send(caps_imageCapture_data_t *ca
         return;
     }
 
-    cap_evt = st_cap_attr_create_string((char *)caps_helper_imageCapture.attr_captureTime.name,
-        caps_data->captureTime_value, NULL);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
+            (char *)caps_helper_imageCapture.attr_captureTime.name,
+            caps_data->captureTime_value,
+            NULL,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send captureTime value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 

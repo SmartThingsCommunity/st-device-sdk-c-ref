@@ -61,27 +61,24 @@ static void caps_energyMeter_set_energy_unit(caps_energyMeter_data_t *caps_data,
 
 static void caps_energyMeter_attr_energy_send(caps_energyMeter_data_t *caps_data)
 {
-    IOT_EVENT *cap_evt;
-    uint8_t evt_num = 1;
-    int sequence_no;
+    int sequence_no = -1;
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
         return;
     }
 
-    cap_evt = st_cap_attr_create_number((char *) caps_helper_energyMeter.attr_energy.name, caps_data->energy_value, caps_data->energy_unit);
-    if (!cap_evt) {
-        printf("fail to create cap_evt\n");
-        return;
-    }
+    ST_CAP_SEND_ATTR_NUMBER(caps_data->handle,
+            (char *)caps_helper_energyMeter.attr_energy.name,
+            caps_data->energy_value,
+            caps_data->energy_unit,
+            NULL,
+            sequence_no);
 
-    sequence_no = st_cap_attr_send(caps_data->handle, evt_num, &cap_evt);
     if (sequence_no < 0)
         printf("fail to send energy value\n");
-
-    printf("Sequence number return : %d\n", sequence_no);
-    st_cap_attr_free(cap_evt);
+    else
+        printf("Sequence number return : %d\n", sequence_no);
 }
 
 
