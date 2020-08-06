@@ -6,6 +6,17 @@ The SmartThings Device SDK(STDK for short) Reference is the git repository of ex
 
 It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
 
+## Announcements
+
+Good news! We have launched the new commercial program for MQTT devices. You will be able to submit for certification into the SmartThings mobile app later this month. To prepare for submission, please perform the necessary steps with your current integrations:
+
+ - Update to the latest SmartThings Device SDK
+   - Please use SmartThings Device SDK v1.3.3 or later
+ - Downlaod the updated onboarding_config.json for your devices.
+ - Re-register any test devices you have registered previously.
+ - Update to the latest SmartThings mobile app to test your device
+   - Please use SmartThings mobile application v1.7.51 (for Android), v1.6.51 (for iOS) or later
+
 ## Directory layout
 
 The reference git is delivered via the following directory structure :
@@ -52,6 +63,12 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
       >
       > You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
 
+  - Example for EMW3166
+
+    - Setup [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the available MXCHIP website.
+    - Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA)
+      In order to use the pre-supplied build script(e.g. `build.sh`), please set `mico config --global MICODER /path_of_the_toolchain`
+
 ### Build
 
 1. Download the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
@@ -70,6 +87,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
          ex) ./setup.sh rtl8195
          ex) ./setup.sh rtl8720c
          ex) ./setup.sh rtl8721c
+         ex) ./setup.sh emw3166
 
      $ ./setup.sh esp8266
      ```
@@ -81,15 +99,16 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
      > Note :
      > The `menuconfig` option is just supported on the Espressif chipset.
      ```sh
-     # ./build.sh {chip_name} {app_name} {option}
+     # ./build.sh {app_path} {option}
      $ cd ~/st-device-sdk-c-ref
-     $ ./build.sh esp8266 st_switch menuconfig
+     $ ./build.sh apps/esp32/switch_example menuconfig
      ```
 
 3. Run `build.sh` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
 
    ```sh
-   $ ./build.sh esp8266 st_switch          # ./build.sh {chip_name} {app_name}
+   $ ./build.sh apps/esp32/switch_example          # ./build.sh {app_path}
+
    ```
 
 ### flash & monitor
@@ -97,10 +116,12 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 Serial port needs to be matched to the computer environment for serial port flashing and monitoring.
 
 - Example for ESP8266/ESP32
-  - Baud rate 115200 for flashing or 74880 for monitoring, Date bit 8, Parity None, Stop bits 1
+  - Baud rate 115200 for flashing or 74880 for monitoring, Data bit 8, Parity None, Stop bits 1
   - These data are described in the build configuration file(e.g.  sdkconfig)
 - Example for RTL8195
-  - Baud rate 115200, Date bit 8, Parity None, Stop bits 1
+  - Baud rate 115200, Data bit 8, Parity None, Stop bits 1
+- Example for EMW3166
+  - Baud rate 9600 for flashing(user uart) and 115200 for monitoring(USB uart), Data bit 8, Parity None, Stop bits 1
 
 Flashing can be done according to the method supported by chipset SDK.
 
@@ -111,14 +132,14 @@ Flashing can be done according to the method supported by chipset SDK.
   - options
     - clean : clean previous build outputs
       ```sh
-      # ./build.sh {chip_name} {app_name} {options}
-      $ ./build.sh esp8266 st_switch clean
+      # ./build.sh {app_path} {options}
+      $ ./build.sh apps/esp32/switch_example clean
       ```
     - flash : download executable binaries to the device
     - monitor : monitor the serial output of device. this option can be used with flash option.
       ```sh
-      # ./build.sh {chip_name} {app_name} {options}
-      $ ./build.sh esp8266 st_switch flash monitor
+      # ./build.sh {app_path} {options}
+      $ ./build.sh apps/esp32/switch_example flash monitor
       ```
 
 - Example for RTL8195
@@ -127,6 +148,14 @@ Flashing can be done according to the method supported by chipset SDK.
   - Connect Ameba RTL8195 to Windows PC, you can find removable disk named MBED.
   - Just copy `ram_all.bin` in `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
   - After copy successfully, please reset Ameba RTL8195 target and monitor
+
+- Example for EMW3166
+
+  In order to flash the MXCHIP emw3166 chipset binary, you have to proceed steps below at Windows PC, with a terminal support Ymodem transmission.
+  - Connect user uart(PB7-tx, PB6-rx) of emw3166 to Windows PC with a USB-TTL convertor, and connect USB uart for power.
+  - Create serial session with flashing config (Baud rate 9600) to connect user uart port, then hold 'BOOT' and press 'RESET' to enable flashing
+  - Tansfer binary file in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` with Ymodem on terminal
+  - After sending successfully, press 'RESET' on MiCOKit-3166 target and monitor with USB uart
 
 ## License
 
