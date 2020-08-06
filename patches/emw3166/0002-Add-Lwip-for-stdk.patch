@@ -1,0 +1,139 @@
+From b2e4031777d58c6181faccaf44b77fa6e36a4876 Mon Sep 17 00:00:00 2001
+From: "baojun.luo" <baojun.luo@samsung.com>
+Date: Wed, 15 Jan 2020 19:23:58 +0900
+Subject: [PATCH] Add Lwip for stdk
+
+Signed-off-by: baojun.luo <baojun.luo@samsung.com>
+Signed-off-by: qin.li <36225353+SRCN-LiQin@users.noreply.github.com>
+---
+ MiCO/net/LwIP/LwIP.mk                              |  1 +
+ MiCO/net/LwIP/mico/arch/cc.h                       |  2 +-
+ MiCO/net/LwIP/mico/lwipopts.h                      |  4 +--
+ .../LwIP/ver1.4.0.rc1/src/include/posix/netdb.h    | 33 +++++++++++++++++++++
+ .../ver1.4.0.rc1/src/include/posix/sys/socket.h    | 34 ++++++++++++++++++++++
+ 5 files changed, 71 insertions(+), 3 deletions(-)
+ create mode 100644 MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/netdb.h
+ create mode 100644 MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
+
+diff --git a/MiCO/net/LwIP/LwIP.mk b/MiCO/net/LwIP/LwIP.mk
+index c7c42a4..6c888dc 100644
+--- a/MiCO/net/LwIP/LwIP.mk
++++ b/MiCO/net/LwIP/LwIP.mk
+@@ -41,6 +41,7 @@ GLOBAL_DEFINES += $(NAME)_VERSION_REVISION=$(VERSION_REVISION)
+ 
+ LWIP_INCLUDES := ver$(VERSION) \
+                  ver$(VERSION)/src/include \
++                 ver$(VERSION)/src/include/posix \
+                  ver$(VERSION)/src/include/ipv4 \
+                  lwip_eth \
+                  mico
+diff --git a/MiCO/net/LwIP/mico/arch/cc.h b/MiCO/net/LwIP/mico/arch/cc.h
+index 887499c..d1a8ce0 100644
+--- a/MiCO/net/LwIP/mico/arch/cc.h
++++ b/MiCO/net/LwIP/mico/arch/cc.h
+@@ -36,7 +36,7 @@
+ #include <stdint.h>
+ #include <stddef.h>
+ #include <inttypes.h>
+-#include "../../../mico/cpu.h"
++#include "cpu.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/MiCO/net/LwIP/mico/lwipopts.h b/MiCO/net/LwIP/mico/lwipopts.h
+index cd957ee..20c7a4d 100644
+--- a/MiCO/net/LwIP/mico/lwipopts.h
++++ b/MiCO/net/LwIP/mico/lwipopts.h
+@@ -145,8 +145,8 @@ extern "C" {
+  * designed to accomodate single full size TCP frame in one pbuf, including
+  * TCP_MSS, IP header, and link header.
+  */
+-#define PBUF_POOL_BUFSIZE              (LWIP_MEM_ALIGN_SIZE(MICO_LINK_MTU) + LWIP_MEM_ALIGN_SIZE(sizeof(struct pbuf)) + 1)
+-
++//#define PBUF_POOL_BUFSIZE              (LWIP_MEM_ALIGN_SIZE(MICO_LINK_MTU) + LWIP_MEM_ALIGN_SIZE(sizeof(struct pbuf)) + 1)
++#define PBUF_POOL_BUFSIZE	1560
+ 
+ /**
+  * TCP_MSS: TCP Maximum segment size. (default is 536, a conservative default,
+diff --git a/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/netdb.h b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/netdb.h
+new file mode 100644
+index 0000000..12d4c7f
+--- /dev/null
++++ b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/netdb.h
+@@ -0,0 +1,33 @@
++/**
++ * @file
++ * This file is a posix wrapper for lwip/netdb.h.
++ */
++
++/*
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ *    this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ *    this list of conditions and the following disclaimer in the documentation
++ *    and/or other materials provided with the distribution.
++ * 3. The name of the author may not be used to endorse or promote products
++ *    derived from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
++ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
++ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
++ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
++ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
++ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
++ * OF SUCH DAMAGE.
++ *
++ * This file is part of the lwIP TCP/IP stack.
++ *
++ */
++
++#include "lwip/netdb.h"
+diff --git a/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
+new file mode 100644
+index 0000000..9482c16
+--- /dev/null
++++ b/MiCO/net/LwIP/ver1.4.0.rc1/src/include/posix/sys/socket.h
+@@ -0,0 +1,34 @@
++/**
++ * @file
++ * This file is a posix wrapper for lwip/sockets.h.
++ */
++
++/*
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ *    this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ *    this list of conditions and the following disclaimer in the documentation
++ *    and/or other materials provided with the distribution.
++ * 3. The name of the author may not be used to endorse or promote products
++ *    derived from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
++ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
++ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
++ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
++ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
++ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
++ * OF SUCH DAMAGE.
++ *
++ * This file is part of the lwIP TCP/IP stack.
++ *
++ */
++
++#include "mico_socket.h"
++#include "mico_common.h"
+-- 
+2.7.4
+

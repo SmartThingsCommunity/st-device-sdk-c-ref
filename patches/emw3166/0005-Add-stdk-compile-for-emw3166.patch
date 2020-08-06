@@ -1,0 +1,321 @@
+From 8f32a00971818f46ce21e088c281ab01fcca2c52 Mon Sep 17 00:00:00 2001
+From: "baojun.luo" <baojun.luo@samsung.com>
+Date: Wed, 15 Jan 2020 19:16:52 +0900
+Subject: [PATCH] Add stdk compile for emw3166
+
+Signed-off-by: baojun.luo <baojun.luo@samsung.com>
+Signed-off-by: qin.li <qin.li@samsung.com>
+---
+ MiCO/MiCO.mk                                      |  6 ++-
+ MiCO/iot_main.c                                   | 23 +++++++++
+ MiCO/mico_config.h                                | 16 ++++++
+ MiCO/system/system.mk                             |  2 +-
+ makefiles/config.mk                               | 60 +++++++++++++++++++++++
+ makefiles/mico_target_config.mk                   | 44 ++++++++++++++---
+ makefiles/micoder_host_cmd.mk                     |  2 +-
+ platform/MCU/STM32F4xx/peripherals/platform_rng.c | 16 +++---
+ 8 files changed, 153 insertions(+), 16 deletions(-)
+ create mode 100644 MiCO/iot_main.c
+ create mode 100644 MiCO/mico_config.h
+ create mode 100644 makefiles/config.mk
+ mode change 100755 => 100644 makefiles/mico_target_config.mk
+
+diff --git a/MiCO/MiCO.mk b/MiCO/MiCO.mk
+index 28c4f83..877499a 100644
+--- a/MiCO/MiCO.mk
++++ b/MiCO/MiCO.mk
+@@ -17,7 +17,7 @@ ifneq ($(ALIOS_SUPPORT),y)
+ $(NAME)_COMPONENTS += MiCO/core
+ endif
+ 
+-$(NAME)_SOURCES += mico_main.c core/mico_config.c
++$(NAME)_SOURCES += mico_main.c core/mico_config.c iot_main.c
+ 
+ ifneq ($(filter $(subst ., ,$(COMPONENTS)),mocOS mocIP),)
+ $(NAME)_SOURCES += moc_main.c
+@@ -25,7 +25,9 @@ endif
+ 
+ $(NAME)_COMPONENTS += MiCO/security \
+                       MiCO/system \
+-                      drivers/keypad/gpio_button
++                      drivers/keypad/gpio_button \
++                      filesystem/FatFs \
++                      protocols/SNTP
+                       
+ $(NAME)_COMPONENTS += utilities
+ $(NAME)_COMPONENTS += net/mbedtls
+diff --git a/MiCO/iot_main.c b/MiCO/iot_main.c
+new file mode 100644
+index 0000000..e18a038
+--- /dev/null
++++ b/MiCO/iot_main.c
+@@ -0,0 +1,23 @@
++#include <stdio.h>
++#include "iot_debug.h"
++#include <sys/times.h>
++#include <task.h>
++
++extern void app_main(void);
++
++clock_t _times(struct tms* tms)
++{
++	return (clock_t)-1;
++}
++
++static void user_init_entry(void *arg)
++{
++	IOT_INFO("user_init_entry...");
++	app_main();
++	vTaskDelete(NULL);
++}
++
++int main(void)
++{
++	xTaskCreate(user_init_entry, "user_init_entry", 8192, NULL, 10, NULL);
++}
+diff --git a/MiCO/mico_config.h b/MiCO/mico_config.h
+new file mode 100644
+index 0000000..071034f
+--- /dev/null
++++ b/MiCO/mico_config.h
+@@ -0,0 +1,16 @@
++/**
++******************************************************************************
++* @file    mico_config.h
++* @author  William Xu
++* @version V1.0.0
++* @date    08-Aug-2018
++* @brief   This file provide application options diff to default.
++******************************************************************************
++*/
++
++#ifndef __MICO_CONFIG_H
++#define __MICO_CONFIG_H
++
++
++
++#endif
+diff --git a/MiCO/system/system.mk b/MiCO/system/system.mk
+index 25755f8..b837867 100644
+--- a/MiCO/system/system.mk
++++ b/MiCO/system/system.mk
+@@ -20,7 +20,7 @@ $(NAME)_SOURCES := mico_system_init.c \
+                    mico_station_monitor.c \
+                    system_misc.c 
+ 
+-$(NAME)_SOURCES  += command_console/mico_cli.c
++#$(NAME)_SOURCES  += command_console/mico_cli.c
+ $(NAME)_INCLUDES += command_console
+ 
+ $(NAME)_SOURCES += config_server/config_server_menu.c \
+diff --git a/makefiles/config.mk b/makefiles/config.mk
+new file mode 100644
+index 0000000..13011a2
+--- /dev/null
++++ b/makefiles/config.mk
+@@ -0,0 +1,60 @@
++########################################
++# Config
++########################################
++
++#/* For STDK */
++CONFIG_STDK_IOT_CORE=y
++CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP=y
++CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
++CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3166=y
++CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
++CONFIG_SAMSUNG_BUILD_ENG=y
++CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG=y
++
++ifeq ($(CONFIG_STDK_IOT_CORE),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_USE_MBEDTLS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_USE_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_NET_MBEDTLS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_NET_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3166),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3166
++endif
++
++ifeq ($(CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP),y)
++STDK_CFLAGS += -DCONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++endif
++
++ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
++STDK_CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG), y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG
++endif
++
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519
++CONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE=y
+diff --git a/makefiles/mico_target_config.mk b/makefiles/mico_target_config.mk
+old mode 100755
+new mode 100644
+index 0e19c62..7d6e1c9
+--- a/makefiles/mico_target_config.mk
++++ b/makefiles/mico_target_config.mk
+@@ -172,7 +172,7 @@ IMAGE_TYPE          := $(if $(filter $(IMAGE_TYPE_LIST),$(COMPONENTS)),$(firstwo
+ RUN_LINT            := $(filter lint,$(COMPONENTS))
+ MOC                 := $(filter $(MOC_LIST),$(COMPONENTS))
+ ALIOS               := $(filter aos,$(COMPONENTS))
+-COMPONENTS          := $(filter-out $(MOC_LIST) $(BUS_LIST) $(BUILD_TYPE_LIST) $(IMAGE_TYPE_LIST) $(TOTAL_BUILD) aos, $(COMPONENTS))
++COMPONENTS          := $(filter-out $(PROJECT_TITLE) $(MOC_LIST) $(BUS_LIST) $(BUILD_TYPE_LIST) $(IMAGE_TYPE_LIST) $(TOTAL_BUILD) aos, $(COMPONENTS))
+ 
+ # Set debug/release specific options
+ ifeq ($(BUILD_TYPE),release)
+@@ -258,7 +258,7 @@ endif
+ NET			:=$(notdir $(NET_FULL))
+ RTOS        :=$(notdir $(RTOS_FULL))
+ TLS         :=$(notdir $(TLS_FULL))
+-APP         :=$(notdir $(APP_FULL))
++APP         :=$(IOT_APPS_PATH)/$(PROJECT_TITLE)
+ 
+ # Define default RTOS and TCPIP stack
+ ifndef RTOS
+@@ -332,7 +332,7 @@ CURDIR :=
+ $(eval $(call PROCESS_COMPONENT, $(COMPONENTS)))
+ 
+ # Add some default values
+-MiCO_SDK_INCLUDES += -I$(MICO_OS_PATH)/include $(addprefix -I,$(APP_FULL)) -I.
++MiCO_SDK_INCLUDES += -I$(MICO_OS_PATH)/include $(addprefix -I,$(IOT_APPS_PATH)/$(PROJECT_TITLE)) -I.
+ MiCO_SDK_DEFINES += $(EXTERNAL_MiCO_GLOBAL_DEFINES)
+ 
+ ALL_RESOURCES := $(sort $(foreach comp,$(PROCESSED_COMPONENTS),$($(comp)_RESOURCES_EXPANDED)))
+@@ -340,7 +340,7 @@ ALL_RESOURCES := $(sort $(foreach comp,$(PROCESSED_COMPONENTS),$($(comp)_RESOURC
+ # Make sure the user has specified a component from each category
+ $(if $(RTOS),,$(error No RTOS specified. Options are: $(notdir $(wildcard MiCO/RTOS/*))))
+ $(if $(PLATFORM),,$(error No platform specified. Options are: $(notdir $(wildcard board/*))))
+-$(if $(APP),,$(error No application specified.))
++#$(if $(APP),,$(error No application specified.))
+ $(if $(BUS),,$(error No bus specified. Options are: SDIO SPI))
+ 
+ # Make sure a WLAN_CHIP, WLAN_CHIP_REVISION, WLAN_CHIP_FAMILY and HOST_OPENOCD have been defined
+@@ -386,13 +386,45 @@ MiCO_SDK_UNIT_TEST_SOURCES  +=$(foreach comp,$(PROCESSED_COMPONENTS), $(addprefi
+ ifeq ($(ADD_UNIT_TESTS_TO_LINK_FILES),1)
+ MiCO_SDK_LINK_FILES         += $(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o, $(foreach comp,$(PROCESSED_COMPONENTS), $(addprefix $$(OUTPUT_DIR)/Modules/$(call GET_BARE_LOCATION,$(comp)),$($(comp)_UNIT_TEST_SOURCES))) )))
+ endif
+-
+-
++##############################################################################
++#add iot_core
++include $(MICO_OS_PATH)/makefiles/config.mk
++MiCO_SDK_CFLAGS             +=$(STDK_CFLAGS)
++ST_IOT_CORE_DIR = $(COMPONENT_PATH)
++include $(ST_IOT_CORE_DIR)/component.mk
++INCLUDES += $(CPPFLAGS)
++INCLUDES += -I$(PROJECT_PATH)
++IOT_CORE_EXCLUDE_C += $(ST_IOT_CORE_DIR)/easysetup/http/lwip_httpd/fsdata_custom.c
++IOT_CORE_C += $(foreach srcdir,$(COMPONENT_SRCDIRS),$(wildcard $(ST_IOT_CORE_DIR)/$(srcdir)/*.c))
++IOT_CORE_SOURCES += $(filter-out $(IOT_CORE_EXCLUDE_C), $(IOT_CORE_C))
++IOT_CORE_INCLUDES += $(foreach inc,$(COMPONENT_ADD_INCLUDEDIRS), $(ST_IOT_CORE_DIR)/$(inc))
++
++#add stdk app
++IOT_APP_SOURCES	+= $(wildcard $(APP)/main/*.c)
++IOT_APP_INCLUDES += $(APP)
++IOT_APP_INCLUDES += $(IOT_APPS_PATH)/$(PROJECT_TITLE)/main
++
++$(eval PROCESSED_COMPONENTS += IOT_APP)
++$(eval PROCESSED_COMPONENTS += IOT_CORE)
++
++MiCO_SDK_INCLUDES           +=$(addprefix -I,$(IOT_CORE_INCLUDES))
++
++MiCO_SDK_LINK_FILES += $(PROJECT_PATH)/main/onboarding_config.json.o
++MiCO_SDK_LINK_FILES += $(PROJECT_PATH)/main/device_info.json.o
++
++TMP_ROOT_CA_BACKUP_FILE=./iot_root_ca.c.bak
++###############################################################################
+ # Build target, generate config file
+ .PHONY: $(MAKECMDGOALS)
+ $(MAKECMDGOALS): $(CONFIG_FILE) $(TOOLCHAIN_HOOK_TARGETS)
+ 
+ $(CONFIG_FILE): $(MiCO_SDK_MAKEFILES) | $(CONFIG_FILE_DIR)
++	$(QUIET)$(CP) $(PROJECT_PATH)/main/onboarding_config.json ./
++	$(QUIET)$(CP) $(PROJECT_PATH)/main/device_info.json ./
++	$(QUIET)$(OBJCOPY) -I binary -O elf32-littlearm -B arm onboarding_config.json $(PROJECT_PATH)/main/onboarding_config.json.o
++	$(QUIET)$(OBJCOPY) -I binary -O elf32-littlearm -B arm device_info.json $(PROJECT_PATH)/main/device_info.json.o
++	$(QUIET)$(RM) ./onboarding_config.json
++	$(QUIET)$(RM) ./device_info.json
+ 	$(QUIET)$(call WRITE_FILE_CREATE, $(CONFIG_FILE) ,MiCO_SDK_MAKEFILES           		+= $(MiCO_SDK_MAKEFILES))
+ 	$(QUIET)$(call WRITE_FILE_APPEND, $(CONFIG_FILE) ,TOOLCHAIN_NAME            		:= $(TOOLCHAIN_NAME))
+ 	$(QUIET)$(call WRITE_FILE_APPEND, $(CONFIG_FILE) ,MiCO_SDK_LDFLAGS             		+= $(strip $(MiCO_SDK_LDFLAGS)))
+diff --git a/makefiles/micoder_host_cmd.mk b/makefiles/micoder_host_cmd.mk
+index ce0f50c..e0983de 100644
+--- a/makefiles/micoder_host_cmd.mk
++++ b/makefiles/micoder_host_cmd.mk
+@@ -11,7 +11,7 @@ TOOLS_ROOT ?= $(SOURCE_ROOT)mico-os/MiCoder
+ 
+ OPENOCD_PATH      := $(TOOLS_ROOT)/OpenOCD/
+ OPENOCD_CFG_PATH  := $(MAKEFILES_PATH)/OpenOCD/
+-PATH :=
++PATH := /bin:/usr/bin:$PATH
+ 
+ JTAG         ?= jlink_swd
+ 
+diff --git a/platform/MCU/STM32F4xx/peripherals/platform_rng.c b/platform/MCU/STM32F4xx/peripherals/platform_rng.c
+index f8d59c5..ddc707e 100644
+--- a/platform/MCU/STM32F4xx/peripherals/platform_rng.c
++++ b/platform/MCU/STM32F4xx/peripherals/platform_rng.c
+@@ -47,7 +47,6 @@
+ OSStatus platform_random_number_read( void *inBuffer, int inByteCount )
+ {
+     // PLATFORM_TO_DO
+-     // PLATFORM_TO_DO
+     int idx;
+     uint32_t *pWord = inBuffer;
+     uint32_t tempRDM;
+@@ -59,16 +58,21 @@ OSStatus platform_random_number_read( void *inBuffer, int inByteCount )
+     remainByteCount = inByteCount%4;
+     pByte = (uint8_t *)pWord+inWordCount*4;
+ 
++    RNG_DeInit();
++    RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE);
++    RNG_Cmd(ENABLE);
++
+     for(idx = 0; idx<inWordCount; idx++, pWord++){
+-        srand(mico_rtos_get_time());
+-        *pWord = rand();
++        while(RNG_GetFlagStatus(RNG_FLAG_DRDY)!=SET);
++        *pWord = RNG_GetRandomNumber();
+     }
+ 
+     if(remainByteCount){
+-        srand(mico_rtos_get_time());
+-        tempRDM = rand();
++        while(RNG_GetFlagStatus(RNG_FLAG_DRDY)!=SET);
++        tempRDM = RNG_GetRandomNumber();
+         memcpy(pByte, &tempRDM, (size_t)remainByteCount);
+     }
+-    
++
++    RNG_DeInit();
+     return kNoErr;
+ }
+-- 
+2.7.4
+

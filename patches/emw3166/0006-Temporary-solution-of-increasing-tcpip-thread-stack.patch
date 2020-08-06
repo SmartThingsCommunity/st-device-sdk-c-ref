@@ -1,0 +1,53 @@
+From 4e0ff4f6dba176ecdaad3dfccbbf352822226857 Mon Sep 17 00:00:00 2001
+From: "qin.li" <qin.li@samsung.com>
+Date: Wed, 26 Feb 2020 10:25:07 +0800
+Subject: [PATCH] Temporary solution of increasing tcpip thread stack size
+
+---
+ MiCO/RTOS/FreeRTOS/ver9.0.0/Source/tasks.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/MiCO/RTOS/FreeRTOS/ver9.0.0/Source/tasks.c b/MiCO/RTOS/FreeRTOS/ver9.0.0/Source/tasks.c
+index af79227..6dbfa50 100644
+--- a/MiCO/RTOS/FreeRTOS/ver9.0.0/Source/tasks.c
++++ b/MiCO/RTOS/FreeRTOS/ver9.0.0/Source/tasks.c
+@@ -684,6 +684,9 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
+ 	{
+ 	TCB_t *pxNewTCB;
+ 	BaseType_t xReturn;
++	size_t uStackDepth;
++
++	uStackDepth = (strcmp(pcName, "tcpip_thread") == 0)? 2048 : usStackDepth;
+ 
+ 		/* If the stack grows down then allocate the stack then the TCB so the stack
+ 		does not grow into the TCB.  Likewise if the stack grows up then allocate
+@@ -700,7 +703,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
+ 				/* Allocate space for the stack used by the task being created.
+ 				The base of the stack memory stored in the TCB so the task can
+ 				be deleted later if required. */
+-				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
++				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) uStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+ 
+ 				if( pxNewTCB->pxStack == NULL )
+ 				{
+@@ -715,7 +718,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
+ 		StackType_t *pxStack;
+ 
+ 			/* Allocate space for the stack used by the task being created. */
+-			pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
++			pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) uStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+ 
+ 			if( pxStack != NULL )
+ 			{
+@@ -751,7 +754,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
+ 			}
+ 			#endif /* configSUPPORT_STATIC_ALLOCATION */
+ 
+-			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
++			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) uStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+ 			prvAddNewTaskToReadyList( pxNewTCB );
+ 			xReturn = pdPASS;
+ 		}
+-- 
+2.7.4
+

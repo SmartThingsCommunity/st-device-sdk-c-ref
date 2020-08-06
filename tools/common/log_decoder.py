@@ -5,6 +5,7 @@ import os
 import sys
 import base64
 import time
+import uuid
 
 default_log_file = "all_log_dump"
 tz_offset_sec = int(time.mktime(time.localtime()) - time.mktime(time.gmtime()))
@@ -51,14 +52,18 @@ class dumpState_info:
     stdk_version_code = 0
     clock_time = 0
     sequence_number = 0
+    dip_version = 0
     os_name = ""
     os_version = ""
     bsp_name = ""
     bsp_version = ""
+    dip_id = ""
+    device_id = "********"
     def __init__(self, dumpState_line):
         self.stdk_version_code = int.from_bytes(dumpState_line[0:4], endian)
         self.clock_time = int.from_bytes(dumpState_line[4:8], endian)
         self.sequence_number = int.from_bytes(dumpState_line[8:12], endian)
+        self.dip_version = int.from_bytes(dumpState_line[12:16], endian)
         self.os_name = dumpState_line[16:32].decode().replace("\x00", "")
         self.os_version = dumpState_line[32:48].decode().replace("\x00", "")
         self.bsp_name = dumpState_line[48:64].decode().replace("\x00", "")
@@ -66,6 +71,8 @@ class dumpState_info:
         self.firmware_version = dumpState_line[80:96].decode().replace("\x00", "")
         self.model_number = dumpState_line[96:112].decode().replace("\x00", "")
         self.manufacturer_name = dumpState_line[112:128].decode().replace("\x00", "")
+        self.dip_id = dumpState_line[128:144]
+        self.device_id = dumpState_line[144:152].decode().replace("\x00", "*")
     def printInfo(self):
         output = ""
         output += "stdk_version_code : " + hex(self.stdk_version_code) + "\n"
@@ -78,6 +85,8 @@ class dumpState_info:
         output += "firmware_version : " + self.firmware_version + "\n"
         output += "model_number : " + self.model_number + "\n"
         output += "manufacturer_name : " + self.manufacturer_name + "\n"
+        output += "DIP : " + str(uuid.UUID(bytes=self.dip_id)) + " (Ver:" + str(self.dip_version >> 16) + "." + str(self.dip_version & 0xffff) + ")\n"
+        output += "DeviceID : " + self.device_id + "-****-****-****-************\n"
         print(output)
         output_file.write(output)
 

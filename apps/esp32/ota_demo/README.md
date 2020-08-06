@@ -5,15 +5,24 @@ This document describes how the **Firmware Update** capability could be used at 
 
 This OTA demo device application is part of [OTA demo](../../../doc/ota_demo.md) system which includes all necessary component for demonstration.
 
-Because this application is based on _st_switch_ example. you could find more detailed information which isn't described here from _st_switch_'s [README.md](../st_switch/README.md).
+Because this application is based on _switch_example_ . you could find more detailed information which isn't described here from _st_switch_'s [README.md](../switch_example/README.md).
 ***
 
 Change configuration
 -------------------
-Open a new terminal and run command to enable HTTPS feature. (-> component config -> ESP HTTP client -> [*]Enable https)
-```sh
-$ [st-device-sdk-c-ref path]/build.sh esp32 ota_demo menuconfig  
+These compile options will enable HTTPS and MBEDTLS feature to connect OTA server.   
+`stdkconfig`
+```c
+// Enable option for HTTPS
+# ESP HTTP client
+CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS=y
+
+// Enable option for MBEDTLS
+# Network
+CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
 ```
+
+***
 
 Import certificate
 -------------------

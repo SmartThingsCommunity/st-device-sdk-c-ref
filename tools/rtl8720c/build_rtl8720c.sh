@@ -1,14 +1,14 @@
 #!/bin/bash
 
-export CHIP_NAME=${1}
-PROJECT="${PWD}/bsp/${CHIP_NAME}/project/realtek_amebaz2_v0_example"
+export BSP_NAME=${1}
+PROJECT="${PWD}/bsp/${BSP_NAME}/project/realtek_amebaz2_v0_example"
 export PROJECT_TITLE=${2}
 
 export STDK_PATH="${PWD}"
 export CORE_PATH="${PWD}/iot-core"
 
-IOT_APPS_PATH="${PWD}/apps/${CHIP_NAME}"
-IOT_OUTPUT_PATH="${PWD}/output/${CHIP_NAME}"
+IOT_APPS_PATH="${PWD}/apps/${BSP_NAME}"
+IOT_OUTPUT_PATH="${PWD}/output/${BSP_NAME}"
 OUTPUT_BUILD=y
 export COMPONENT_PATH="${PWD}/iot-core/src"
 export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
@@ -16,8 +16,8 @@ export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 print_usage () {
 	echo "    Usage: ./build.sh rtl8720c APP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
-	echo "    ex) ./build.sh rtl8720c smart_switch"
-	echo "    ex) ./build.sh rtl8720c st_switch"
+	echo "    ex) ./build.sh rtl8720c switch_example"
+	echo "    ex) ./build.sh rtl8720c light_example"
 	echo
 }
 
