@@ -1,4 +1,4 @@
-From eab7b7f6761d477157bfc57c7d2301fb4f2a40c6 Mon Sep 17 00:00:00 2001
+From f006ec3e14d3a9418adbc85910b9326dccd13916 Mon Sep 17 00:00:00 2001
 From: Kai Lv <kai.lv@samsung.com>
 Date: Tue, 15 Oct 2019 16:00:03 +0800
 Subject: [PATCH] Update ameba1(rtl8195) configuration
@@ -7,16 +7,16 @@ Change-Id: Idc8679f4bf8383e179919046a9b2f1f1d47633be
 Signed-off-by: Kai Lv <kai.lv@samsung.com>
 ---
  .../GCC-RELEASE/application.mk                     | 330 +++++++++++++--------
- .../GCC-RELEASE/config.mk                          |  43 +++
+ .../GCC-RELEASE/config.mk                          |  67 +++++
  .../GCC-RELEASE/rlx8195A-symbol-v02-img2.ld        |   2 +-
  .../inc/FreeRTOSConfig.h                           |   4 +-
  .../realtek_ameba1_va0_example/inc/platform_opts.h |   6 +-
  project/realtek_ameba1_va0_example/src/main.c      |  31 +-
- 6 files changed, 280 insertions(+), 136 deletions(-)
+ 6 files changed, 304 insertions(+), 136 deletions(-)
  create mode 100644 project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
 
 diff --git a/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk b/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk
-index 3245393..1dd0f20 100644
+index 3245393..23c8979 100644
 --- a/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk
 +++ b/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk
 @@ -1,3 +1,8 @@
@@ -454,10 +454,10 @@ index 3245393..1dd0f20 100644
  	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 diff --git a/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk b/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
 new file mode 100644
-index 0000000..c817b33
+index 0000000..d5e78f1
 --- /dev/null
 +++ b/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,67 @@
 +########################################
 +# Config
 +########################################
@@ -465,41 +465,65 @@ index 0000000..c817b33
 +#/* For STDK */
 +CONFIG_STDK_IOT_CORE=y
 +CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
 +CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP=y
 +CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
 +CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195=y
 +CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
++CONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519=y
++
++CONFIG_SAMSUNG_BUILD_ENG=y
++CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG=
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE),y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE
-+endif
-+
-+ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
-+CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
 +endif
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE_USE_MBEDTLS),y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_USE_MBEDTLS
 +endif
 +
-+ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195),y)
-+CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195
++ifeq ($(CONFIG_STDK_IOT_CORE_NET_MBEDTLS),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_NET_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
 +endif
 +
 +ifeq ($(CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP),y)
 +CFLAGS += -DCONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP
 +endif
 +
++ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519),y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519
++endif
++
 +ifeq ($(CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION),y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION
 +endif
 +
++ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
++CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
++endif
 +
-+
-+
-+
-+ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
-+CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG), y)
++CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG
 +endif
 diff --git a/project/realtek_ameba1_va0_example/GCC-RELEASE/rlx8195A-symbol-v02-img2.ld b/project/realtek_ameba1_va0_example/GCC-RELEASE/rlx8195A-symbol-v02-img2.ld
 index cd47a4a..ca2b766 100644
