@@ -7,7 +7,7 @@ idf_component_register(SRCS "main.c"
                                 "onboarding_config.json"
                     )
 
-set(stdk_config ${CMAKE_CURRENT_SOURCE_DIR}/../stdk_config.cmake)
+set(STDK_IOT_CORE_USE_DEFINED_CONFIG "y")
 
 set(STDK_LINK_LIBRARY
         __idf_libsodium
