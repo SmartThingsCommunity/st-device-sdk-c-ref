@@ -8,12 +8,12 @@ Subject: [PATCH] esp32: mbedtls: Add MBEDTLS_DEBUG_LEVEl config for log
  1 file changed, 8 insertions(+)
 
 diff --git a/components/mbedtls/Kconfig b/components/mbedtls/Kconfig
-index 4ba0180..1d9f93d 100644
+index 681e3a7..c5f78ef 100644
 --- a/components/mbedtls/Kconfig
 +++ b/components/mbedtls/Kconfig
-@@ -92,6 +92,14 @@ menu "mbedTLS"
-             at runtime in order to enable mbedTLS debug output via the ESP
-             log mechanism.
+@@ -105,6 +105,14 @@ menu "mbedTLS"
+             Enable the CMAC (Cipher-based Message Authentication Code) mode for
+             block ciphers.
  
 +    config MBEDTLS_DEBUG_LEVEL
 +        int "Mbedtls debugging level"
