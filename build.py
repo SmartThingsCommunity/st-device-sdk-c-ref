@@ -27,7 +27,7 @@ def print_usage():
 
 def find_build_script(bsp_name):
     if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".py")):
-        return os.path.join("tools", bsp_name, "build_"+bsp_name+".py")
+        return "python " + os.path.join("tools", bsp_name, "build_"+bsp_name+".py")
     if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")):
         return os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")
     print("Fail to find build script")

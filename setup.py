@@ -24,7 +24,7 @@ def print_usage():
 
 def find_setup_script(bsp_name):
     if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")):
-        return os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")
+        return "python " + os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")
     if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")):
         return os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")
     print("Fail to find setup script")
@@ -33,14 +33,12 @@ def find_setup_script(bsp_name):
 
 def update_submodule(path):
     cwd = os.getcwd()
-    ret_val = os.system("git submodule status " + path + " &> /dev/null")
-    if not ret_val:
-        os.system("git submodule sync " + path)
-        os.system("git submodule init " + path)
-        os.system("git submodule update " + path)
-        os.chdir(path)
-        os.system("git reset --hard HEAD")
-        os.chdir(cwd)
+    os.system("git submodule sync " + path)
+    os.system("git submodule init " + path)
+    os.system("git submodule update " + path)
+    os.chdir(path)
+    os.system("git reset --hard HEAD")
+    os.chdir(cwd)
 
 update_submodule(STDK_CORE_PATH)
 

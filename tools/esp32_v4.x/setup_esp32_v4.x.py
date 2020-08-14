@@ -12,17 +12,15 @@ PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", BSP_NAME)
 
 CONFIG_PATH = os.path.join(BSP_PATH, "components", "iot-core_config")
 
-ret_val = os.system("git submodule status " + BSP_PATH + " &> /dev/null")
-if not ret_val:
-	os.chdir(BSP_PATH)
-	os.system("git am " + os.path.join(PATCH_PATH, "*.patch"))
-	if not os.path.exists(CONFIG_PATH):
-		os.makedirs(CONFIG_PATH)
 
-	cmake_file = open(os.path.join(CONFIG_PATH, "CMakeLists.txt"), "w")
-	cmake_file.write("idf_component_register()")
-	cmake_file.close()
-	exit(0)
+os.chdir(BSP_PATH)
+os.system("git am " + os.path.join(PATCH_PATH, "*.patch"))
+if not os.path.exists(CONFIG_PATH):
+	os.makedirs(CONFIG_PATH)
+cmake_file = open(os.path.join(CONFIG_PATH, "CMakeLists.txt"), "w")
+cmake_file.write("idf_component_register()")
+cmake_file.close()
+'''
 elif platform.system() == "Windows":
 	print("Failed to apply patches")
 	exit(1)
@@ -37,7 +35,7 @@ else:
 			os.system("patch -f -p1 < " + os.path.join(PATCH_PATH, patch_file_name))
 		print("Check source code in " + BSP_PATH)
 		exit(0)
-
+'''
 os.chdir(BSP_PATH)
 if platform.system() == "Windows":
 	os.system("install.bat")

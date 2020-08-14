@@ -41,6 +41,6 @@ if platform.system() == "Windows":
     export_cmd = "export.bat"
 else:
     export_cmd = ". ./export.sh"
-build_cmd = "python3 " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
+build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
 
 subprocess.call(export_cmd + " && cd " + APP_PATH + " && "+ build_cmd, shell=True)
