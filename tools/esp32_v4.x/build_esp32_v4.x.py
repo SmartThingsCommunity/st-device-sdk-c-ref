@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import platform
 import sys
@@ -19,8 +19,6 @@ STDK_PATH = os.environ["STDK_REF_PATH"]
 CORE_PATH = os.environ["STDK_CORE_PATH"]
 
 os.environ["IDF_PATH"] = BSP_PATH
-
-print("PATH : " + os.environ["PATH"])
 
 if not (os.path.exists(BSP_PATH) and os.path.exists(APP_PATH)):
     print("Fail to find path.")
