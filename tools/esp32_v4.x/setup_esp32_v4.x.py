@@ -20,24 +20,9 @@ if not os.path.exists(CONFIG_PATH):
 cmake_file = open(os.path.join(CONFIG_PATH, "CMakeLists.txt"), "w")
 cmake_file.write("idf_component_register()")
 cmake_file.close()
-'''
-elif platform.system() == "Windows":
-	print("Failed to apply patches")
-	exit(1)
-else:
-	if os.listdir(BSP_PATH) == []:
-		print("Failed to find source code in " + BSP_PATH)
-		exit(1)
-	else:
-		os.chdir(BSP_PATH)
-		patch_files = os.listdir(PATCH_PATH)
-		for patch_file_name in patch_files:
-			os.system("patch -f -p1 < " + os.path.join(PATCH_PATH, patch_file_name))
-		print("Check source code in " + BSP_PATH)
-		exit(0)
-'''
+
 os.chdir(BSP_PATH)
-if platform.system() == "Windows":
-	os.system("install.bat")
-else:
+if "SHELL" in os.environ:
 	os.system("./install.sh")
+else:
+	os.system("install.bat")

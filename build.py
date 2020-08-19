@@ -17,19 +17,20 @@ os.environ["STDK_CORE_PATH"] = STDK_CORE_PATH
 
 def print_usage():
     print("")
-    print("Usage: ./build.py apps/[BSP_NAME]/[APP_NAME]")
+    print("Usage: python build.py apps/[BSP_NAME]/[APP_NAME]")
     print("                 or")
-    print("       ./build.py [BSP_NAME] [APP_NAME]")
+    print("       python build.py [BSP_NAME] [APP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) ./build.py apps/esp32_v4.x/switch_example")
-    print("  ex) ./build.py apps/esp32_v4.x/light_example")
+    print("  ex) python build.py apps/esp32_v4.x/switch_example")
+    print("  ex) python build.py esp32_v4.x light_example")
     print("")
 
 def find_build_script(bsp_name):
     if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".py")):
         return "python " + os.path.join("tools", bsp_name, "build_"+bsp_name+".py")
-    if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")):
-        return os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")
+    if "SHELL" in os.environ:
+        if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")):
+            return os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")
     print("Fail to find build script")
     print_usage()
     exit()

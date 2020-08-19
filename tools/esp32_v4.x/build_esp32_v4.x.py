@@ -23,9 +23,8 @@ os.environ["IDF_PATH"] = BSP_PATH
 print("PATH : " + os.environ["PATH"])
 
 if not (os.path.exists(BSP_PATH) and os.path.exists(APP_PATH)):
-  print("Fail to find path.")
-  exit(1)
-
+    print("Fail to find path.")
+    exit(1)
 
 shutil.copy(os.path.join(CORE_PATH, "src", "Kconfig"), os.path.join(BSP_PATH, "components", "iot-core_config"))
 
@@ -37,10 +36,11 @@ else:
     MAKE_OPTION = "build"
 
 os.chdir(BSP_PATH)
-if platform.system() == "Windows":
-    export_cmd = "export.bat"
-else:
+if "SHELL" in os.environ:
     export_cmd = ". ./export.sh"
+else:
+    export_cmd = "export.bat"
+
 build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
 
-subprocess.call(export_cmd + " && cd " + APP_PATH + " && "+ build_cmd, shell=True)
+subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)

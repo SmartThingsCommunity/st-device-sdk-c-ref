@@ -17,16 +17,17 @@ os.environ["STDK_CORE_PATH"] = STDK_CORE_PATH
 
 def print_usage():
     print("")
-    print("Usage: ./setup.py [BSP_NAME]")
+    print("Usage: python setup.py [BSP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) ./build.py esp32_v4.x")
+    print("  ex) python setup.py esp32_v4.x")
     print("")
 
 def find_setup_script(bsp_name):
     if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")):
         return "python " + os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")
-    if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")):
-        return os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")
+    if "SHELL" in os.environ:
+        if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")):
+            return os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")
     print("Fail to find setup script")
     print_usage()
     exit()
@@ -64,3 +65,9 @@ for args in EXTRA_ARGS:
 ret_val = os.system(setup_cmd)
 if ret_val:
     print_usage()
+else:
+    print("")
+    print("To use SmartThings Device SDK build script, run following command:")
+    print("")
+    print("    python build.py " + BSP_NAME + " [APP_NAME]")
+    print("")
