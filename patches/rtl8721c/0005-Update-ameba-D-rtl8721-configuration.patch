@@ -1,4 +1,4 @@
-From d896e91b9fcef974b9a47bb431c28a17428d722a Mon Sep 17 00:00:00 2001
+From d66add38168f5626f0626ccf3647655b9d7f2a35 Mon Sep 17 00:00:00 2001
 From: "baojun.luo" <baojun.luo@samsung.com>
 Date: Sat, 16 Nov 2019 00:37:03 +0900
 Subject: [PATCH] Update ameba-D rtl8721 configuration
@@ -10,7 +10,7 @@ Signed-off-by: Feng <feng.song@samsung.com>
  .../common/api/platform/platform_stdlib_rtl8721d.h |   2 +-
  .../project_hp/asdk/Makefile.include.gen           |  35 ++++-
  .../GCC-RELEASE/project_hp/asdk/code_analyze.py    |   0
- .../GCC-RELEASE/project_hp/asdk/config.mk          |  44 ++++++
+ .../GCC-RELEASE/project_hp/asdk/config.mk          |  67 +++++++++
  .../asdk/gnu_utility/image_tool/imagetool.sh       |   0
  .../GCC-RELEASE/project_hp/asdk/gnu_utility/pad.sh |   0
  .../project_hp/asdk/gnu_utility/prepend_header.sh  |   0
@@ -32,7 +32,7 @@ Signed-off-by: Feng <feng.song@samsung.com>
  .../project_lp/asdk/gnu_utility/prepend_header.sh  |   0
  .../project_lp/asdk/ld/rlx8721d_rom_symbol_acut.ld |   1 -
  .../realtek_amebaD_va0_example/src/src_hp/main.c   | 161 ++-------------------
- 25 files changed, 457 insertions(+), 173 deletions(-)
+ 25 files changed, 480 insertions(+), 173 deletions(-)
  mode change 100644 => 100755 project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/code_analyze.py
  create mode 100644 project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk
  mode change 100644 => 100755 project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/gnu_utility/image_tool/imagetool.sh
@@ -151,10 +151,10 @@ old mode 100644
 new mode 100755
 diff --git a/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk b/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk
 new file mode 100644
-index 0000000..21ad22d
+index 0000000..cf54b26
 --- /dev/null
 +++ b/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,67 @@
 +########################################
 +# Config
 +########################################
@@ -162,30 +162,50 @@ index 0000000..21ad22d
 +#/* For STDK */
 +CONFIG_STDK_IOT_CORE=y
 +CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
 +CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP=y
 +CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
 +CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8721C=y
 +CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
-+CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519=y
++
++CONFIG_SAMSUNG_BUILD_ENG=y
++CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG=
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE),y)
 +GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE
-+endif
-+
-+ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
-+GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
 +endif
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE_USE_MBEDTLS),y)
 +GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_USE_MBEDTLS
 +endif
 +
-+ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8721C),y)
-+GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8721C
++ifeq ($(CONFIG_STDK_IOT_CORE_NET_MBEDTLS),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_NET_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
 +endif
 +
 +ifeq ($(CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP),y)
 +GLOBAL_CFLAGS += -DCONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8721C),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8721C
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519),y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519
 +endif
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION),y)
@@ -194,10 +214,13 @@ index 0000000..21ad22d
 +
 +ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
 +GLOBAL_CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
 +endif
 +
-+ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS),y)
-+GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG), y)
++GLOBAL_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG
 +endif
 diff --git a/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/gnu_utility/image_tool/imagetool.sh b/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/gnu_utility/image_tool/imagetool.sh
 old mode 100644

@@ -1,4 +1,4 @@
-From 27e07cc04be8512073398646e68b8adbccdacccc Mon Sep 17 00:00:00 2001
+From b98c06e5bfe451a7d88347302d612e9da62f5b0c Mon Sep 17 00:00:00 2001
 From: Feng Song <56996751+hisongfeng@users.noreply.github.com>
 Date: Fri, 12 Jun 2020 18:27:58 +0900
 Subject: [PATCH] add-usr_config.mk-for-in-app-can-enable-disable-config
@@ -8,15 +8,15 @@ Subject: [PATCH] add-usr_config.mk-for-in-app-can-enable-disable-config
 
 Signed-off-by: feng.song <56996751+hisongfeng@users.noreply.github.com>
 ---
- component/common/api/platform/platform_stdlib_rtl8721d.h  | 8 ++++++++
- .../GCC-RELEASE/project_hp/asdk/config.mk                 | 2 ++
- 2 files changed, 10 insertions(+)
+ component/common/api/platform/platform_stdlib_rtl8721d.h | 16 ++++++++--------
+ .../GCC-RELEASE/project_hp/asdk/config.mk                |  2 ++
+ 2 files changed, 10 insertions(+), 8 deletions(-)
 
 diff --git a/component/common/api/platform/platform_stdlib_rtl8721d.h b/component/common/api/platform/platform_stdlib_rtl8721d.h
-index 40c75a5..bdcae00 100644
+index 40c75a5..79575ad 100644
 --- a/component/common/api/platform/platform_stdlib_rtl8721d.h
 +++ b/component/common/api/platform/platform_stdlib_rtl8721d.h
-@@ -87,6 +87,14 @@
+@@ -87,18 +87,18 @@
  	#define rand						Rand
  	#define srand				
  	
@@ -31,6 +31,18 @@ index 40c75a5..bdcae00 100644
  	//extern int _sscanf_patch(const char *buf, const char *fmt, ...);
  	//#define sscanf					_sscanf_patch
  	
+ 
+ #endif	// defined (__IARSTDLIB__)
+ 
+-extern void *pvPortMalloc( size_t xWantedSize );
+-extern void vPortFree( void *pv );
+-#define malloc                  pvPortMalloc
+-#define free                    vPortFree
+-#define realloc			pvPortReAlloc
+-#define calloc			rtw_calloc
+-
+-
+ #endif // PLATFORM_STDLIB_8721D_H
 diff --git a/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk b/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk
 index 21ad22d..eadb830 100644
 --- a/project/realtek_amebaD_va0_example/GCC-RELEASE/project_hp/asdk/config.mk
@@ -45,5 +57,5 @@ index 21ad22d..eadb830 100644
  CONFIG_STDK_IOT_CORE=y
  CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
 -- 
-2.17.1
+2.7.4
 
