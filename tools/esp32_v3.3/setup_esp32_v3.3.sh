@@ -6,6 +6,7 @@ git submodule status bsp/${BSP_NAME} &> /dev/null
 if [ "$?" == "0" ]; then
 	cd bsp/${BSP_NAME}
 	git am ../../patches/${BSP_NAME}/*.patch
+    git submodule update
 else
 	if [ "$(ls bsp/${BSP_NAME})" == "" ]; then
 		echo "Failed to find source code in bsp/${BSP_NAME}"
@@ -17,4 +18,3 @@ else
 	fi
 	echo "Check source code in bsp/${BSP_NAME}"
 fi
-
