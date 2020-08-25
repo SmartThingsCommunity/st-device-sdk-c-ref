@@ -152,14 +152,14 @@ Now that the programming environment is setup, you need to create project and re
 
 First, please sign in to the [Developer Workspace](https://smartthings.developer.samsung.com/workspace/) with a Samsung Account.
 
-<img src="res/sign_in.png" style="zoom:50%;" align="left"/>
+<img src="res/sign_in.png" style="zoom:20%;" align="left"/>
 
 ### Create a new project
 
 To create project for direct connected device. Please select select _New Project_ &rightarrow; _Device Integration_ &rightarrow; _Direct-connected_  
 
-<img src="res/create_project1.png" style="zoom:50%;" align="left"/>
-<img src="res/create_project2.png" style="zoom:50%;" align="left"/>
+![create project](./res/create-project.gif)
+
 
 &nbsp;
 
@@ -169,14 +169,11 @@ A device profile contains the components, capabilities, and metadata (ID, name, 
 
 Click the _DEFINE DEVICE PROFILE_ &rightarrow; _ADD A DEVICE PROFILE_ and then fill out required information (e.g. Basic infor, Component & Capability, UI display)
 
-<img src="res/create_device_profile1.png" style="zoom:50%;" align="left"/>
-<img src="res/create_device_profile2.png" style="zoom:50%;" align="left"/>
+![create device profile](./res/create-device-profile.gif)
 
 &nbsp;
 
-The "[Health Check](https://smartthings.developer.samsung.com/docs/devices/health.html)" capability is automatically added for all direct connected devices. Please leave it and add your capabilities
-
-<img src="res/add_health_check_capability_switch.jpg" style="zoom:90%;" align="left"/>
+The "[Health Check](https://smartthings.developer.samsung.com/docs/devices/health.html)" capability is automatically added for all direct connected devices. Please leave it and add your capabilities  
 
 &nbsp;
 
@@ -184,7 +181,7 @@ The "[Health Check](https://smartthings.developer.samsung.com/docs/devices/healt
 
 The device onboarding guides device owners when their device is first registering and connecting to SmartThings.  You can customize the screens presented by adding a device onboarding.  The ownership validation type is also defined at this stage.
 
-<img src="res/create_device_onboarding.png" style="zoom:50%;" align="left"/>
+![create device onboarding](./res/create-device-onboarding.gif)
 
 &nbsp;  
 
@@ -194,7 +191,7 @@ The device onboarding guides device owners when their device is first registerin
 The product info defines how this device is shown at SmartThings mobile app catalog. 
 You can define device’s category and its regional availability.
 
-<img src="res/create_product_info.png" style="zoom:50%;" align="center"/>  
+![create product info](./res/add-product-info.gif)  
 
 &nbsp;  
   
@@ -213,7 +210,7 @@ You can start testing by deploying your device to test from _Test_ &rightarrow; 
 You can add identity of device for authenticating your device to SmartThings cloud. This requires device information like serial number and device public key (ED25519).
 Because maximum number of test device is limited per user, Once you reaches maximum number of test device, you should remove one of existing one.
 
-<img src="res/adding_test_device1.png" style="zoom:70%;" align="center"/>
+![register test device](./res/register-test-device.gif)
 
 This example shows how to create ED25519 key pair with SDK tools. You can get device_info.json file as a result from tools/keygen/linux/output_{ serialNumber}
 
