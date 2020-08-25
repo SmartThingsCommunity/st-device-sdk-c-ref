@@ -6,7 +6,7 @@ import os
 import sys
 
 REPLACE_LIST = [
-    ["esp32", "esp32_v3.3"]
+    ["from", "to"]
 ]
 
 STDK_REF_PATH = os.path.dirname(os.path.abspath(__file__))

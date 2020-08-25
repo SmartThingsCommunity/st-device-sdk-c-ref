@@ -13,11 +13,6 @@ if [[ "${1}" == "apps/"*"/"?* ]]; then
     ARGUMENTS="${BSP_NAME} ${APP_NAME} $@"
 fi
 
-if [ ${BSP_NAME} == "esp32" ]; then
-    BSP_NAME="esp32_v3.3"
-    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
-fi
-
 print_usage () {
     echo "    Usage: ./build.sh BSP_NAME APP_NAME"
     echo "                     or "

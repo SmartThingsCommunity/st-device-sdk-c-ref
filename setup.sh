@@ -17,11 +17,6 @@ print_usage () {
 	echo
 }
 
-if [ "${BSP_NAME}" == "esp32" ]; then
-    BSP_NAME="esp32_v3.3"
-    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
-fi
-
 if [ "${BSP_NAME}" == "" ]; then
 	print_usage
 	exit 0
