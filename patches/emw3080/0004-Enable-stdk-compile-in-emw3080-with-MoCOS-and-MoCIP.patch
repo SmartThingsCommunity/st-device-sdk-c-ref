@@ -1,0 +1,493 @@
+From 998f49abc84a26b29f34eebe9d64a483b27a9d28 Mon Sep 17 00:00:00 2001
+From: "qin.li" <qin.li@samsung.com>
+Date: Tue, 10 Mar 2020 17:39:01 +0800
+Subject: [PATCH] Enable stdk compile in emw3080, with MoCOS and MoCIP
+
+---
+ MiCO/MiCO.mk                                | 13 ++++---
+ MiCO/iot_main.c                             | 23 +++++++++++
+ MiCO/mico_config.h                          | 16 ++++++++
+ MiCO/net/mbedtls/include/mbedtls/platform.h |  2 +-
+ MiCO/net/mbedtls/library/platform.c         |  6 +--
+ MiCO/net/mbedtls/port/net.c                 |  5 ++-
+ MiCO/net/mbedtls/port/porting_layer.c       | 12 +++---
+ MiCO/net/stdk/config.mk                     | 60 +++++++++++++++++++++++++++++
+ MiCO/net/stdk/stdk.mk                       | 20 ++++++++++
+ MiCO/net/stdk/sys/socket.h                  | 18 +++++++++
+ MiCO/system/system.mk                       |  2 +-
+ board/MK3080B/MK3080B.mk                    |  2 +-
+ include/mico_socket.h                       |  4 +-
+ libraries/utilities/json_c/cJSON.c          |  2 +-
+ makefiles/mico_target_config.mk             | 31 ++++++++++++---
+ makefiles/micoder_host_cmd.mk               |  2 +-
+ 16 files changed, 190 insertions(+), 28 deletions(-)
+ create mode 100644 MiCO/iot_main.c
+ create mode 100644 MiCO/mico_config.h
+ create mode 100644 MiCO/net/stdk/config.mk
+ create mode 100644 MiCO/net/stdk/stdk.mk
+ create mode 100644 MiCO/net/stdk/sys/socket.h
+
+diff --git a/MiCO/MiCO.mk b/MiCO/MiCO.mk
+index 28c4f83..686cfc9 100644
+--- a/MiCO/MiCO.mk
++++ b/MiCO/MiCO.mk
+@@ -17,7 +17,7 @@ ifneq ($(ALIOS_SUPPORT),y)
+ $(NAME)_COMPONENTS += MiCO/core
+ endif
+ 
+-$(NAME)_SOURCES += mico_main.c core/mico_config.c
++$(NAME)_SOURCES += mico_main.c core/mico_config.c iot_main.c
+ 
+ ifneq ($(filter $(subst ., ,$(COMPONENTS)),mocOS mocIP),)
+ $(NAME)_SOURCES += moc_main.c
+@@ -25,10 +25,12 @@ endif
+ 
+ $(NAME)_COMPONENTS += MiCO/security \
+                       MiCO/system \
+-                      drivers/keypad/gpio_button
+-                      
++                      drivers/keypad/gpio_button \
++                      protocols/SNTP
++
+ $(NAME)_COMPONENTS += utilities
+ $(NAME)_COMPONENTS += net/mbedtls
++$(NAME)_COMPONENTS += net/stdk
+ 
+ GLOBAL_DEFINES += 
+ 
+@@ -54,8 +56,9 @@ mocOS_START_STACK    := 800
+ GLOBAL_INCLUDES += . \
+                    system \
+                    system/include \
+-                   security
+-                   
++                   security \
++                   net/stdk
++
+ # $(NAME)_CFLAGS  = $(COMPILER_SPECIFIC_PEDANTIC_CFLAGS)
+ 
+ 
+diff --git a/MiCO/iot_main.c b/MiCO/iot_main.c
+new file mode 100644
+index 0000000..af09542
+--- /dev/null
++++ b/MiCO/iot_main.c
+@@ -0,0 +1,23 @@
++#include <stdio.h>
++#include "iot_debug.h"
++#include <sys/times.h>
++
++extern void app_main(void);
++
++clock_t _times(struct tms* tms)
++{
++	return (clock_t)-1;
++}
++
++static void user_init_entry(void *arg)
++{
++	IOT_INFO("user_init_entry...");
++	app_main();
++
++	iot_os_thread_delete(NULL);
++}
++
++int main(void)
++{
++	iot_os_thread_create(user_init_entry, "user_init_entry", 4096, NULL, 10, NULL);
++}
+diff --git a/MiCO/mico_config.h b/MiCO/mico_config.h
+new file mode 100644
+index 0000000..071034f
+--- /dev/null
++++ b/MiCO/mico_config.h
+@@ -0,0 +1,16 @@
++/**
++******************************************************************************
++* @file    mico_config.h
++* @author  William Xu
++* @version V1.0.0
++* @date    08-Aug-2018
++* @brief   This file provide application options diff to default.
++******************************************************************************
++*/
++
++#ifndef __MICO_CONFIG_H
++#define __MICO_CONFIG_H
++
++
++
++#endif
+diff --git a/MiCO/net/mbedtls/include/mbedtls/platform.h b/MiCO/net/mbedtls/include/mbedtls/platform.h
+index 2b33a27..2303375 100644
+--- a/MiCO/net/mbedtls/include/mbedtls/platform.h
++++ b/MiCO/net/mbedtls/include/mbedtls/platform.h
+@@ -79,7 +79,7 @@ extern "C" {
+  * The function pointers for calloc and free
+  */
+ #ifndef MTK_BOOTLOADER_USE_MBEDTLS
+-#include "FreeRTOS.h"
++//#include "FreeRTOS.h"
+ #endif
+ #if defined(MBEDTLS_PLATFORM_MEMORY)
+ #if defined(MBEDTLS_PLATFORM_FREE_MACRO) && \
+diff --git a/MiCO/net/mbedtls/library/platform.c b/MiCO/net/mbedtls/library/platform.c
+index 434a991..5147007 100644
+--- a/MiCO/net/mbedtls/library/platform.c
++++ b/MiCO/net/mbedtls/library/platform.c
+@@ -33,9 +33,9 @@ log_create_module(mbedtls, PRINT_LEVEL_INFO);
+ #endif
+ 
+ #if defined(MBEDTLS_PLATFORM_MEMORY)
+-#include "FreeRTOSConfig.h"
+-#include "FreeRTOS.h"
+-#include "portable.h"
++//#include "FreeRTOSConfig.h"
++//#include "FreeRTOS.h"
++//#include "portable.h"
+ #if !defined(MBEDTLS_PLATFORM_STD_CALLOC)
+ static void *platform_calloc_uninit( size_t n, size_t size )
+ {
+diff --git a/MiCO/net/mbedtls/port/net.c b/MiCO/net/mbedtls/port/net.c
+index 816398d..9b8c98b 100644
+--- a/MiCO/net/mbedtls/port/net.c
++++ b/MiCO/net/mbedtls/port/net.c
+@@ -34,10 +34,11 @@
+ #include <string.h>
+ 
+ #include <sys/types.h>
+-#include "lwip/sockets.h"
++//#include "lwip/sockets.h"
++#include "mico_socket.h"
+ #include <sys/time.h>
+ #include <unistd.h>
+-#include <netdb.h>
++//#include <netdb.h>
+ #include <errno.h>
+ 
+ #include <stdlib.h>
+diff --git a/MiCO/net/mbedtls/port/porting_layer.c b/MiCO/net/mbedtls/port/porting_layer.c
+index aba0715..d169477 100644
+--- a/MiCO/net/mbedtls/port/porting_layer.c
++++ b/MiCO/net/mbedtls/port/porting_layer.c
+@@ -37,29 +37,31 @@
+ #else
+ #include MBEDTLS_CONFIG_FILE
+ #endif
+-#include "FreeRTOS.h"
++//#include "FreeRTOS.h"
+ 
+ static size_t mbedtls_heap_peak = 0;
+ static size_t mbedtls_heap_current = 0;
+ void *mbedtls_calloc(size_t nmemb, size_t size)
+ {
+     char *ret;
+-    ret = (char *)pvPortCalloc(nmemb, size);
++/*    ret = (char *)pvPortCalloc(nmemb, size);
+     if (ret == NULL) {
+     }
+ 
+     mbedtls_heap_current += nmemb * size;
+     if (mbedtls_heap_current > mbedtls_heap_peak) {
+         mbedtls_heap_peak = mbedtls_heap_current;
+-    }
++    }*/
++    ret = calloc(nmemb, size);
+     return ret;
+ }
+ 
+ void mbedtls_free( void *pv )
+ {
+-    size_t before_size, after_size;
++/*    size_t before_size, after_size;
+     before_size = xPortGetFreeHeapSize();
+     vPortFree(pv);
+     after_size = xPortGetFreeHeapSize();
+-    mbedtls_heap_current -= (after_size - before_size);
++    mbedtls_heap_current -= (after_size - before_size);*/
++    free(pv);
+ }
+diff --git a/MiCO/net/stdk/config.mk b/MiCO/net/stdk/config.mk
+new file mode 100644
+index 0000000..cbe9b23
+--- /dev/null
++++ b/MiCO/net/stdk/config.mk
+@@ -0,0 +1,60 @@
++########################################
++# Config
++########################################
++
++#/* For STDK */
++CONFIG_STDK_IOT_CORE=y
++CONFIG_STDK_IOT_CORE_USE_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
++CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP=y
++CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
++CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3080=y
++CONFIG_STDK_IOT_CORE_OS_SUPPORT_MOCOS=y
++CONFIG_SAMSUNG_BUILD_ENG=y
++
++ifeq ($(CONFIG_STDK_IOT_CORE),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_EASYSETUP_HTTP),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_EASYSETUP_HTTP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_USE_MBEDTLS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_USE_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_NET_MBEDTLS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_NET_MBEDTLS
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3080),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3080
++endif
++
++ifeq ($(CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP),y)
++STDK_CFLAGS += -DCONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_OS_SUPPORT_MOCOS),y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_MOCOS
++endif
++
++ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
++STDK_CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG), y)
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG
++endif
++
++STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519
++STDK_CFLAGS += -DCONFIG_SAMSUNG_RUN_TIME_STATS
++CONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE=y
+diff --git a/MiCO/net/stdk/stdk.mk b/MiCO/net/stdk/stdk.mk
+new file mode 100644
+index 0000000..8a44c3d
+--- /dev/null
++++ b/MiCO/net/stdk/stdk.mk
+@@ -0,0 +1,20 @@
++#
++#
++NAME := Stdk
++
++STDK_SRCDIRS = $(PWD)/mico-os/MiCO/net/stdk
++include ${STDK_SRCDIRS}/config.mk
++$(NAME)_CFLAGS += $(STDK_CFLAGS)
++
++include ${STDK_SRCDIRS}/src/component.mk
++
++#
++# Get the list of C files
++#
++IOT_CORE_SOURCES += $(subst $(STDK_SRCDIRS)/, ,$(foreach srcdir,$(COMPONENT_SRCDIRS),$(wildcard $(STDK_SRCDIRS)/src/$(srcdir)/*.c)))
++$(NAME)_SOURCES += $(IOT_CORE_SOURCES)
++
++#
++# Get the list of header files
++#
++GLOBAL_INCLUDES += $(foreach inc,$(COMPONENT_ADD_INCLUDEDIRS), $(ST_IOT_CORE_DIR)/src/$(inc))
+diff --git a/MiCO/net/stdk/sys/socket.h b/MiCO/net/stdk/sys/socket.h
+new file mode 100644
+index 0000000..11e232e
+--- /dev/null
++++ b/MiCO/net/stdk/sys/socket.h
+@@ -0,0 +1,18 @@
++/**
++ ******************************************************************************
++ * @file    wrapper of sys socket.h
++ * @author  qin li
++ * @version V1.0.0
++ * @date    1-Apr-2020
++ * @brief   This file provides all the headers of BSD socket APIs.
++ ******************************************************************************
++ */
++#ifndef __MOC_SOCKET_WRAPPER_H__
++#define __MOC_SOCKET_WRAPPER_H__
++
++
++#include "mico_socket.h"
++#include "mico_common.h"
++
++
++#endif /*__MOC_SOCKET_WRAPPER_H__*/
+diff --git a/MiCO/system/system.mk b/MiCO/system/system.mk
+index 25755f8..b837867 100644
+--- a/MiCO/system/system.mk
++++ b/MiCO/system/system.mk
+@@ -20,7 +20,7 @@ $(NAME)_SOURCES := mico_system_init.c \
+                    mico_station_monitor.c \
+                    system_misc.c 
+ 
+-$(NAME)_SOURCES  += command_console/mico_cli.c
++#$(NAME)_SOURCES  += command_console/mico_cli.c
+ $(NAME)_INCLUDES += command_console
+ 
+ $(NAME)_SOURCES += config_server/config_server_menu.c \
+diff --git a/board/MK3080B/MK3080B.mk b/board/MK3080B/MK3080B.mk
+index 453293b..23c9801 100644
+--- a/board/MK3080B/MK3080B.mk
++++ b/board/MK3080B/MK3080B.mk
+@@ -55,7 +55,7 @@ $(NAME)_SOURCES := mico_board.c
+ 
+ # MOC configuration
+ VALID_OSNS_COMBOS   := mocOS@mocIP
+-VALID_TLS           := mocSSL
++#VALID_TLS           := mocSSL
+ MOC_APP_OFFSET      := 0x64000
+ 
+ 
+diff --git a/include/mico_socket.h b/include/mico_socket.h
+index 3573f28..345cfa0 100644
+--- a/include/mico_socket.h
++++ b/include/mico_socket.h
+@@ -311,6 +311,8 @@ enum ssl_version_type_e
+ };
+ typedef uint8_t ssl_version_type_t;
+ 
++#define O_NONBLOCK 1
++
+ #if !defined __GNUC__
+ 
+ struct timeval {
+@@ -318,8 +320,6 @@ struct timeval {
+     long      tv_usec;    /* and microseconds */
+ };
+ 
+-#define O_NONBLOCK 1
+-
+ #define FD_SETSIZE        64    /**< MAX fd number is 64 in MICO. */
+ #define howmany(x, y)   (((x) + ((y) - 1)) / (y))
+ 
+diff --git a/libraries/utilities/json_c/cJSON.c b/libraries/utilities/json_c/cJSON.c
+index 1904b2d..62b7264 100644
+--- a/libraries/utilities/json_c/cJSON.c
++++ b/libraries/utilities/json_c/cJSON.c
+@@ -133,7 +133,7 @@ typedef struct internal_hooks
+     void *(*reallocate)(void *pointer, size_t size);
+ } internal_hooks;
+ 
+-#if defined(_MSC_VER)
++#if defined(_MSC_VER) || defined(CONFIG_CPU_MX1290)
+ 
+ /* work around MSVC error C2322: '...' address of dillimport '...' is not static */
+ static void *internal_malloc(size_t size)
+diff --git a/makefiles/mico_target_config.mk b/makefiles/mico_target_config.mk
+index 0e19c62..2d968e6 100755
+--- a/makefiles/mico_target_config.mk
++++ b/makefiles/mico_target_config.mk
+@@ -172,7 +172,7 @@ IMAGE_TYPE          := $(if $(filter $(IMAGE_TYPE_LIST),$(COMPONENTS)),$(firstwo
+ RUN_LINT            := $(filter lint,$(COMPONENTS))
+ MOC                 := $(filter $(MOC_LIST),$(COMPONENTS))
+ ALIOS               := $(filter aos,$(COMPONENTS))
+-COMPONENTS          := $(filter-out $(MOC_LIST) $(BUS_LIST) $(BUILD_TYPE_LIST) $(IMAGE_TYPE_LIST) $(TOTAL_BUILD) aos, $(COMPONENTS))
++COMPONENTS          := $(filter-out $(PROJECT_TITLE) $(MOC_LIST) $(BUS_LIST) $(BUILD_TYPE_LIST) $(IMAGE_TYPE_LIST) $(TOTAL_BUILD) aos, $(COMPONENTS))
+ 
+ # Set debug/release specific options
+ ifeq ($(BUILD_TYPE),release)
+@@ -183,7 +183,8 @@ endif
+ 
+ # MOC define mocOS and mocIP
+ ifneq ($(MOC),)
+-COMPONENTS += mocOS mocIP mocSSL
++#COMPONENTS += mocOS mocIP mocSSL
++COMPONENTS += mocOS mocIP
+ endif
+ 
+ # Read platform information
+@@ -258,7 +259,7 @@ endif
+ NET			:=$(notdir $(NET_FULL))
+ RTOS        :=$(notdir $(RTOS_FULL))
+ TLS         :=$(notdir $(TLS_FULL))
+-APP         :=$(notdir $(APP_FULL))
++APP         :=$(IOT_APPS_PATH)/$(PROJECT_TITLE)
+ 
+ # Define default RTOS and TCPIP stack
+ ifndef RTOS
+@@ -272,7 +273,7 @@ COMPONENTS += $(NET)
+ endif
+ 
+ ifndef TLS
+-TLS := wolfSSL
++#TLS := wolfSSL
+ COMPONENTS += $(TLS)
+ endif
+ 
+@@ -332,7 +333,7 @@ CURDIR :=
+ $(eval $(call PROCESS_COMPONENT, $(COMPONENTS)))
+ 
+ # Add some default values
+-MiCO_SDK_INCLUDES += -I$(MICO_OS_PATH)/include $(addprefix -I,$(APP_FULL)) -I.
++MiCO_SDK_INCLUDES += -I$(MICO_OS_PATH)/include $(addprefix -I,$(IOT_APPS_PATH)/$(PROJECT_TITLE)) -I.
+ MiCO_SDK_DEFINES += $(EXTERNAL_MiCO_GLOBAL_DEFINES)
+ 
+ ALL_RESOURCES := $(sort $(foreach comp,$(PROCESSED_COMPONENTS),$($(comp)_RESOURCES_EXPANDED)))
+@@ -340,7 +341,7 @@ ALL_RESOURCES := $(sort $(foreach comp,$(PROCESSED_COMPONENTS),$($(comp)_RESOURC
+ # Make sure the user has specified a component from each category
+ $(if $(RTOS),,$(error No RTOS specified. Options are: $(notdir $(wildcard MiCO/RTOS/*))))
+ $(if $(PLATFORM),,$(error No platform specified. Options are: $(notdir $(wildcard board/*))))
+-$(if $(APP),,$(error No application specified.))
++#$(if $(APP),,$(error No application specified.))
+ $(if $(BUS),,$(error No bus specified. Options are: SDIO SPI))
+ 
+ # Make sure a WLAN_CHIP, WLAN_CHIP_REVISION, WLAN_CHIP_FAMILY and HOST_OPENOCD have been defined
+@@ -386,13 +387,31 @@ MiCO_SDK_UNIT_TEST_SOURCES  +=$(foreach comp,$(PROCESSED_COMPONENTS), $(addprefi
+ ifeq ($(ADD_UNIT_TESTS_TO_LINK_FILES),1)
+ MiCO_SDK_LINK_FILES         += $(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o, $(foreach comp,$(PROCESSED_COMPONENTS), $(addprefix $$(OUTPUT_DIR)/Modules/$(call GET_BARE_LOCATION,$(comp)),$($(comp)_UNIT_TEST_SOURCES))) )))
+ endif
++##############################################################################
++#add stdk app
++IOT_APP_SOURCES	+= $(wildcard $(APP)/main/*.c)
++IOT_APP_INCLUDES += $(APP)
++IOT_APP_INCLUDES += $(IOT_APPS_PATH)/$(PROJECT_TITLE)/main
+ 
++$(eval PROCESSED_COMPONENTS += IOT_APP)
++
++MiCO_SDK_LINK_FILES += $(PROJECT_PATH)/main/onboarding_config.json.o
++MiCO_SDK_LINK_FILES += $(PROJECT_PATH)/main/device_info.json.o
++
++TMP_ROOT_CA_BACKUP_FILE=./iot_root_ca.c.bak
++###############################################################################
+ 
+ # Build target, generate config file
+ .PHONY: $(MAKECMDGOALS)
+ $(MAKECMDGOALS): $(CONFIG_FILE) $(TOOLCHAIN_HOOK_TARGETS)
+ 
+ $(CONFIG_FILE): $(MiCO_SDK_MAKEFILES) | $(CONFIG_FILE_DIR)
++	$(QUIET)$(CP) $(PROJECT_PATH)/main/onboarding_config.json ./
++	$(QUIET)$(CP) $(PROJECT_PATH)/main/device_info.json ./
++	$(QUIET)$(OBJCOPY) -I binary -O elf32-littlearm -B arm onboarding_config.json $(PROJECT_PATH)/main/onboarding_config.json.o
++	$(QUIET)$(OBJCOPY) -I binary -O elf32-littlearm -B arm device_info.json $(PROJECT_PATH)/main/device_info.json.o
++	$(QUIET)$(RM) ./onboarding_config.json
++	$(QUIET)$(RM) ./device_info.json
+ 	$(QUIET)$(call WRITE_FILE_CREATE, $(CONFIG_FILE) ,MiCO_SDK_MAKEFILES           		+= $(MiCO_SDK_MAKEFILES))
+ 	$(QUIET)$(call WRITE_FILE_APPEND, $(CONFIG_FILE) ,TOOLCHAIN_NAME            		:= $(TOOLCHAIN_NAME))
+ 	$(QUIET)$(call WRITE_FILE_APPEND, $(CONFIG_FILE) ,MiCO_SDK_LDFLAGS             		+= $(strip $(MiCO_SDK_LDFLAGS)))
+diff --git a/makefiles/micoder_host_cmd.mk b/makefiles/micoder_host_cmd.mk
+index ce0f50c..e0983de 100644
+--- a/makefiles/micoder_host_cmd.mk
++++ b/makefiles/micoder_host_cmd.mk
+@@ -11,7 +11,7 @@ TOOLS_ROOT ?= $(SOURCE_ROOT)mico-os/MiCoder
+ 
+ OPENOCD_PATH      := $(TOOLS_ROOT)/OpenOCD/
+ OPENOCD_CFG_PATH  := $(MAKEFILES_PATH)/OpenOCD/
+-PATH :=
++PATH := /bin:/usr/bin:$PATH
+ 
+ JTAG         ?= jlink_swd
+ 
+-- 
+2.7.4
+
