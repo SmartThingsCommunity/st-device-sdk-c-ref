@@ -19,7 +19,7 @@ def print_usage():
     print("")
     print("Usage: python setup.py [BSP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) python setup.py esp32_v4.x")
+    print("  ex) python setup.py esp32")
     print("")
 
 def find_setup_script(bsp_name):
