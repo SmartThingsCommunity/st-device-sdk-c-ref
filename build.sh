@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WARN_MSG="WARN : This script will be DEPRECATED. Please use 'build.py'"
+
 export STDK_CORE_PATH=`readlink -e -n "./iot-core"`
 
 BSP_NAME=${1}
@@ -44,6 +46,7 @@ print_path() {
 if [ "${BSP_NAME}" == "" ]; then
     print_usage
     print_path
+    echo ${WARN_MSG}
     exit 0
 fi
 
@@ -51,6 +54,7 @@ if [ ! -e tools/${BSP_NAME}/build_${BSP_NAME}.sh ]; then
     echo "Failed to find tools/${BSP_NAME}/build_${BSP_NAME}.sh"
     print_usage
     print_path
+    echo ${WARN_MSG}
     exit 1
 fi
 
@@ -58,3 +62,4 @@ tools/${BSP_NAME}/build_${BSP_NAME}.sh ${ARGUMENTS}
 if [ "$?" -ne "0" ]; then
     print_path
 fi
+echo ${WARN_MSG}

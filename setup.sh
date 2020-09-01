@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WARN_MSG="WARN : This script will be DEPRECATED. Please use 'build.py'"
+
 CORE_PATH="iot-core"
 BSP_NAME=${1}
 ARGUMENTS=$@
@@ -19,12 +21,14 @@ print_usage () {
 
 if [ "${BSP_NAME}" == "" ]; then
 	print_usage
+	echo ${WARN_MSG}
 	exit 0
 fi
 
 if [ ! -e tools/${BSP_NAME}/setup_${BSP_NAME}.sh ]; then
 	echo "Failed to find tools/${BSP_NAME}/setup_${BSP_NAME}.sh"
 	print_usage
+	echo ${WARN_MSG}
 	exit 1
 fi
 
@@ -49,3 +53,5 @@ if [ "$?" == "0" ]; then
 fi
 
 tools/${BSP_NAME}/setup_${BSP_NAME}.sh ${ARGUMENTS}
+
+echo ${WARN_MSG}
