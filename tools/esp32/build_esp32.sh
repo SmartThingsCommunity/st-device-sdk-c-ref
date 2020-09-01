@@ -9,8 +9,6 @@ export CORE_PATH="${PWD}/iot-core"
 IOT_APPS_PATH="${PWD}/apps/${BSP_NAME}"
 PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 
-XTENSA_PATH=`dirname ~/esp/xtensa-esp32-elf/bin/.`
-export PATH=${XTENSA_PATH}:${PATH}
 export IDF_PATH="${PWD}/bsp/${BSP_NAME}"
 
 MAKE_OPTION_ARRAY=("menuconfig" "defconfig" "all" "flash" "clean" "size" "size-components" "size-symbols" "erase_flash" "monitor" "simple_monitor" "list-components" "app" "app-flash" "app-clean" "print_flash_cmd" "help" "bootloader" "bootloader-flash" "bootloader-clean" "partition_table")
