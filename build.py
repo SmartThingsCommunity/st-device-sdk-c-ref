@@ -21,8 +21,8 @@ def print_usage():
     print("                 or")
     print("       python build.py [BSP_NAME] [APP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) python build.py apps/esp32_v4.x/switch_example")
-    print("  ex) python build.py esp32_v4.x light_example")
+    print("  ex) python build.py apps/esp32/switch_example")
+    print("  ex) python build.py esp32 light_example")
     print("")
 
 def find_build_script(bsp_name):
