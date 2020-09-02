@@ -6,17 +6,6 @@ The SmartThings Device SDK(STDK for short) Reference is the git repository of ex
 
 It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
 
-## Announcements
-
-Good news! We have launched the new commercial program for MQTT devices. You will be able to submit for certification into the SmartThings mobile app later this month. To prepare for submission, please perform the necessary steps with your current integrations:
-
- - Update to the latest SmartThings Device SDK
-   - Please use SmartThings Device SDK v1.3.3 or later
- - Downlaod the updated onboarding_config.json for your devices.
- - Re-register any test devices you have registered previously.
- - Update to the latest SmartThings mobile app to test your device
-   - Please use SmartThings mobile application v1.7.51 (for Android), v1.6.51 (for iOS) or later
-
 ## Directory layout
 
 The reference git is delivered via the following directory structure :
