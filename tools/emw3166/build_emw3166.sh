@@ -13,10 +13,10 @@ OUTPUT_BUILD=y
 export COMPONENT_PATH="${PWD}/iot-core/src"
 export PROJECT_PATH="${IOT_APPS_PATH}/${PROJECT_TITLE}"
 print_usage () {
-	echo "    Usage: ./build.sh emw3166 APP_NAME"
+	echo "    Usage: python build.py emw3166 APP_NAME"
 	echo "- - - - - - - - - - - - - - - - - - -"
-	echo "    ex) ./build.sh emw3166 switch_example"
-	echo "    ex) ./build.sh emw3166 light_example"
+	echo "    ex) python build.py emw3166 switch_example"
+	echo "    ex) python build.py emw3166 light_example"
 	echo
 }
 
