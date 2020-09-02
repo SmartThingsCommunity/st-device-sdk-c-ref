@@ -59,6 +59,8 @@ class dumpState_info:
     bsp_version = ""
     dip_id = ""
     device_id = "********"
+    mqtt_success_count = 0
+    mqtt_try_count = 0
     def __init__(self, dumpState_line):
         self.stdk_version_code = int.from_bytes(dumpState_line[0:4], endian)
         self.clock_time = int.from_bytes(dumpState_line[4:8], endian)
@@ -73,6 +75,8 @@ class dumpState_info:
         self.manufacturer_name = dumpState_line[112:128].decode().replace("\x00", "")
         self.dip_id = dumpState_line[128:144]
         self.device_id = dumpState_line[144:152].decode().replace("\x00", "*")
+        self.mqtt_success_count = int.from_bytes(dumpState_line[152:156], endian)
+        self.mqtt_try_count = int.from_bytes(dumpState_line[156:160], endian)
     def printInfo(self):
         output = ""
         output += "stdk_version_code : " + hex(self.stdk_version_code) + "\n"
@@ -87,6 +91,8 @@ class dumpState_info:
         output += "manufacturer_name : " + self.manufacturer_name + "\n"
         output += "DIP : " + str(uuid.UUID(bytes=self.dip_id)) + " (Ver:" + str(self.dip_version >> 16) + "." + str(self.dip_version & 0xffff) + ")\n"
         output += "DeviceID : " + self.device_id + "-****-****-****-************\n"
+        output += "mqtt_success_count : " + str(self.mqtt_success_count) + "\n"
+        output += "mqtt_try_count : " + str(self.mqtt_try_count) + "\n"
         print(output)
         output_file.write(output)
 
