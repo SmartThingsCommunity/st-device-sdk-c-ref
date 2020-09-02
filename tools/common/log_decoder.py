@@ -61,6 +61,7 @@ class dumpState_info:
     device_id = "********"
     mqtt_success_count = 0
     mqtt_try_count = 0
+    log_time = 0
     def __init__(self, dumpState_line):
         self.stdk_version_code = int.from_bytes(dumpState_line[0:4], endian)
         self.clock_time = int.from_bytes(dumpState_line[4:8], endian)
@@ -77,9 +78,11 @@ class dumpState_info:
         self.device_id = dumpState_line[144:152].decode().replace("\x00", "*")
         self.mqtt_success_count = int.from_bytes(dumpState_line[152:156], endian)
         self.mqtt_try_count = int.from_bytes(dumpState_line[156:160], endian)
+        self.log_time = int.from_bytes(dumpState_line[160:164], endian)
     def printInfo(self):
         output = ""
         output += "stdk_version_code : " + hex(self.stdk_version_code) + "\n"
+        output += "logtime : " + time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.log_time + tz_offset_sec)) + " (epoch : " + str(self.log_time) + ")\n"
         output += "uptime : " + str(self.clock_time) + "\n"
         output += "sequence_number : " + str(self.sequence_number) + "\n"
         output += "os_name : " + self.os_name.strip() + "\n"
