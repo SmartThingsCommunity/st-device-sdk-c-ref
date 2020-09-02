@@ -1,4 +1,4 @@
- Getting Started for Direct-connected device
+- # Getting Started for Direct-connected device
 
 SmartThings Direct-connected devices are Wi-Fi enabled devices that use the SmartThings Platform as their primary cloud infrastructure. And these devices will use the MQTT protocol for communication.
 
