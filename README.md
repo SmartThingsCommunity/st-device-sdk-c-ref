@@ -41,8 +41,8 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
       In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
   - Example for ESP32
-    - Setup ESP32 toolchain by using  'setup.py'
-    - If problem occures, Please refer to [ESP32 get-started guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites)
+    - Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+    - Setup ESP32 toolchain by using `setup.py`
 
   - Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)
     - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.
