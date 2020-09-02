@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,11 @@ static void esp_uart_init() {
     // Configure parameters of an UART driver,
     // communication pins and install the driver
     uart_config_t uart_config = {
-        .baud_rate = 115200,
+#ifdef CONFIG_CONSOLE_UART_BAUDRATE
+        .baud_rate = CONFIG_CONSOLE_UART_BAUDRATE,
+#else
+        .baud_rate = 115200, // ROM default BAUDRATE
+#endif
         .data_bits = UART_DATA_8_BITS,
         .parity    = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
