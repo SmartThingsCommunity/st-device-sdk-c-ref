@@ -228,7 +228,7 @@ nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=
 Copy `STDK**E90W***uCX` from keygen output and paste it into “Device serial number” field of “Register A Test Device” page.
 Copy public key string from keygen output (`nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=` in this example) and paste it into “Device Public Key” field.
 
-<img src="res/adding_test_device2.png" style="zoom:20%;" align="left"/>
+<img src="res/adding_test_device2.png" style="zoom:20%;"/>
 &nbsp;  
 
 ### Generate Device QR code
@@ -261,7 +261,7 @@ This is the information that the IoT device must have in order to connect to the
 
 If you use a sample device application from this git repository, please download it and then, just overwrite the existing `onboarding_config.json` file is in the `main` directory of sample device application with the new one you downloaded. In fact, overwriting is just one of several possible ways to inject it to the device. If the json information is guaranteed to be a parameter in the `st_conn_init()` function, you can refer to it differently according to your own development way.
 
-<img src="res/downloading_onboarding_config_file_switch.png" style="zoom:70%;" align="left"/>
+<img src="res/downloading_onboarding_config_file_switch.png" style="zoom:70%;"/>
 &nbsp;  
 &nbsp;  
 
