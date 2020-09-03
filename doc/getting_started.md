@@ -1,4 +1,4 @@
-- # Getting Started for Direct-connected device
+# Getting Started for Direct-connected device
 
 SmartThings Direct-connected devices are Wi-Fi enabled devices that use the SmartThings Platform as their primary cloud infrastructure. And these devices will use the MQTT protocol for communication.
 
@@ -119,15 +119,15 @@ You must setup a toolchain according to each chipset you selected.
 
 ***Example for ESP32*** :
 
-- *Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+- *Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.*
 
-*Setup ESP32 toolchain by using `setup.py`
+*Setup ESP32 toolchain by using `setup.py`*
 
 ***Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)*** :
 
-- *Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.
+- *Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.*
 
-*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
 
 ***Example for RTL8195***
 
@@ -250,9 +250,9 @@ mnid = 'FFFF' # "FFFF" is an example. you should replace it with yo
 onboardingId = '111' # "111" is an example. you should replace it with yours
 serialNumber = 'STDKtest0001' # "STDKtest0001" is an example. you should replace it with yours
 qrUrl = 'https://qr.samsungiots.com/?m=' + mnid + '&s=' + onboardingId + '&r=' + serialNumber
+qrcode.QRCode(box_size=10, border=4)
 img = qrcode.make(qrUrl)
 img.save(serialNumber + '.png')
-qrcode.QRCode(box_size=10, border=4)
 ```
 
 ### Download onboarding_config.json
@@ -280,106 +280,91 @@ An easy way to get started is to branch out one of the example projects provided
 
 ### Update device information
 
-Your IoT device needs two pieces of information when connecting to the SmartThings Platform :
+Your IoT device needs two pieces of information when connecting to the SmartThings Platform. These json formatted information should be passed to SmartThings Device SDK as a parameter of `st_conn_init()` api.
 
-- Device Identity
+- device_info.json
 - onboarding_config.json
 
-1. Device Identity
+1. device_info.json
 
-   Device identity provides data that need to be sent for authentication with the server. There are two different packets of information, one is ED25519 and the other is X.509.
+   `device_info.json` file could contain per device specific information including firmware version, device private key, device public key and device serial number.
 
-   - **ED25519**
+   We have two type of the format of `device_info.json`.
 
-     All of the device identity data are included in the `device_info.json` file in the `main` directory of the device application.
+   - **All inclusive**
 
-     If you create a device identity with a command with an option like `python3 stdk-keygen.py --firmware switch_example_001` like the first phase,  you can get the ready-to-use `device_info.json` file directly. In this case, please make sure you overwrite the existing `device_info.json` file with the new one you created.
-
+     `device_info.json` file could include all the information as json format. Our SmartThings Device SDK sample application (e.g. `light_example`, `switch_example`) uses this method.  
+     This is the easiest and simplest way to contain security information for devices. But having per device specific information as json format may not be suitable for manufacturing. So this is recommended for the test devices for individual developer.
      ```sh
-     # Overwrite device_info.json with a new one
-     $ cp ./output_STDK**E90W***uCX/device_info.json ~/st-device-sdk-c-ref/apps/esp8266/switch_example/main/
+     # Format of device_info.json
+     {
+       "deviceInfo": {
+         "firmwareVersion": "firmwareVersion_here",
+         "privateKey": "privateKey_here",
+         "publicKey": "publicKey_here",
+         "serialNumber": "serialNumber_here"
+       }
+     }
+     ```
+     This file can be generated by [stdk-keygen.py](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/master/tools/keygen#individual) like below example.
+     ```sh
+     python3 stdk-keygen.py --firmware switch_example_ver001 --mnid fJXX
      ```
 
+   - **Firmware version only**
+
+     We can leave only the firmware version at `device_info.json` like below.
+     ```sh
+     # Format of device_info.json
+     {
+       "deviceInfo": {
+         "firmwareVersion": "firmwareVersion_here"
+       }
+     }
+     ```
+     In this case other sercurity information like device private key, device public key and device serial number should be moved to dedicated secure partition - called as SmartThings Non-Volatile (STNV) Partition - with `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION` option enabled.  
+     This is subitable for manufacturing because it could have dedicated secure partition for immutable information. SmartThings Device SDK expect security information from STNV parition with below path name.
+     The mapping between `iot_nvd_t` and real storage path name can be found at `iot_bsp_nv_data_XXX.c` for [each bsp's porting layer](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/master/src/port/bsp).  
+     [stdk-keygen.py](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/master/tools/keygen#commercial) also supports batch creation by reading csv formatted series of device serial number.
+
+     | Data Path     | Description                   | Examples                 |
+     | :------------ | :---------------------------- | :----------------------- |
+     | PublicKey     | Client (= Device) Public key  | device.pubkey.b64        |
+     | PrivateKey    | Client (= Device) Private key | device.seckey.b64        |
+     | SerialNum     | Device Serial Number          | SN12345678F              |
+
      > **Note :**
      >
-     > If you are using the `device_info.json` file, please disable the build configuration associated with SmartThings Non-Volatile memory partition(STNV for short) as follows. Once again, don't set the build configuration below to `y`. :
-     >
-     > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=`
-
-     But, the manufacturers cannot place the device identity data on the source code because it is not possible to build and flash each time for each device. To resolve this problem in the commercial level device application, these device identity data for each device should be flashed into a secure partition area during the manufacturing process and a method to access data stored in a secure partition area should be implemented for each chipset.
-
-     For Espressif chipset, we have provided these solutions(e.g. a secure partition area(we call it STNV) and a method to access data stored in STNV) as an example, so please refer to it. You can find this example in the source code with the `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION` keyword.
-
-     **[The example of flashed items in the Espressif chipset]**
-
-     | Flashed items | Type | Description                   | Examples                 |
-     | :------------ | :--- | :---------------------------- | :----------------------- |
-     | PKType        | data | PubKey Algorithm type         | ED25519                  |
-     | CACert        | file | Server CA Certificate         | root.crt.pem             |
-     | PublicKey     | file | Client (= Device) Public key  | device.pubkey.b64        |
-     | PrivateKey    | file | Client (= Device) Private key | device.seckey.b64        |
-     | SerialNum     | data | Device Serial Number          | SN12345678F              |
-
-     > **Note :**
-     >
-     > If you want to flash the device identity data in a specific partition, you should set the build configuration below to `y`. : 
-     >
-     > `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION=y`
-
-   - **X.509**
-
-     It will be supported later.
+     > If `CONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION` option has enabled, SmartThings Device SDK ignores `privateKey`, `publicKey` and `serialNumber` field from `device_info.json` file
 
 2. onboarding_config.json
 
-   Place the `onboarding_config.json` file created during the device registration phase in the `main` directory of device application. Please make sure you overwrite the existing `onboarding_config.json` file with the new one you created like `device_info.json` file above.
-
-   ***Example***
-
+   The `onboarding_config.json` contains project common information. this can be downloaded from Developer Workspace project page as a file. Our sample appliation (e.g. `light_example`, `switch_example`) embedding it as an object blob. But developer could decide how to embed it as a part of device firmware.
    ```sh
-   # Location for switch_example app of ESP8266
-   ~/st-device-sdk-c-ref/apps/esp8266/switch_example/main/onboarding_config.json
-   ```
-
-   ```sh
-   # Example of onboarding_config.json
+   # Format of onboarding_config.json
    {
      "onboardingConfig": {
-       "deviceOnboardingId": "OI_SWITCH_01",
-       "mnId": "****",
-       "setupId": "001",
-       "vid": "VID_SWITCH_01",
-       "deviceTypeId": "Switch",
+       "deviceOnboardingId": "NAME",
+       "mnId": "MNID",
+       "setupId": "999",
+       "vid": "VID",
+       "deviceTypeId": "TYPE",
        "ownershipValidationTypes": [
-         "BUTTON"
+         "JUSTWORKS",
+         "BUTTON",
+         "PIN",
+         "QR"
        ],
        "identityType": "ED25519",
        "deviceIntegrationProfileKey": {
-         "id": "123e4567-e89b-12d3-a456-426614174000",
+         "id": "DIP_UUID",
          "majorVersion": 0,
          "minorVersion": 1
        }
      }
    }
    ```
-
-   - deviceOnboardingId : It is a prefix to be used for the SSID of Soft-AP during Easy-setup process. This value comes from `Device Onboarding ID` when doing "Create a device information" on the DevWS. By default, the last four digits(e.g. 7c16) of the example below represent the last four digits of the Serial Number of device.
-     - Example of SSID : OI_SWITCH_01_E4mnId......7c16
-   - mnId : Manufacturer ID. A unique four-letter ID assigned to SmartThings developers (individual MNID) or enrolled organizations (company MNID) that can be viewed at "My Page > MNID".
-   - setupId : a unique three-digit number. This value comes from `Setup ID` when doing "Create device onboarding information" on the DevWS.
-   - vid :   An alphanumeric identifier for your device. This value comes from `Vendor ID` when doing "Create a device profile" on the DevWS.
-   - deviceTypeId : This determines the device's icon and default UI layout in the SmartThings app. This is the value you selected from the value given as a list when doing "Create a device profile".
-   - ownershipValidationTypes : This is the type of ownership confirmation used during onboarding process. This value comes from `Confirm Method` when doing "Create a device profile" on the DevWS. Currently, there are four supported types.
-     - JUSTWORKS
-     - BUTTON
-     - PIN
-     - QR
-
-   - identityType : A unique certificate or public key pair type used to authenticate a device on SmartThings Platform. You can choose between
-     - ED25519
-     - *X.509 (will be supported)*
-   - deviceIntegrationProfileKey : information to indicates your device's functionalities at SmartThings Platform.
-
+  
 ### Develop device application
 
 A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the pre-supplied sample device applications, like `switch_example`. This allows for rapid development as you begin to develop your new device. Please refer to the [API references](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/master/doc/STDK_APIs.pdf) related to the IoT core device library as shown:
