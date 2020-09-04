@@ -194,7 +194,7 @@ static void esp_uart_init() {
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
     uart_param_config(UART_NUM_0, &uart_config);
-    uart_driver_install(UART_NUM_0, UART_LINE_SIZE * 2, 0, 0, NULL);
+    uart_driver_install(UART_NUM_0, UART_LINE_SIZE * 2, 0, 0, NULL, 0);
 }
 
 static void esp_uart_cli_task()
