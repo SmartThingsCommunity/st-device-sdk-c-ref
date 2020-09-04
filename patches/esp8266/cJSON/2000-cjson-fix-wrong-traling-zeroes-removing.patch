@@ -18,17 +18,17 @@ Following is error case,
 
 Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
 ---
- components/cjson/cJSON/cJSON.c | 5 +++++
+ cJSON.c | 5 +++++
  1 file changed, 5 insertions(+)
 
-diff --git a/components/cjson/cJSON/cJSON.c b/components/cjson/cJSON/cJSON.c
+diff --git a/cJSON.c b/cJSON.c
 index 5f167bf1..46e0ae8e 100644
---- a/components/cjson/cJSON/cJSON.c
-+++ b/components/cjson/cJSON/cJSON.c
+--- a/cJSON.c
++++ b/cJSON.c
 @@ -555,6 +555,11 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
                  length--;
              }
- 
+
 +            if (*pbuf == '.') {
 +                pbuf--;
 +                length--;
