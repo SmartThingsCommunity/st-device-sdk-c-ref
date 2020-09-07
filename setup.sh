@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WARN_MSG="WARN : This script will be DEPRECATED. Please use 'build.py'"
+
 CORE_PATH="iot-core"
 BSP_NAME=${1}
 ARGUMENTS=$@
@@ -13,22 +15,20 @@ print_usage () {
 	echo "    ex) ./setup.sh rtl8720c"
 	echo "    ex) ./setup.sh rtl8721c"
 	echo "    ex) ./setup.sh emw3166"
+	echo "    ex) ./setup.sh emw3080"
 	echo
 }
 
-if [ "${BSP_NAME}" == "esp32" ]; then
-    BSP_NAME="esp32_v3.3"
-    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
-fi
-
 if [ "${BSP_NAME}" == "" ]; then
 	print_usage
+	echo ${WARN_MSG}
 	exit 0
 fi
 
 if [ ! -e tools/${BSP_NAME}/setup_${BSP_NAME}.sh ]; then
 	echo "Failed to find tools/${BSP_NAME}/setup_${BSP_NAME}.sh"
 	print_usage
+	echo ${WARN_MSG}
 	exit 1
 fi
 
@@ -53,3 +53,5 @@ if [ "$?" == "0" ]; then
 fi
 
 tools/${BSP_NAME}/setup_${BSP_NAME}.sh ${ARGUMENTS}
+
+echo ${WARN_MSG}

@@ -6,7 +6,7 @@ import os
 import sys
 
 REPLACE_LIST = [
-    ["esp32", "esp32_v3.3"]
+    ["from", "to"]
 ]
 
 STDK_REF_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +19,7 @@ def print_usage():
     print("")
     print("Usage: python setup.py [BSP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) python setup.py esp32_v4.x")
+    print("  ex) python setup.py esp32")
     print("")
 
 def find_setup_script(bsp_name):
