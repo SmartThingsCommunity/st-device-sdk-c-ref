@@ -37,7 +37,7 @@ if [ ! -d ${PROJECT_PATH} ]; then
   exit 1
 fi
 
-cp ${CORE_PATH}/src/Kconfig ${IDF_PATH}/components/iot-core_config/
+cp ${CORE_PATH}/src/Kconfig ${IDF_PATH}/components/iot-core_config/Kconfig
 
 ### Build
 

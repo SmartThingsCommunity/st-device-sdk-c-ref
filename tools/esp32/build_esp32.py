@@ -24,7 +24,7 @@ if not (os.path.exists(BSP_PATH) and os.path.exists(APP_PATH)):
     print("Fail to find path.")
     exit(1)
 
-shutil.copy(os.path.join(CORE_PATH, "src", "Kconfig"), os.path.join(BSP_PATH, "components", "iot-core_config"))
+shutil.copy(os.path.join(CORE_PATH, "src", "Kconfig"), os.path.join(BSP_PATH, "components", "iot-core_config", "Kconfig"))
 
 if EXTRA_ARGS:
     MAKE_OPTION = ""
