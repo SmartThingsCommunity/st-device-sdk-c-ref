@@ -6,25 +6,14 @@ Direct-connected devices connect directly to the SmartThings cloud. The Direct C
 
 It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
 
-## Announcements
-
-Good news! We have launched the new commercial program for MQTT devices. You will be able to submit for certification into the SmartThings mobile app later this month. To prepare for submission, please perform the necessary steps with your current integrations:
-
- - Update to the latest SmartThings Device SDK
-   - Please use SmartThings Device SDK v1.3.3 or later
- - Downlaod the updated onboarding_config.json for your devices.
- - Re-register any test devices you have registered previously.
- - Update to the latest SmartThings mobile app to test your device
-   - Please use SmartThings mobile application v1.7.51 (for Android), v1.6.51 (for iOS) or later
-
 ## Directory layout
 
 The reference git is delivered via the following directory structure :
 
 - `apps` : sample device applications for each chipset
-- `bsp` : An original chipset vendor's SDK is located.  If you use a chipset that has already been ported, this vendor's SDK can be easily downloaded as a submodule in this directory through the predefined script(e.g. `setup.sh`).
+- `bsp` : An original chipset vendor's SDK is located.  If you use a chipset that has already been ported, this vendor's SDK can be easily downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
 - `doc` : documents
-- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.sh`).
+- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
 - `output` : build outputs will be placed
 - `patches` : patches to be applied in the original chipset vendor's SDK for resolving some problems
 - `tools` : scripts to be applied for each chipset
@@ -38,20 +27,15 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 - Install the toolchain defined in the chipset SDK you use. If there is no environmental comment, it is basically only described for 64-bit Ubuntu-based.
   - Example for ESP8266 (Ubuntu/Debian quickstart)
     - Setup [ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html) according to the available Expressif website.
-      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+      In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
-      > Info :
-      >
-      > The ESP8266 example of the Direct Connected Device SDK was developed from the 19cfb19 commit ID based on ESP8266_RTOS_SDK v3.2.
+  - Example for ESP32
+    - Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+    - Setup ESP32 toolchain by using `setup.py`
 
-  - Example for ESP32 (Ubuntu/Debian quickstart)
-
-    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html) according to the available Expressif website.
-      In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
-
-      > Info :
-      >
-      > The ESP32 example of the Direct Connected Device SDK was developed from the beb34b5 commit ID based on esp-idf v3.3.
+  - Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)
+    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.
+      In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
   - Example for RTL8195
 
@@ -67,29 +51,30 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 
     - Setup [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the available MXCHIP website.
     - Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA)
-      In order to use the pre-supplied build script(e.g. `build.sh`), please set `mico config --global MICODER /path_of_the_toolchain`
+      In order to use the pre-supplied build script(e.g. `build.py`), please set `mico config --global MICODER /path_of_the_toolchain`
 
 ### Build
 
-1. Download the Direct Connected Device SDK Reference source code. Basically, this reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.sh` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
+1. Download the Direct Connected Device SDK Reference source code. Basically, this reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.py` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
 
    - Download the source code via `git clone`.
-   - And then, run the `setup.sh` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
+   - And then, run the `setup.py` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
      ```sh
      $ cd ~
      $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
      $ cd st-device-sdk-c-ref
-     $ ./setup.sh
-         Usage: ./setup.sh CHIP_NAME
+     $ python setup.py
+         Usage: python setup.py CHIP_NAME
      - - - - - - - - - - - - - - - - - - -
-         ex) ./setup.sh esp8266
-         ex) ./setup.sh esp32
-         ex) ./setup.sh rtl8195
-         ex) ./setup.sh rtl8720c
-         ex) ./setup.sh rtl8721c
-         ex) ./setup.sh emw3166
+         ex) python setup.py esp8266
+         ex) python setup.py esp32
+         ex) python setup.py esp32_v3.3
+         ex) python setup.py rtl8195
+         ex) python setup.py rtl8720c
+         ex) python setup.py rtl8721c
+         ex) python setup.py emw3166
 
-     $ ./setup.sh esp8266
+     $ python setup.py esp8266
      ```
 
 2. Check the build configuration of a sample device application. If you want to use specific build options, you can directly modify the build configuration file(e.g. sdkconfig, sdkconfig.h) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option to configure them.
@@ -99,15 +84,15 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
      > Note :
      > The `menuconfig` option is just supported on the Espressif chipset.
      ```sh
-     # ./build.sh {app_path} {option}
+     # python build.py {app_path} {option}
      $ cd ~/st-device-sdk-c-ref
-     $ ./build.sh apps/esp32/switch_example menuconfig
+     $ python build.py apps/esp32/switch_example menuconfig
      ```
 
-3. Run `build.sh` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
+3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
 
    ```sh
-   $ ./build.sh apps/esp32/switch_example          # ./build.sh {app_path}
+   $ python build.py apps/esp32/switch_example          # python build.py {app_path}
 
    ```
 
@@ -127,19 +112,19 @@ Flashing can be done according to the method supported by chipset SDK.
 
 - Example for ESP8266/ESP32
 
-  You can flash the executables into a target device via `build.sh` with additional option. Actually, you don't need to run `./build.sh esp8266 st_switch` before running `./build.sh esp8266 st_switch flash`, this will automatically rebuild anything which needs it.
+  You can flash the executables into a target device via `build.py` with additional option. Actually, you don't need to run `python build.py esp8266 st_switch` before running `python build.py esp8266 st_switch flash`, this will automatically rebuild anything which needs it.
 
   - options
     - clean : clean previous build outputs
       ```sh
-      # ./build.sh {app_path} {options}
-      $ ./build.sh apps/esp32/switch_example clean
+      # python build.py {app_path} {options}
+      $ python build.py apps/esp32/switch_example clean
       ```
     - flash : download executable binaries to the device
     - monitor : monitor the serial output of device. this option can be used with flash option.
       ```sh
-      # ./build.sh {app_path} {options}
-      $ ./build.sh apps/esp32/switch_example flash monitor
+      # python build.py {app_path} {options}
+      $ python build.py apps/esp32/switch_example flash monitor
       ```
 
 - Example for RTL8195

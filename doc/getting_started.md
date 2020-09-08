@@ -1,4 +1,4 @@
-# Getting Started for Direct-connected device
+- # Getting Started for Direct-connected device
 
 SmartThings Direct-connected devices are Wi-Fi enabled devices that use the SmartThings Platform as their primary cloud infrastructure. And these devices will use the MQTT protocol for communication.
 
@@ -8,11 +8,11 @@ This article demonstrates how to integrate a direct-connected device with SmartT
 
 When developing a new direct-connected device application with SmartThings Device SDK, you will progress through the following steps. You can also refer to the [Code Lab data of the 2019 Samsung Developer Conference](https://developer.samsung.com/codelab/smartthings/smartthings-device-sdk/overview.html). It will be more practical for you to understand the SmartThings Device SDK.
 
-- [Setup Environment](#Setup Environment)
+- [Setup Environment](#setup-environment)
 
-- [Register a Device](#Register a Device)
+- [Register a Device](#register-a-device)
 
-- [Develop a Device Application](#Develop a device application)
+- [Develop a Device Application](#develop-a-device-application)
 
   <img src="res/workflow.jpg" style="zoom:100%;" align="left"/>  
 
@@ -31,7 +31,7 @@ There are two git repositories for working with the SmartThings Device SDK. The 
 
 #### Download Reference
 
-You can just choose to download the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) from GitHub, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` and `a chipset SDK` can be easily downloaded as submodules in this Reference repository through the predefined `setup.sh` script. If you are the first to use this SmartThings Device SDK, we recommend that you use the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) for easier understanding.
+You can just choose to download the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) from GitHub, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` and `a chipset SDK` can be easily downloaded as submodules in this Reference repository through the predefined `setup.py` script. If you are the first to use this SmartThings Device SDK, we recommend that you use the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) for easier understanding.
 
 From the terminal, navigate to the directory you want the SmartThings Device SDK to locate and clone it using the following git command:
 
@@ -48,17 +48,17 @@ You can use a script to automatically download the `IoT Core Device Library` and
 
 ```sh
 $ cd ~/st-device-sdk-c-ref
-$ ./setup.sh
-    Usage: ./setup.sh CHIP_NAME
+$ python setup.py
+    Usage: python setup.py CHIP_NAME
 - - - - - - - - - - - - - - - - - - -
-    ex) ./setup.sh esp8266
-    ex) ./setup.sh esp32
-    ex) ./setup.sh rtl8195
-    ex) ./setup.sh rtl8720c
-    ex) ./setup.sh rtl8721c
-    ex) ./setup.sh emw3166
+    ex) python setup.py esp8266
+    ex) python setup.py esp32
+    ex) python setup.py rtl8195
+    ex) python setup.py rtl8720c
+    ex) python setup.py rtl8721c
+    ex) python setup.py emw3166
 
-$ ./setup.sh esp8266                       # ./setup.sh {chip_name}
+$ python setup.py esp8266                       # python setup.py {chip_name}
 ```
 
 ### Create device identity
@@ -69,7 +69,7 @@ Open a terminal window and run the following `stdk-keygen.py` script to create a
 
 ```sh
 $ cd ~/Workspace/st-device-sdk-c-ref/iot-core/tools/keygen/
-$ python3 stdk-keygen.py –firmware switch_example_001
+$ python3 stdk-keygen.py --firmware switch_example_001
 Use following serial number and public key
 for the identity of your device in Developer Workspace.
 
@@ -115,24 +115,19 @@ You must setup a toolchain according to each chipset you selected.
 
 - *[ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html)*
 
-*In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toolchain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
-
-> ***Info :***
-> *The ESP8266 example of SmartThings Device SDK was developed from the 19cfb19 commit ID based on ESP8266_RTOS_SDK v3.2.*
-
-
+*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toolchain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
 
 ***Example for ESP32*** :
 
-- *[ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html)*
+- *Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
 
-*In order to use the pre-supplied build script(e.g. `build.sh`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toolchain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
+*Setup ESP32 toolchain by using `setup.py`
 
-> ***Info :***
->
-> *The ESP32 example of SmrtThings Device SDK was developed from the beb34b5 commit ID based on esp-idf v3.3.*
+***Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)*** :
 
+- *Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.
 
+*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
 
 ***Example for RTL8195***
 
@@ -219,7 +214,7 @@ Serial number for testing device would be randomly generated by this tool which 
 
 ```sh
 $ cd ~/Workspace/st-device-sdk-c-ref/iot-core/tools/keygen/
-$ python3 stdk-keygen.py –firmware switch_example_001
+$ python3 stdk-keygen.py --firmware switch_example_001
 Use following serial number and public key
 for the identity of your device in Developer Workspace.
 
@@ -233,7 +228,7 @@ nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=
 Copy `STDK**E90W***uCX` from keygen output and paste it into “Device serial number” field of “Register A Test Device” page.
 Copy public key string from keygen output (`nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=` in this example) and paste it into “Device Public Key” field.
 
-<img src="res/adding_test_device2.png" style="zoom:20%;" align="left"/>
+<img src="res/adding_test_device2.png" style="zoom:20%;"/>
 &nbsp;  
 
 ### Generate Device QR code
@@ -266,7 +261,7 @@ This is the information that the IoT device must have in order to connect to the
 
 If you use a sample device application from this git repository, please download it and then, just overwrite the existing `onboarding_config.json` file is in the `main` directory of sample device application with the new one you downloaded. In fact, overwriting is just one of several possible ways to inject it to the device. If the json information is guaranteed to be a parameter in the `st_conn_init()` function, you can refer to it differently according to your own development way.
 
-<img src="res/downloading_onboarding_config_file_switch.png" style="zoom:70%;" align="left"/>
+<img src="res/downloading_onboarding_config_file_switch.png" style="zoom:70%;"/>
 &nbsp;  
 &nbsp;  
 
@@ -464,12 +459,12 @@ void app_main(void)
 
 ### Build & Flash the App
 
-Go to the root directory of the SmartThings Device SDK Reference git repo. and execute the build script(build.sh) with the below parameter.
+Go to the root directory of the SmartThings Device SDK Reference git repo. and execute the build script(build.py) with the below parameter.
 
 ```sh
 # Example for ESP8266
 $ cd ~/st-device-sdk-c-ref/
-$ ./build.sh apps/esp8266/switch_example             # ./build.sh {app_directory}
+$ python build.py apps/esp8266/switch_example             # python build.py {app_directory}
 ```
 
 After compiling, following results can be seen. In fact, as you know, we have to flash these results according to the binary download method that exists per chipset.
@@ -494,9 +489,9 @@ In case of Espressif chipset(e.g. ESP8266, ESP32), you can now run the following
 
 ```sh
 # Example for ESP8266
-# ./build.sh {app_directory} {option}
+# python build.py {app_directory} {option}
 $ cd ~/st-device-sdk-c-ref/
-$ ./build.sh apps/esp8266/switch_example flash
+$ python build.py apps/esp8266/switch_example flash
 ```
 
 The serial port needs to be matched to the computer environment for serial port flashing. For example, the settings for serial port flashing can be configured with `menuconfig` option in Espressif. If the serial port setting does not match your environment, please execute the following:
@@ -505,12 +500,12 @@ The serial port needs to be matched to the computer environment for serial port 
 > The `menuconfig` option is only supported on the Espressif chipset. If you use a different chipset, please set it according to the selected original chipset guide.
 ```sh
 # Example for ESP8266
-# ./build.sh {app_directory} {option}
+# python build.py {app_directory} {option}
 $ cd ~/st-device-sdk-c-ref
-$ ./build.sh apps/esp8266/switch_example menuconfig
+$ python build.py apps/esp8266/switch_example menuconfig
 ```
 
-Plus, You don't need to run `./build.sh appes/esp8266/switch_example` before running `./build.sh appes/esp8266/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
+Plus, You don't need to run `python build.py appes/esp8266/switch_example` before running `python build.py appes/esp8266/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
 
 For more details about flashing and monitoring, please refer to the [README](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/README.md) file.
 
@@ -521,6 +516,6 @@ The SmartThings App should be used to control an IoT device that is running with
 | Step | Description                                                  |
 | :--: | ------------------------------------------------------------ |
 |  1   | **Enable developer mode**<br>You must enable the `Developer Mode` in the SmartThings app before testing.<br>For more details, please refer to the link below.<br>https://smartthings.developer.samsung.com/docs/testing/developer-mode.html<br><img src="res/developer_mode.jpg" style="zoom:80%;" align="left"/> |
-|  2   | **Reset the device**<br>Just push the reset button of device.<br><br>If you use an Espressif chipset, you can also run the `monitor` command to reset the device in the console window like below.<br>  $ cd ~/st-device-sdk-c-ref<br>  $ ./build.sh apps/esp866/switch_example monitor    # This is only for Espressif chipset. |
+|  2   | **Reset the device**<br>Just push the reset button of device.<br><br>If you use an Espressif chipset, you can also run the `monitor` command to reset the device in the console window like below.<br>  $ cd ~/st-device-sdk-c-ref<br>  $ python build.py apps/esp866/switch_example monitor    # This is only for Espressif chipset. |
 |  3   | **Add device(Onboarding Process)**<br>There are two ways to add a device in the SmartThings application. You can proceed in one of the two ways below.<br>- Select the `Device Onboarding Name` via "My Testing Devices" menu. <br><img src="res/added_device1.jpg" style="zoom:100%;" align="left"/><br><br>- Use the automatic Detection pop-up window. By default, the last four digits(e.g. 7c16) of the example detection pop-up below represent the last four digits of the Serial Number of device.<br><img src="res/added_device2.jpg" style="zoom:100%;" align="left"/> |
 |  4   | **Control & Monitor a device**<br>Now that your device is on the SmartThings App. If there is no problem during above onboarding process, it means your device is well registered to the SmartThings Platform. <br><br>Control & Monitor your device via the App and make sure the App is working the way you think it should.<br><img src="res/added_device.jpg" style="zoom:80%;" align="left"/> |

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WARN_MSG="WARN : This script will be DEPRECATED. Please use 'build.py'"
+
 export STDK_CORE_PATH=`readlink -e -n "./iot-core"`
 
 BSP_NAME=${1}
@@ -13,11 +15,6 @@ if [[ "${1}" == "apps/"*"/"?* ]]; then
     ARGUMENTS="${BSP_NAME} ${APP_NAME} $@"
 fi
 
-if [ ${BSP_NAME} == "esp32" ]; then
-    BSP_NAME="esp32_v3.3"
-    ARGUMENTS=`echo ${ARGUMENTS} | sed 's/esp32/esp32_v3.3/'`
-fi
-
 print_usage () {
     echo "    Usage: ./build.sh BSP_NAME APP_NAME"
     echo "                     or "
@@ -29,6 +26,7 @@ print_usage () {
     echo "    ex) ./build.sh rtl8720c switch_example"
     echo "    ex) ./build.sh rtl8721c switch_example"
     echo "    ex) ./build.sh emw3166 switch_example"
+    echo "    ex) ./build.sh emw3080 switch_example"
     echo
 }
 
@@ -48,6 +46,7 @@ print_path() {
 if [ "${BSP_NAME}" == "" ]; then
     print_usage
     print_path
+    echo ${WARN_MSG}
     exit 0
 fi
 
@@ -55,6 +54,7 @@ if [ ! -e tools/${BSP_NAME}/build_${BSP_NAME}.sh ]; then
     echo "Failed to find tools/${BSP_NAME}/build_${BSP_NAME}.sh"
     print_usage
     print_path
+    echo ${WARN_MSG}
     exit 1
 fi
 
@@ -62,3 +62,4 @@ tools/${BSP_NAME}/build_${BSP_NAME}.sh ${ARGUMENTS}
 if [ "$?" -ne "0" ]; then
     print_path
 fi
+echo ${WARN_MSG}
