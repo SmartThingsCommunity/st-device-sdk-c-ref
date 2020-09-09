@@ -1,4 +1,4 @@
-# SmartThings SDK for Connected Devices for C
+# SmartThings SDK for Direct Connected Devices for C
 
 [![License](https://img.shields.io/badge/licence-Apache%202.0-brightgreen.svg?style=flat)](LICENSE)
 
