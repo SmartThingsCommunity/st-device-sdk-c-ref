@@ -1,10 +1,15 @@
 #!/bin/bash
 
-WARN_MSG="WARN : This script will be DEPRECATED. Please use 'build.py'"
+WARN_MSG="WARN : This script will be DEPRECATED. Please use 'setup.py'"
+
+export STDK_REF_PATH=$(dirname $(realpath $0))
+export STDK_CORE_PATH="${STDK_REF_PATH}/iot-core"
 
 CORE_PATH="iot-core"
 BSP_NAME=${1}
 ARGUMENTS=$@
+
+
 
 print_usage () {
 	echo "    Usage: ./setup.sh BSP_NAME"
@@ -53,5 +58,12 @@ if [ "$?" == "0" ]; then
 fi
 
 tools/${BSP_NAME}/setup_${BSP_NAME}.sh ${ARGUMENTS}
-
+if [ "$?" == "0" ]; then
+  echo ""
+  echo "To use SmartThings Device SDK build script, run following command:"
+  echo ""
+  echo "    python build.py ${BSP_NAME} [APP_NAME]"
+  echo ""
+fi
 echo ${WARN_MSG}
+

@@ -1,0 +1,34 @@
+From d590ae243efd69e14dae705b32dd1add3ff5e362 Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Fri, 3 Jul 2020 20:10:14 +0900
+Subject: [PATCH] mbedtls: esp: add support eckey alt that use iot security
+
+Use iot_security_pk_xxx as eckey alternative functions.
+
+To enable this, need to set following.
+- CONFIG_STDK_IOT_CORE_MBEDTLS_USE_ALT
+
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ components/mbedtls/port/include/mbedtls/esp_config.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/components/mbedtls/port/include/mbedtls/esp_config.h b/components/mbedtls/port/include/mbedtls/esp_config.h
+index 1aef136..7cc5100 100644
+--- a/components/mbedtls/port/include/mbedtls/esp_config.h
++++ b/components/mbedtls/port/include/mbedtls/esp_config.h
+@@ -2269,7 +2269,11 @@
+ #include MBEDTLS_USER_CONFIG_FILE
+ #endif
+
++#ifdef CONFIG_STDK_IOT_CORE_MBEDTLS_USE_ALT
++#define MBEDTLS_ECKEY_IOT_ALT
++#else
+ #define MBEDTLS_IOT_CORE_OPTIM
++#endif
+
+ #include "mbedtls/check_config.h"
+
+-- 
+2.7.4
+

@@ -67,6 +67,8 @@ if ret_val:
     print_usage()
 else:
     print("")
+    print("======================================================================")
+    print("")
     print("To use SmartThings Device SDK build script, run following command:")
     print("")
     print("    python build.py " + BSP_NAME + " [APP_NAME]")
