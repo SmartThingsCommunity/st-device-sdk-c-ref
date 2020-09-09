@@ -20,7 +20,6 @@ function apply_patch() {
   for patch in ${PATCH_DIR}/*
   do
     if [[ "${patch}" == *".patch" ]]; then
-
       if [ "${IS_GIT}" == "1" ]; then
         git am ${patch}
       else
