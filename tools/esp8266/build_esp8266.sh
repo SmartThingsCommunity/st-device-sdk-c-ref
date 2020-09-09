@@ -79,11 +79,13 @@ fi
 PARTITION_NAME=${PARTITION_NAME%.*}
 PARTITION_TABLE=${PARTITION_TABLE}/${PARTITION_NAME}.csv
 
-GET_PART_INFO="${STDK_PATH}/bsp/${BSP_NAME}/components/partition_table/parttool.py -q"
+PARTITION_TABLE_OFFSET=`cat ${PROJECT_PATH}/sdkconfig | grep  -E "CONFIG_PARTITION_TABLE_OFFSET" | awk -F '=' '{print $2}'`
+GET_PART_INFO="${STDK_PATH}/bsp/${BSP_NAME}/components/partition_table/parttool.py -q --partition-table-file ${PROJECT_PATH}/build/${PARTITION_NAME}.bin --partition-table-offset ${PARTITION_TABLE_OFFSET}"
+
 
 BOOTLOADER_OFFSET=`cat ${IDF_PATH}/components/bootloader/Makefile.projbuild | grep  -E "BOOTLOADER_OFFSET" | awk -F ':= ' '{print $2}'`
-APP_OFFSET=`${GET_PART_INFO} --default-boot-partition --offset ${PROJECT_PATH}/build/${PARTITION_NAME}.bin`
-OTA_DATA_OFFSET=`${GET_PART_INFO} --type data --subtype ota --offset ${PROJECT_PATH}/build/${PARTITION_NAME}.bin`
+APP_OFFSET=`${GET_PART_INFO} get_partition_info --partition-boot-default --info offset`
+OTA_DATA_OFFSET=`${GET_PART_INFO} get_partition_info --partition-type data --partition-subtype ota --info offset`
 PARTITION_OFFSET=`cat ${PROJECT_PATH}/sdkconfig | grep ^CONFIG_PARTITION_TABLE_OFFSET\= | awk -F'=' '{print $2}'`
 
 ADDRESS_INFO_FILE=${PROJECT_PATH}/address_info.txt

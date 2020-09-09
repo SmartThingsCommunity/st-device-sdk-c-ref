@@ -10,19 +10,18 @@ To enable this, need to set following.
 
 Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
 ---
- .../ssl/mbedtls/mbedtls/include/mbedtls/pk.h  |   3 +
- .../mbedtls/include/mbedtls/pk_internal.h     |   3 +
- components/ssl/mbedtls/mbedtls/library/pk.c   |   4 +
- .../ssl/mbedtls/mbedtls/library/pk_wrap_alt.c | 225 ++++++++++++++++++
- .../port/esp8266/include/mbedtls/esp_config.h |   5 +
- 5 files changed, 240 insertions(+)
- create mode 100644 components/ssl/mbedtls/mbedtls/library/pk_wrap_alt.c
+ include/mbedtls/pk.h          |   3 +
+ include/mbedtls/pk_internal.h |   3 +
+ library/pk.c                  |   4 +
+ library/pk_wrap_alt.c         | 225 ++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 235 insertions(+)
+ create mode 100644 library/pk_wrap_alt.c
 
-diff --git a/components/ssl/mbedtls/mbedtls/include/mbedtls/pk.h b/components/ssl/mbedtls/mbedtls/include/mbedtls/pk.h
-index 1059bdaa..3b7e7584 100644
---- a/components/ssl/mbedtls/mbedtls/include/mbedtls/pk.h
-+++ b/components/ssl/mbedtls/mbedtls/include/mbedtls/pk.h
-@@ -81,6 +81,9 @@ typedef enum {
+diff --git a/include/mbedtls/pk.h b/include/mbedtls/pk.h
+index 1364275..4ccd18b 100644
+--- a/include/mbedtls/pk.h
++++ b/include/mbedtls/pk.h
+@@ -83,6 +83,9 @@ typedef enum {
      MBEDTLS_PK_ECDSA,
      MBEDTLS_PK_RSA_ALT,
      MBEDTLS_PK_RSASSA_PSS,
@@ -30,13 +29,13 @@ index 1059bdaa..3b7e7584 100644
 +    MBEDTLS_PK_ECKEY_ALT,
 +#endif
  } mbedtls_pk_type_t;
- 
+
  /**
-diff --git a/components/ssl/mbedtls/mbedtls/include/mbedtls/pk_internal.h b/components/ssl/mbedtls/mbedtls/include/mbedtls/pk_internal.h
-index 3dae0fc5..7342348f 100644
---- a/components/ssl/mbedtls/mbedtls/include/mbedtls/pk_internal.h
-+++ b/components/ssl/mbedtls/mbedtls/include/mbedtls/pk_internal.h
-@@ -102,6 +102,9 @@ extern const mbedtls_pk_info_t mbedtls_rsa_info;
+diff --git a/include/mbedtls/pk_internal.h b/include/mbedtls/pk_internal.h
+index 48b7a5f..d3bf2da 100644
+--- a/include/mbedtls/pk_internal.h
++++ b/include/mbedtls/pk_internal.h
+@@ -125,6 +125,9 @@ extern const mbedtls_pk_info_t mbedtls_rsa_info;
  #if defined(MBEDTLS_ECP_C)
  extern const mbedtls_pk_info_t mbedtls_eckey_info;
  extern const mbedtls_pk_info_t mbedtls_eckeydh_info;
@@ -44,13 +43,13 @@ index 3dae0fc5..7342348f 100644
 +extern const mbedtls_pk_info_t mbedtls_eckey_alt_info;
 +#endif
  #endif
- 
+
  #if defined(MBEDTLS_ECDSA_C)
-diff --git a/components/ssl/mbedtls/mbedtls/library/pk.c b/components/ssl/mbedtls/mbedtls/library/pk.c
-index 718c26dd..dc2e8d06 100644
---- a/components/ssl/mbedtls/mbedtls/library/pk.c
-+++ b/components/ssl/mbedtls/mbedtls/library/pk.c
-@@ -91,6 +91,10 @@ const mbedtls_pk_info_t * mbedtls_pk_info_from_type( mbedtls_pk_type_t pk_type )
+diff --git a/library/pk.c b/library/pk.c
+index 3e6cd38..4c13189 100644
+--- a/library/pk.c
++++ b/library/pk.c
+@@ -123,6 +123,10 @@ const mbedtls_pk_info_t * mbedtls_pk_info_from_type( mbedtls_pk_type_t pk_type )
              return( &mbedtls_eckey_info );
          case MBEDTLS_PK_ECKEY_DH:
              return( &mbedtls_eckeydh_info );
@@ -61,11 +60,11 @@ index 718c26dd..dc2e8d06 100644
  #endif
  #if defined(MBEDTLS_ECDSA_C)
          case MBEDTLS_PK_ECDSA:
-diff --git a/components/ssl/mbedtls/mbedtls/library/pk_wrap_alt.c b/components/ssl/mbedtls/mbedtls/library/pk_wrap_alt.c
+diff --git a/library/pk_wrap_alt.c b/library/pk_wrap_alt.c
 new file mode 100644
-index 00000000..9fc8a170
+index 0000000..9fc8a17
 --- /dev/null
-+++ b/components/ssl/mbedtls/mbedtls/library/pk_wrap_alt.c
++++ b/library/pk_wrap_alt.c
 @@ -0,0 +1,225 @@
 +/* ***************************************************************************
 + *
@@ -292,23 +291,6 @@ index 00000000..9fc8a170
 +#endif /* MBEDTLS_ECP_C */
 +
 +#endif /* MBEDTLS_PK_C */
-diff --git a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-index 4bc2d3b4..4ee48e9b 100644
---- a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-+++ b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-@@ -2984,7 +2984,12 @@
- 
- #define MBEDTLS_DEBUGF(_fmt, ...)   printf(_fmt "\r\n", ##__VA_ARGS__)
- 
-+#ifdef CONFIG_STDK_IOT_CORE_MBEDTLS_USE_ALT
-+#define MBEDTLS_ECKEY_IOT_ALT
-+#else
- #define MBEDTLS_IOT_CORE_OPTIM
-+#endif
-+
- 
- #include "mbedtls/check_config.h"
- 
 -- 
-2.17.1
+2.7.4
 

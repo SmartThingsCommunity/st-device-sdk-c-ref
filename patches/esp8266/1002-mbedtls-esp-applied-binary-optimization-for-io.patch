@@ -1,0 +1,42 @@
+From feac21128e717751f2b675fca7ddfb09094c39a0 Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Tue, 24 Sep 2019 16:17:14 +0900
+Subject: [PATCH] mbedtls: esp: applied binary optimization for iot-core
+
+- MBEDTLS_IOT_CORE_OPTIM
+
+We can reduce binary size by 14672 bytes @ 0.3.6 version.
+
+From 564544 to 549872 on smart_switch usr binary.
+
+Change-Id: Ic345fd83a622d71c074bab00ecc2cc98d5ad5ebe
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ components/mbedtls/port/include/mbedtls/esp_config.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/components/mbedtls/port/include/mbedtls/esp_config.h b/components/mbedtls/port/include/mbedtls/esp_config.h
+index ad82896..53245cf 100644
+--- a/components/mbedtls/port/include/mbedtls/esp_config.h
++++ b/components/mbedtls/port/include/mbedtls/esp_config.h
+@@ -1895,7 +1895,7 @@
+  *
+  * This module is required for SSL/TLS and SHA1-signed certificates.
+  */
+-#define MBEDTLS_SHA1_C
++//#define MBEDTLS_SHA1_C
+
+ /**
+  * \def MBEDTLS_SHA256_C
+@@ -2269,6 +2269,8 @@
+ #include MBEDTLS_USER_CONFIG_FILE
+ #endif
+
++#define MBEDTLS_IOT_CORE_OPTIM
++
+ #include "mbedtls/check_config.h"
+
+ #endif /* MBEDTLS_CONFIG_H */
+-- 
+2.7.4
+
