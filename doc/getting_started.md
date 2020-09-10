@@ -367,7 +367,8 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
   
 ### Develop device application
 
-A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the pre-supplied sample device applications, like `switch_example`. This allows for rapid development as you begin to develop your new device. Please refer to the [API references](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/master/doc/STDK_APIs.pdf) related to the IoT core device library as shown:
+A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the example device applications, like `switch_example`, `light_example`. This allows for rapid development as you begin to develop your new device.  
+Major APIs are like below:
 
 - connection management
   - st_conn_init()
@@ -379,12 +380,15 @@ A device application is developed using the APIs provided by the IoT Core Device
 - capability management
   - st_cap_handle_init()
   - st_cap_cmd_set_cb()
-  - st_cap_attr_create_int()
-  - st_cap_attr_create_number()
-  - st_cap_attr_create_string()
-  - st_cap_attr_create_string_array()
-  - st_cap_attr_free()
-  - st_cap_attr_send()
+  - st_cap_create_attr()
+    - ST_CAP_CREATE_ATTR_NUMBER
+    - ST_CAP_SEND_ATTR_NUMBER
+    - ST_CAP_CREATE_ATTR_STRING
+    - ST_CAP_SEND_ATTR_STRING
+    - ST_CAP_CREATE_ATTR_STRINGS_ARRAY
+    - ST_CAP_SEND_ATTR_STRINGS_ARRAY
+  - st_cap_free_attr()
+  - st_cap_send_attr()
 
 ***Main function example for ESP8266*** :
 
@@ -470,7 +474,7 @@ output/
 
 ```
 
-In case of Espressif chipset(e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries(e.g. app, bootloader, and init data bin) to the chipset.
+In case of Espressif chipset (e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries (e.g. app, bootloader, and init data bin) to the chipset.
 
 ```sh
 # Example for ESP8266
