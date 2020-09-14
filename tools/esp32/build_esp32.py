@@ -7,16 +7,45 @@ import shutil
 import subprocess
 
 OUTPUT_OPTION_ARRAY=["all", "flash", "app", "app-flash", "bootloader", "bootloader-flash", "partition_table"]
+AFTER_OPTION_ARRAY=["flash", "monitor"]
 
 BSP_NAME = sys.argv[1]
 APP_NAME = sys.argv[2]
 EXTRA_ARGS = sys.argv[3:]
 
 BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", BSP_NAME)
+PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", BSP_NAME)
 APP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "apps", "esp32", APP_NAME)
 COMMON_TOOLS_PATH = os.path.join(os.environ["STDK_REF_PATH"], "tools", "common")
 
 os.environ["IDF_PATH"] = BSP_PATH
+
+
+def get_qrgen_image():
+    qrgen_script = os.path.join(os.environ["STDK_REF_PATH"], "iot-core", "tools", "qrgen", "stdk-qrgen.py")
+    qrgen_image = ""
+    if os.path.isfile(qrgen_script):
+        try:
+            import qrcode
+        except:
+            print("Failed to import 'qrcode' to generate QR image for easysetup.")
+        else:
+            try:
+                qrgen_output = subprocess.check_output(
+                    ["python", qrgen_script, "--folder", os.path.join(APP_PATH, "main")], universal_newlines=True)
+            except:
+                print("Failed to generate QR image for easysetup.")
+            else:
+                qrgen_image = qrgen_output.split()[1]
+                qrgen_url = qrgen_output.split()[4]
+                if "m=MNID" in qrgen_url or "r=serialNumber_here" in qrgen_url:
+                    # json file is default.
+                    os.remove(qrgen_image)
+                    qrgen_image = ""
+                else:
+                    print("QR image : " + qrgen_image)
+                    qrgen_image = os.path.abspath(qrgen_image)
+    return qrgen_image
 
 if not (os.path.exists(BSP_PATH) and os.path.exists(APP_PATH)):
     print("Fail to find path.")
@@ -61,8 +90,6 @@ with open(os.path.join(APP_PATH, "sdkconfig"), 'r') as readfile:
 if use_custom_partition_table:
     partition_name = custom_partition_name
 
-qr_file =  os.path.join(APP_PATH, project_name + ".png")
-subprocess.call("python " + os.path.join(COMMON_TOOLS_PATH, "generate_qr.py") + " " + APP_PATH + " " + qr_file, shell=True)
 
 output_list = [
     os.path.join(APP_PATH, "build", "ota_data_initial.bin"),
@@ -71,8 +98,9 @@ output_list = [
     os.path.join(APP_PATH, "build", "partition_table", "partition-table.bin"),
 ]
 
-if os.path.isfile(qr_file):
-    output_list.append(qr_file)
+qrgen_image = get_qrgen_image()
+if qrgen_image:
+    output_list.append(os.path.join(qrgen_image))
 
 debug_list = [
     os.path.join(APP_PATH, "build", project_name + ".elf"),
@@ -86,7 +114,4 @@ sys.path.append(COMMON_TOOLS_PATH)
 from generate_output import generate_output
 generate_output(os.environ["STDK_REF_PATH"], BSP_NAME, APP_NAME, output_list, debug_list)
 
-if os.path.isfile(qr_file):
-    os.remove(qr_file)
-
-subprocess.call("python " + os.path.join(COMMON_TOOLS_PATH, "check_submodule.py") + " " + BSP_PATH, shell=True)
+subprocess.call("python " + os.path.join(COMMON_TOOLS_PATH, "check_submodule.py") + " " + BSP_PATH + " " + PATCH_PATH, shell=True)
