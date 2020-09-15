@@ -48,16 +48,20 @@ You can use a script to automatically download the `IoT Core Device Library` and
 ```sh
 $ cd ~/st-device-sdk-c-ref
 $ python setup.py
-    Usage: python setup.py CHIP_NAME
-- - - - - - - - - - - - - - - - - - -
-    ex) python setup.py esp8266
-    ex) python setup.py esp32
-    ex) python setup.py rtl8195
-    ex) python setup.py rtl8720c
-    ex) python setup.py rtl8721c
-    ex) python setup.py emw3166
+Usage: python setup.py [BSP_NAME]
+--------------------------------------------------
+  ex) python setup.py rtl8721c
+  ex) python setup.py rtl8720c
+  ex) python setup.py rtl8195
+  ex) python setup.py esp32_v3.3
+  ex) python setup.py emw3080
+  ex) python setup.py emw3166
+  ex) python setup.py esp8266
+  ex) python setup.py esp32
+  ex) python setup.py esp32s2
 
-$ python setup.py esp8266                    # python setup.py {chip_name}
+
+$ python setup.py esp8266
 ```
 
 ### Create device identity
@@ -129,7 +133,7 @@ You must setup a toolchain according to each chipset you selected.
   $ python setup.py esp32
   ```
 
-**Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)** :
+**Example for ESP32_v3.3 (legacy)** :
 
 - Setup [ESP32 Toolchain](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain).
 
@@ -504,15 +508,23 @@ $ python build.py apps/esp8266/switch_example menuconfig
 
 Plus, You don't need to run `python build.py appes/esp8266/switch_example` before running `python build.py appes/esp8266/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
 
-For more details about flashing and monitoring, please refer to the [README](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/README.md) file.
+For more details about flashing and monitoring, please refer to the [README](../README.md#flash--monitor) file.
 
 ### Test
 
-The SmartThings App should be used to control an IoT device that is running with the SmartThings Platform. Go to Google Play or the iOS App Store and download the SmartThings app on your phone.
+The SmartThings App should be used to control an IoT device that is running with the SmartThings Platform. Go to application market place (e.g. Play Store, App Store, Galaxy Store) and download the SmartThings app on your mobile device.
 
-| Step | Description                                                  |
-| :--: | ------------------------------------------------------------ |
-|  1   | **Enable developer mode**<br>You must enable the `Developer Mode` in the SmartThings app before testing.<br>For more details, please refer to the link below.<br>https://smartthings.developer.samsung.com/docs/testing/developer-mode.html<br><img src="res/developer_mode.jpg" style="zoom:80%;" align="left"/> |
-|  2   | **Reset the device**<br>Just push the reset button of device.<br><br>If you use an Espressif chipset, you can also run the `monitor` command to reset the device in the console window like below.<br>  $ cd ~/st-device-sdk-c-ref<br>  $ python build.py apps/esp866/switch_example monitor    # This is only for Espressif chipset. |
-|  3   | **Add device(Onboarding Process)**<br>There are two ways to add a device in the SmartThings application. You can proceed in one of the two ways below.<br>- Select the `Device Onboarding Name` via "My Testing Devices" menu. <br><img src="res/added_device1.jpg" style="zoom:100%;" align="left"/><br><br>- Use the automatic Detection pop-up window. By default, the last four digits(e.g. 7c16) of the example detection pop-up below represent the last four digits of the Serial Number of device.<br><img src="res/added_device2.jpg" style="zoom:100%;" align="left"/> |
-|  4   | **Control & Monitor a device**<br>Now that your device is on the SmartThings App. If there is no problem during above onboarding process, it means your device is well registered to the SmartThings Platform. <br><br>Control & Monitor your device via the App and make sure the App is working the way you think it should.<br><img src="res/added_device.jpg" style="zoom:80%;" align="left"/> |
+1. **Enable developer mode**  
+You need to enable the ***Developer Mode*** in the SmartThings app before start testing.  
+Please refer [here](https://smartthings.developer.samsung.com/docs/testing/developer-mode.htm) for more details.  
+![developer mode](./res/developer_mode.png)
+
+2. **Add device**  
+Go to ***Add device*** and click ***My Testing Devices*** or ***Scan QR code***. You can now see and add your self-published devices.  
+![add device 1](./res/add_device1.png)
+![add device 2](./res/add_device2.png)
+
+3. **Control device**  
+You can control test device from dash board action and device plug user interface
+![device control 1](./res/device_control1.png)
+![device control 2](./res/device_control2.png)
