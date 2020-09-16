@@ -28,23 +28,31 @@ def get_qrgen_image():
         try:
             import qrcode
         except:
-            print("Failed to import 'qrcode' to generate QR image for easysetup.")
+            print("WARN: Failed to import 'qrcode' to generate QR image for easysetup.")
+            print("      To install module, run 'pip install qrcode'")
         else:
             try:
                 qrgen_output = subprocess.check_output(
                     ["python", qrgen_script, "--folder", os.path.join(APP_PATH, "main")], universal_newlines=True)
             except:
-                print("Failed to generate QR image for easysetup.")
+                print("WARN: Failed to generate QR image for easysetup.")
             else:
-                qrgen_image = qrgen_output.split()[1]
-                qrgen_url = qrgen_output.split()[4]
-                if "m=MNID" in qrgen_url or "r=serialNumber_here" in qrgen_url:
-                    # json file is default.
-                    os.remove(qrgen_image)
-                    qrgen_image = ""
+                if qrgen_output.find("Error"):
+                    print(qrgen_output)
+                    print("WARN: Failed to generate QR image for easysetup.")
+                    if qrgen_output.find("No module named"):
+                        print("      To install module, run 'pip install " + qrgen_output.split()[-1] +"'")
                 else:
-                    print("QR image : " + qrgen_image)
-                    qrgen_image = os.path.abspath(qrgen_image)
+                    qrgen_image = qrgen_output.split()[1]
+                    qrgen_url = qrgen_output.split()[4]
+                    if not qrgen_image.endswith(".png"):
+                        qrgen_image = ""
+                    elif "m=MNID" in qrgen_url or "r=serialNumber_here" in qrgen_url:
+                        # invalid file name or default json file
+                        os.remove(qrgen_image)
+                        qrgen_image = ""
+                    else:
+                        qrgen_image = os.path.abspath(qrgen_image)
     return qrgen_image
 
 def copy_output():
