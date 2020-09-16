@@ -15,31 +15,41 @@ STDK_CORE_PATH = os.path.join(STDK_REF_PATH, "iot-core")
 os.environ["STDK_REF_PATH"] = STDK_REF_PATH
 os.environ["STDK_CORE_PATH"] = STDK_CORE_PATH
 
+
 def print_usage():
     print("")
     print("Usage: python setup.py [BSP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) python setup.py esp32")
+    for dir in os.listdir(os.path.join(STDK_REF_PATH, "bsp")):
+        if (os.path.isdir(os.path.join(STDK_REF_PATH, "bsp", dir))
+                and os.path.isdir(os.path.join(STDK_REF_PATH, "tools", dir))):
+            print("  ex) python setup.py " + dir)
     print("")
 
+
 def find_setup_script(bsp_name):
-    if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")):
-        return "python " + os.path.join("tools", bsp_name, "setup_"+bsp_name+".py")
+    if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")):
+        return "python " + os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")
     if "SHELL" in os.environ:
-        if os.path.exists(os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")):
-            return os.path.join("tools", bsp_name, "setup_"+bsp_name+".sh")
+        if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")):
+            return os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")
     print("Fail to find setup script")
     print_usage()
     exit()
 
+
 def update_submodule(path):
-    cwd = os.getcwd()
-    os.system("git submodule sync " + path)
-    os.system("git submodule init " + path)
-    os.system("git submodule update " + path)
-    os.chdir(path)
-    os.system("git reset --hard HEAD")
-    os.chdir(cwd)
+    if (path and os.path.isdir(path)):
+        cwd = os.getcwd()
+        os.system("git submodule sync " + path)
+        os.system("git submodule init " + path)
+        os.system("git submodule update " + path)
+        os.chdir(path)
+        os.system("git reset --hard HEAD")
+        os.chdir(cwd)
+    else:
+        print("Failed to update submodule " + path)
+
 
 update_submodule(STDK_CORE_PATH)
 

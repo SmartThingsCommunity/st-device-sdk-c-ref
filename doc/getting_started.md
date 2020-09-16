@@ -6,15 +6,14 @@ This article demonstrates how to integrate a direct-connected device with SmartT
 
 ## Workflow
 
-When developing a new direct-connected device application with SmartThings Device SDK, you will progress through the following steps. You can also refer to the [Code Lab data of the 2019 Samsung Developer Conference](https://developer.samsung.com/codelab/smartthings/smartthings-device-sdk/overview.html). It will be more practical for you to understand the SmartThings Device SDK.
+When developing a new direct-connected device application with SmartThings SDK, you will progress through the following steps. You can also refer to the [Samsung Developer - Code Lab](https://developer.samsung.com/codelab/smartthings/smartthings-device-sdk/overview.html). It will be more practical for you to understand the _SmartThings SDK for Direct Connected Devices_.
 
 - [Setup Environment](#setup-environment)
-
 - [Register a Device](#register-a-device)
-
 - [Develop a Device Application](#develop-a-device-application)
 
-  <img src="res/workflow.jpg" style="zoom:100%;" align="left"/>  
+
+  ![Work Flow](./res/workflow.jpg)
 
 &nbsp;
 
@@ -22,18 +21,18 @@ When developing a new direct-connected device application with SmartThings Devic
 
 The first thing you need to do is set up your programming environment.
 
-### Get SmartThings Device SDK source code
+### Get source code of _SmartThings SDK for Direct Connected Devices_
 
-There are two git repositories for working with the SmartThings Device SDK. The first git repository is for the Internet of Things (IoT) core device library itself, while the second git repository is for sample device applications that use this IoT core device library on the original chipset vendor's SDK.
+There are two git repositories for working with the _SmartThings SDK for Direct Connected Devices_. The first git repository is for the Internet of Things (IoT) core device library itself, while the second git repository is for sample device applications that use this IoT core device library on the chipset vendor's own SDK.
 
 - [IoT Core Device Library](https://github.com/SmartThingsCommunity/st-device-sdk-c)
 - [Reference](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref)
 
 #### Download Reference
 
-You can just choose to download the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) from GitHub, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` and `a chipset SDK` can be easily downloaded as submodules in this Reference repository through the predefined `setup.py` script. If you are the first to use this SmartThings Device SDK, we recommend that you use the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) for easier understanding.
+You can just choose to download the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) from GitHub, if you use a chipset that has already been ported. In this case, the `IoT Core Device Library` and `a chipset SDK` can be easily downloaded as submodules in this Reference repository through the predefined `setup.py` script. If you are new for using the _SmartThings SDK for Direct Connected Devices_, we recommend you to use the [Reference repository](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref) for easier understanding.
 
-From the terminal, navigate to the directory you want the SmartThings Device SDK to locate and clone it using the following git command:
+From the terminal, navigate to the directory you want the _SmartThings SDK for Direct Connected Devices_ to locate (e.g. `~/`) and clone it using the following git command:
 
 ```sh
 $ cd ~
@@ -42,33 +41,37 @@ $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
 
 > **Note** :
 >
-> For the rest of this document, we will assume the above path (~/st-device-sdk-c-ref) is the default reference source code.
+> For the rest of this document, we will assume the above path (`~/st-device-sdk-c-ref`) is the default reference source code.
 
-You can use a script to automatically download the `IoT Core Device Library` and `a chipset vendor's SDK` as follows:
+You can use a script to automatically download the `IoT Core Device Library` and `a chipset vendor's SDK` (e.g. `esp8266`) as follows:
 
 ```sh
 $ cd ~/st-device-sdk-c-ref
 $ python setup.py
-    Usage: python setup.py CHIP_NAME
-- - - - - - - - - - - - - - - - - - -
-    ex) python setup.py esp8266
-    ex) python setup.py esp32
-    ex) python setup.py rtl8195
-    ex) python setup.py rtl8720c
-    ex) python setup.py rtl8721c
-    ex) python setup.py emw3166
+Usage: python setup.py [BSP_NAME]
+--------------------------------------------------
+  ex) python setup.py rtl8721c
+  ex) python setup.py rtl8720c
+  ex) python setup.py rtl8195
+  ex) python setup.py esp32_v3.3
+  ex) python setup.py emw3080
+  ex) python setup.py emw3166
+  ex) python setup.py esp8266
+  ex) python setup.py esp32
+  ex) python setup.py esp32s2
 
-$ python setup.py esp8266                       # python setup.py {chip_name}
+
+$ python setup.py esp8266
 ```
 
 ### Create device identity
 
-In order for your IoT device to connect to the SmartThings Platform, there are required device authentication data.
+In order for your device to connect to the SmartThings cloud, authentication data files are required.
 
-Open a terminal window and run the following `stdk-keygen.py` script to create a Device Identity.
+Run the following `stdk-keygen.py` script in a terminal on your local machine to create a Device Identity.
 
 ```sh
-$ cd ~/Workspace/st-device-sdk-c-ref/iot-core/tools/keygen/
+$ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/
 $ python3 stdk-keygen.py --firmware switch_example_001
 Use following serial number and public key
 for the identity of your device in Developer Workspace.
@@ -101,7 +104,7 @@ $ cat output_STDK**E90W***uCX/device_info.json
 }
 ```
 
-Copy the Serial Number and Public Key after running the command. You will need to upload these values to the SmartThings Platform via [Developer Workspace](https://smartthings.developer.samsung.com/workspace/projects) during the next phase.
+Copy the Serial Number and Public Key after running the command. You will need to upload these values to the SmartThings Platform via [Developer Workspace - Projects](https://smartthings.developer.samsung.com/workspace/projects) during the [next phase](#register-test-devices).
 
 If you create a device identity with a command with an option like above,  You can get the ready-to-use `device_info.json` file directly.
 
@@ -109,35 +112,47 @@ If you create a device identity with a command with an option like above,  You c
 
 You must setup a toolchain according to each chipset you selected.
 
-***Example for ESP8266*** :
+**Example for ESP8266** :
 
-*In fact, ESP8266 supports multiple host environments including Windows, Linux, and macOS. But, based on experience, compile times are significantly faster on Linux. Therefore, we will only describe the Linux environment. And yet, if you prefer to use another environment, please refer to the Espressif's guideline matched on the Espressif Doc site. For more details, see the following document.*
+- Setup [ESP8266 Toolchain](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html#setup-toolchain).
 
-- *[ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html)*
+- Setup ESP8266 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
+  ```sh
+  $ cd ~/st-device-sdk-c-ref
+  $ python setup.py esp8266
+  ```
 
-*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toolchain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
 
-***Example for ESP32*** :
+**Example for ESP32** :
 
-- *Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.*
+- Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#setting-up-development-environment).
 
-*Setup ESP32 toolchain by using `setup.py`*
+- Setup ESP32 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
+  ```sh
+  $ cd ~/st-device-sdk-c-ref
+  $ python setup.py esp32
+  ```
 
-***Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)*** :
+**Example for ESP32_v3.3 (legacy)** :
 
-- *Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.*
+- Setup [ESP32 Toolchain](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain).
 
-*In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.*
+- Setup ESP32 v3.3 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
+  ```sh
+  $ cd ~/st-device-sdk-c-ref
+  $ python setup.py esp32_v3.3
+  ```
 
-***Example for RTL8195***
 
-- *Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.*
-- *Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)*
-  *Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`*
+**Example for RTL8195**
 
-> ***Note :***
+- Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
+- Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
+  Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
+
+> **Note :**
 >
-> *You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.*
+> You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
 
 
 
@@ -147,7 +162,7 @@ Now that the programming environment is setup, you need to create project and re
 
 First, please sign in to the [Developer Workspace](https://smartthings.developer.samsung.com/workspace/) with a Samsung Account.
 
-<img src="res/sign_in.png" style="zoom:20%;" align="left"/>
+![sign in](./res/sign_in.png)
 
 ### Create a new project
 
@@ -193,10 +208,10 @@ You can define device’s category and its regional availability.
 
 ### Deploy your device to test
 
-You can start testing by deploying your device to test from _Test_ &rightarrow; _Test Devices_ or _Overview_ page.  You will be able to see your device in the SmartThings mobile app when in Developer Mode only after it has been deployed for testing.
-- [Official Publishing Process](https://smartthings.developer.samsung.com/docs/devices/publishing/publishing-basics.html)
+You can start testing by deploying your device to test from _Test_ &rightarrow; _Test Devices_ or _Overview_ page.  You will be able to see your device in the SmartThings mobile app when in Developer Mode only when after it has been deployed for testing.
+- [SmartThings Device Publishing Process](https://smartthings.developer.samsung.com/docs/devices/publishing/publishing-basics.html)
 
-<img src="res/deploy_to_test_switch.png" style="zoom:100%;" align="left"/>
+![deplay to test](./res/deploy_to_test_switch.png)
 
 &nbsp;  
 
@@ -209,11 +224,11 @@ Because maximum number of test device is limited per user, Once you reaches maxi
 
 This example shows how to create ED25519 key pair with SDK tools. You can get device_info.json file as a result from tools/keygen/linux/output_{ serialNumber}
 
-Linux version of key generator (keygen) utility is located at st-iot-device-sdk-c-reference/iot-core/tools/keygen/ or st-device-sdk-c/tools/keygen/
+Key generator utility (keygen.py) is located at `st-iot-device-sdk-c-reference/iot-core/tools/keygen/` or `st-device-sdk-c/tools/keygen/`
 Serial number for testing device would be randomly generated by this tool which has STDK + 12-digit alphanumberic format.
 
 ```sh
-$ cd ~/Workspace/st-device-sdk-c-ref/iot-core/tools/keygen/
+$ cd ~/st-device-sdk-c-ref/iot-core/tools/keygen/
 $ python3 stdk-keygen.py --firmware switch_example_001
 Use following serial number and public key
 for the identity of your device in Developer Workspace.
@@ -228,7 +243,7 @@ nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=
 Copy `STDK**E90W***uCX` from keygen output and paste it into “Device serial number” field of “Register A Test Device” page.
 Copy public key string from keygen output (`nFN5x***uQusQ****ZHoBSFaAoP9***kNdLnjDJRew=` in this example) and paste it into “Device Public Key” field.
 
-<img src="res/adding_test_device2.png" style="zoom:20%;"/>
+![adding test device](./res/adding_test_device2.png)
 &nbsp;  
 
 ### Generate Device QR code
@@ -295,8 +310,7 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
 
      `device_info.json` file could include all the information as json format. Our SmartThings Device SDK sample application (e.g. `light_example`, `switch_example`) uses this method.  
      This is the easiest and simplest way to contain security information for devices. But having per device specific information as json format may not be suitable for manufacturing. So this is recommended for the test devices for individual developer.
-     ```sh
-     # Format of device_info.json
+     ```json
      {
        "deviceInfo": {
          "firmwareVersion": "firmwareVersion_here",
@@ -314,8 +328,7 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
    - **Firmware version only**
 
      We can leave only the firmware version at `device_info.json` like below.
-     ```sh
-     # Format of device_info.json
+     ```json
      {
        "deviceInfo": {
          "firmwareVersion": "firmwareVersion_here"
@@ -340,8 +353,7 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
 2. onboarding_config.json
 
    The `onboarding_config.json` contains project common information. this can be downloaded from Developer Workspace project page as a file. Our sample appliation (e.g. `light_example`, `switch_example`) embedding it as an object blob. But developer could decide how to embed it as a part of device firmware.
-   ```sh
-   # Format of onboarding_config.json
+   ```json
    {
      "onboardingConfig": {
        "deviceOnboardingId": "NAME",
@@ -367,7 +379,8 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
   
 ### Develop device application
 
-A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the pre-supplied sample device applications, like `switch_example`. This allows for rapid development as you begin to develop your new device. Please refer to the [API references](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/master/doc/STDK_APIs.pdf) related to the IoT core device library as shown:
+A device application is developed using the APIs provided by the IoT Core Device Library. We recommend reuse of the example device applications, like `switch_example`, `light_example`. This allows for rapid development as you begin to develop your new device.  
+Major APIs are like below:
 
 - connection management
   - st_conn_init()
@@ -379,12 +392,15 @@ A device application is developed using the APIs provided by the IoT Core Device
 - capability management
   - st_cap_handle_init()
   - st_cap_cmd_set_cb()
-  - st_cap_attr_create_int()
-  - st_cap_attr_create_number()
-  - st_cap_attr_create_string()
-  - st_cap_attr_create_string_array()
-  - st_cap_attr_free()
-  - st_cap_attr_send()
+  - st_cap_create_attr()
+    - ST_CAP_CREATE_ATTR_NUMBER
+    - ST_CAP_SEND_ATTR_NUMBER
+    - ST_CAP_CREATE_ATTR_STRING
+    - ST_CAP_SEND_ATTR_STRING
+    - ST_CAP_CREATE_ATTR_STRINGS_ARRAY
+    - ST_CAP_SEND_ATTR_STRINGS_ARRAY
+  - st_cap_free_attr()
+  - st_cap_send_attr()
 
 ***Main function example for ESP8266*** :
 
@@ -470,7 +486,7 @@ output/
 
 ```
 
-In case of Espressif chipset(e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries(e.g. app, bootloader, and init data bin) to the chipset.
+In case of Espressif chipset (e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries (e.g. app, bootloader, and init data bin) to the chipset.
 
 ```sh
 # Example for ESP8266
@@ -492,15 +508,23 @@ $ python build.py apps/esp8266/switch_example menuconfig
 
 Plus, You don't need to run `python build.py appes/esp8266/switch_example` before running `python build.py appes/esp8266/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
 
-For more details about flashing and monitoring, please refer to the [README](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/README.md) file.
+For more details about flashing and monitoring, please refer to the [README](../README.md#flash--monitor) file.
 
 ### Test
 
-The SmartThings App should be used to control an IoT device that is running with the SmartThings Platform. Go to Google Play or the iOS App Store and download the SmartThings app on your phone.
+The SmartThings App should be used to control an IoT device that is running with the SmartThings Platform. Go to application market place (e.g. Play Store, App Store, Galaxy Store) and download the SmartThings app on your mobile device.
 
-| Step | Description                                                  |
-| :--: | ------------------------------------------------------------ |
-|  1   | **Enable developer mode**<br>You must enable the `Developer Mode` in the SmartThings app before testing.<br>For more details, please refer to the link below.<br>https://smartthings.developer.samsung.com/docs/testing/developer-mode.html<br><img src="res/developer_mode.jpg" style="zoom:80%;" align="left"/> |
-|  2   | **Reset the device**<br>Just push the reset button of device.<br><br>If you use an Espressif chipset, you can also run the `monitor` command to reset the device in the console window like below.<br>  $ cd ~/st-device-sdk-c-ref<br>  $ python build.py apps/esp866/switch_example monitor    # This is only for Espressif chipset. |
-|  3   | **Add device(Onboarding Process)**<br>There are two ways to add a device in the SmartThings application. You can proceed in one of the two ways below.<br>- Select the `Device Onboarding Name` via "My Testing Devices" menu. <br><img src="res/added_device1.jpg" style="zoom:100%;" align="left"/><br><br>- Use the automatic Detection pop-up window. By default, the last four digits(e.g. 7c16) of the example detection pop-up below represent the last four digits of the Serial Number of device.<br><img src="res/added_device2.jpg" style="zoom:100%;" align="left"/> |
-|  4   | **Control & Monitor a device**<br>Now that your device is on the SmartThings App. If there is no problem during above onboarding process, it means your device is well registered to the SmartThings Platform. <br><br>Control & Monitor your device via the App and make sure the App is working the way you think it should.<br><img src="res/added_device.jpg" style="zoom:80%;" align="left"/> |
+1. **Enable developer mode**  
+You need to enable the ***Developer Mode*** in the SmartThings app before start testing.  
+Please refer [here](https://smartthings.developer.samsung.com/docs/testing/developer-mode.htm) for more details.  
+![developer mode](./res/developer_mode.png)
+
+2. **Add device**  
+Go to ***Add device*** and click ***My Testing Devices*** or ***Scan QR code***. You can now see and add your self-published devices.  
+![add device 1](./res/add_device1.png)
+![add device 2](./res/add_device2.png)
+
+3. **Control device**  
+You can control test device from dash board action and device plug user interface
+![device control 1](./res/device_control1.png)
+![device control 2](./res/device_control2.png)

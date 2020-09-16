@@ -23,8 +23,11 @@ else:
 if not ret:
     print("(run in " + BSP_PATH + ",\n Or, use SmartThings Device SDK build script)")
 
-os.chdir(BSP_PATH)
-os.system("git am " + os.path.join(PATCH_PATH, "*.patch"))
+if os.path.isdir(PATCH_PATH):
+    os.chdir(BSP_PATH)
+    for patchfile in sorted(os.listdir(PATCH_PATH)):
+        if patchfile.endswith(".patch"):
+            os.system("git am " + os.path.join(PATCH_PATH, patchfile))
 
 if not os.path.isdir(CONFIG_PATH):
     if os.path.exists(CONFIG_PATH):
