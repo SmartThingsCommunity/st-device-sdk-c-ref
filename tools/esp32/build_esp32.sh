@@ -71,22 +71,12 @@ fi
 ### Write address_info.txt
 PROJECT_NAME=`cat ./Makefile | grep ^PROJECT_NAME | awk '{print $3}'`
 
-QR_FILE="${PROJECT_PATH}/${PROJECT_TITLE}.png"
-${COMMON_TOOLS_PATH}/generate_qr.py ${PROJECT_PATH} ${QR_FILE}
-if [ ! -f ${QR_FILE} ]; then
-    QR_FILE=""
-fi
-
 ### Generate output
-export OUTPUT_FILE_LIST="${PROJECT_PATH}/build/ota_data_initial.bin ${PROJECT_PATH}/build/bootloader/bootloader.bin ${PROJECT_PATH}/build/${PROJECT_NAME}.bin ${PROJECT_PATH}/build/partition_table/partition-table.bin ${QR_FILE}"
+export OUTPUT_FILE_LIST="${PROJECT_PATH}/build/ota_data_initial.bin ${PROJECT_PATH}/build/bootloader/bootloader.bin ${PROJECT_PATH}/build/${PROJECT_NAME}.bin ${PROJECT_PATH}/build/partition_table/partition-table.bin"
 
 export DEBUG_FILE_LIST="${PROJECT_PATH}/build/${PROJECT_NAME}.elf ${PROJECT_PATH}/build/${PROJECT_NAME}.map ${PROJECT_PATH}/build/bootloader/bootloader.elf ${PROJECT_PATH}/build/bootloader/bootloader.map ${PROJECT_PATH}/sdkconfig"
 
 ${STDK_PATH}/tools/common/generate_output.sh
-
-if [ ${QR_FILE} ]; then
-    rm ${QR_FILE}
-fi
 
 python ${COMMON_TOOLS_PATH}/check_submodule.py ${IDF_PATH}
 
