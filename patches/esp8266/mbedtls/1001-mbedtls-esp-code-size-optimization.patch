@@ -1,0 +1,651 @@
+From 2c86cbfad02dbc888676504020c6a2d5a341477e Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Thu, 19 Sep 2019 14:16:06 +0900
+Subject: [PATCH] mbedtls: esp: code size optimization
+
+Remove not used codes on st-iot-core from mbedTLS.
+
+MBEDTLS_IOT_CORE_OPTIM will be set in esp_config.h
+:
+We can reduce binary size by 14672 bytes @ 0.3.6 version.
+
+From 564544 to 549872 on smart_switch usr binary.
+
+Change-Id: I60e720d0ab0a967bb4d72faad367565b9a863684
+Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
+---
+ library/asn1parse.c        | 14 ++++++++++++++
+ library/bignum.c           | 26 ++++++++++++++++++++++++++
+ library/ecp.c              | 11 +++++++++++
+ library/ecp_curves.c       |  6 ++++++
+ library/oid.c              |  4 ++++
+ library/pkparse.c          | 12 ++++++++++++
+ library/rsa.c              |  9 +++++++++
+ library/ssl_ciphersuites.c |  3 ++-
+ library/ssl_cli.c          | 12 ++++++++++++
+ library/x509.c             | 12 ++++++++++++
+ library/x509_crt.c         | 14 ++++++++++++++
+ 11 files changed, 122 insertions(+), 1 deletion(-)
+
+diff --git a/library/asn1parse.c b/library/asn1parse.c
+index 171c340..fcc7f05 100644
+--- a/library/asn1parse.c
++++ b/library/asn1parse.c
+@@ -332,6 +332,9 @@ int mbedtls_asn1_get_alg_null( unsigned char **p,
+                        const unsigned char *end,
+                        mbedtls_asn1_buf *alg )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     mbedtls_asn1_buf params;
+
+@@ -344,10 +347,13 @@ int mbedtls_asn1_get_alg_null( unsigned char **p,
+         return( MBEDTLS_ERR_ASN1_INVALID_DATA );
+
+     return( 0 );
++#endif
+ }
+
+ void mbedtls_asn1_free_named_data( mbedtls_asn1_named_data *cur )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#else
+     if( cur == NULL )
+         return;
+
+@@ -355,10 +361,13 @@ void mbedtls_asn1_free_named_data( mbedtls_asn1_named_data *cur )
+     mbedtls_free( cur->val.p );
+
+     mbedtls_platform_zeroize( cur, sizeof( mbedtls_asn1_named_data ) );
++#endif
+ }
+
+ void mbedtls_asn1_free_named_data_list( mbedtls_asn1_named_data **head )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#else
+     mbedtls_asn1_named_data *cur;
+
+     while( ( cur = *head ) != NULL )
+@@ -367,11 +376,15 @@ void mbedtls_asn1_free_named_data_list( mbedtls_asn1_named_data **head )
+         mbedtls_asn1_free_named_data( cur );
+         mbedtls_free( cur );
+     }
++#endif
+ }
+
+ mbedtls_asn1_named_data *mbedtls_asn1_find_named_data( mbedtls_asn1_named_data *list,
+                                        const char *oid, size_t len )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return NULL;
++#else
+     while( list != NULL )
+     {
+         if( list->oid.len == len &&
+@@ -384,6 +397,7 @@ mbedtls_asn1_named_data *mbedtls_asn1_find_named_data( mbedtls_asn1_named_data *
+     }
+
+     return( list );
++#endif
+ }
+
+ #endif /* MBEDTLS_ASN1_PARSE_C */
+diff --git a/library/bignum.c b/library/bignum.c
+index f84e81b..0e9b53e 100644
+--- a/library/bignum.c
++++ b/library/bignum.c
+@@ -529,6 +529,7 @@ cleanup:
+     return( ret );
+ }
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ /*
+  * Helper to write the digits high-order first.
+  */
+@@ -567,6 +568,7 @@ cleanup:
+
+     return( ret );
+ }
++#endif
+
+ /*
+  * Export into an ASCII string
+@@ -574,6 +576,9 @@ cleanup:
+ int mbedtls_mpi_write_string( const mbedtls_mpi *X, int radix,
+                               char *buf, size_t buflen, size_t *olen )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret = 0;
+     size_t n;
+     char *p;
+@@ -653,6 +658,7 @@ cleanup:
+     mbedtls_mpi_free( &T );
+
+     return( ret );
++#endif
+ }
+
+ #if defined(MBEDTLS_FS_IO)
+@@ -1393,6 +1399,9 @@ cleanup:
+  */
+ int mbedtls_mpi_add_int( mbedtls_mpi *X, const mbedtls_mpi *A, mbedtls_mpi_sint b )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     mbedtls_mpi _B;
+     mbedtls_mpi_uint p[1];
+     MPI_VALIDATE_RET( X != NULL );
+@@ -1404,6 +1413,7 @@ int mbedtls_mpi_add_int( mbedtls_mpi *X, const mbedtls_mpi *A, mbedtls_mpi_sint
+     _B.p = p;
+
+     return( mbedtls_mpi_add_mpi( X, A, &_B ) );
++#endif
+ }
+
+ /*
+@@ -1782,6 +1792,9 @@ int mbedtls_mpi_div_int( mbedtls_mpi *Q, mbedtls_mpi *R,
+                          const mbedtls_mpi *A,
+                          mbedtls_mpi_sint b )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     mbedtls_mpi _B;
+     mbedtls_mpi_uint p[1];
+     MPI_VALIDATE_RET( A != NULL );
+@@ -1792,6 +1805,7 @@ int mbedtls_mpi_div_int( mbedtls_mpi *Q, mbedtls_mpi *R,
+     _B.p = p;
+
+     return( mbedtls_mpi_div_mpi( Q, R, A, &_B ) );
++#endif
+ }
+
+ /*
+@@ -1825,6 +1839,9 @@ cleanup:
+  */
+ int mbedtls_mpi_mod_int( mbedtls_mpi_uint *r, const mbedtls_mpi *A, mbedtls_mpi_sint b )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     size_t i;
+     mbedtls_mpi_uint x, y, z;
+     MPI_VALIDATE_RET( r != NULL );
+@@ -1877,6 +1894,7 @@ int mbedtls_mpi_mod_int( mbedtls_mpi_uint *r, const mbedtls_mpi *A, mbedtls_mpi_
+     *r = y;
+
+     return( 0 );
++#endif
+ }
+
+ #if !defined(MBEDTLS_MPI_EXP_MOD_ALT)
+@@ -2525,6 +2543,9 @@ int mbedtls_mpi_is_prime_ext( const mbedtls_mpi *X, int rounds,
+                               int (*f_rng)(void *, unsigned char *, size_t),
+                               void *p_rng )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     mbedtls_mpi XX;
+     MPI_VALIDATE_RET( X     != NULL );
+@@ -2550,6 +2571,7 @@ int mbedtls_mpi_is_prime_ext( const mbedtls_mpi *X, int rounds,
+     }
+
+     return( mpi_miller_rabin( &XX, rounds, f_rng, p_rng ) );
++#endif
+ }
+
+ #if !defined(MBEDTLS_DEPRECATED_REMOVED)
+@@ -2583,6 +2605,9 @@ int mbedtls_mpi_gen_prime( mbedtls_mpi *X, size_t nbits, int flags,
+                    int (*f_rng)(void *, unsigned char *, size_t),
+                    void *p_rng )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+ #ifdef MBEDTLS_HAVE_INT64
+ // ceil(2^63.5)
+ #define CEIL_MAXUINT_DIV_SQRT2 0xb504f333f9de6485ULL
+@@ -2697,6 +2722,7 @@ cleanup:
+     mbedtls_mpi_free( &Y );
+
+     return( ret );
++#endif
+ }
+
+ #endif /* MBEDTLS_GENPRIME */
+diff --git a/library/ecp.c b/library/ecp.c
+index dcf84f4..82cb61c 100644
+--- a/library/ecp.c
++++ b/library/ecp.c
+@@ -344,6 +344,10 @@ int mbedtls_ecp_check_budget( const mbedtls_ecp_group *grp,
+
+ #endif /* MBEDTLS_ECP_RESTARTABLE */
+
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#undef MBEDTLS_ECP_DP_SECP256R1_ENABLED
++#endif
++
+ #if defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED) ||   \
+     defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED) ||   \
+     defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED) ||   \
+@@ -2121,6 +2125,7 @@ cleanup:
+
+ #endif /* ECP_SHORTWEIERSTRASS */
+
++
+ #if defined(ECP_MONTGOMERY)
+ /*
+  * For Montgomery curves, we do all the internal arithmetic in projective
+@@ -2448,6 +2453,7 @@ cleanup:
+ }
+ #endif /* ECP_SHORTWEIERSTRASS */
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ /*
+  * R = m * P with shortcuts for m == 1 and m == -1
+  * NOT constant-time - ONLY for short Weierstrass!
+@@ -2479,6 +2485,7 @@ static int mbedtls_ecp_mul_shortcuts( mbedtls_ecp_group *grp,
+ cleanup:
+     return( ret );
+ }
++#endif
+
+ /*
+  * Restartable linear combination
+@@ -2490,6 +2497,9 @@ int mbedtls_ecp_muladd_restartable(
+              const mbedtls_mpi *n, const mbedtls_ecp_point *Q,
+              mbedtls_ecp_restart_ctx *rs_ctx )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     mbedtls_ecp_point mP;
+     mbedtls_ecp_point *pmP = &mP;
+@@ -2575,6 +2585,7 @@ cleanup:
+     ECP_RS_LEAVE( ma );
+
+     return( ret );
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+ }
+
+ /*
+diff --git a/library/ecp_curves.c b/library/ecp_curves.c
+index 282481d..d9c6f22 100644
+--- a/library/ecp_curves.c
++++ b/library/ecp_curves.c
+@@ -45,6 +45,10 @@
+ #define inline __inline
+ #endif
+
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#undef MBEDTLS_ECP_DP_SECP256R1_ENABLED
++#endif
++
+ /*
+  * Conversion macros for embedded constants:
+  * build lists of mbedtls_mpi_uint's from lists of unsigned char's grouped by 8, 4 or 2
+@@ -578,6 +582,7 @@ static inline void ecp_mpi_set1( mbedtls_mpi *X )
+     X->p = one;
+ }
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ /*
+  * Make group available from embedded constants
+  */
+@@ -606,6 +611,7 @@ static int ecp_group_load( mbedtls_ecp_group *grp,
+
+     return( 0 );
+ }
++#endif
+
+ #if defined(MBEDTLS_ECP_NIST_OPTIM)
+ /* Forward declarations */
+diff --git a/library/oid.c b/library/oid.c
+index 33f437c..0aca3de 100644
+--- a/library/oid.c
++++ b/library/oid.c
+@@ -45,6 +45,10 @@
+ #include "mbedtls/x509.h"
+ #endif
+
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#undef MBEDTLS_ECP_DP_SECP256K1_ENABLED
++#endif
++
+ /*
+  * Macro to automatically add the size of #define'd OIDs
+  */
+diff --git a/library/pkparse.c b/library/pkparse.c
+index d500457..8a749dd 100644
+--- a/library/pkparse.c
++++ b/library/pkparse.c
+@@ -34,6 +34,10 @@
+
+ #include <string.h>
+
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++#undef MBEDTLS_ECP_C
++#endif
++
+ #if defined(MBEDTLS_RSA_C)
+ #include "mbedtls/rsa.h"
+ #endif
+@@ -1006,6 +1010,9 @@ static int pk_parse_key_pkcs8_unencrypted_der(
+                                     const unsigned char* key,
+                                     size_t keylen )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret, version;
+     size_t len;
+     mbedtls_asn1_buf params;
+@@ -1084,6 +1091,7 @@ static int pk_parse_key_pkcs8_unencrypted_der(
+         return( MBEDTLS_ERR_PK_UNKNOWN_PK_ALG );
+
+     return( 0 );
++#endif
+ }
+
+ /*
+@@ -1432,6 +1440,9 @@ int mbedtls_pk_parse_key( mbedtls_pk_context *pk,
+ int mbedtls_pk_parse_public_key( mbedtls_pk_context *ctx,
+                          const unsigned char *key, size_t keylen )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     unsigned char *p;
+ #if defined(MBEDTLS_RSA_C)
+@@ -1533,6 +1544,7 @@ int mbedtls_pk_parse_public_key( mbedtls_pk_context *ctx,
+     ret = mbedtls_pk_parse_subpubkey( &p, p + keylen, ctx );
+
+     return( ret );
++#endif
+ }
+
+ #endif /* MBEDTLS_PK_PARSE_C */
+diff --git a/library/rsa.c b/library/rsa.c
+index 09fd379..8e9adad 100644
+--- a/library/rsa.c
++++ b/library/rsa.c
+@@ -43,6 +43,7 @@
+ #include MBEDTLS_CONFIG_FILE
+ #endif
+
++#undef MBEDTLS_IOT_CORE_OPTIM
+ #if defined(MBEDTLS_RSA_C)
+
+ #include "mbedtls/rsa.h"
+@@ -771,6 +772,7 @@ cleanup:
+     return( 0 );
+ }
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ /*
+  * Generate or update blinding values, see section 10 of:
+  *  KOCHER, Paul C. Timing attacks on implementations of Diffie-Hellman, RSA,
+@@ -810,6 +812,7 @@ static int rsa_prepare_blinding( mbedtls_rsa_context *ctx,
+ cleanup:
+     return( ret );
+ }
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+
+ /*
+  * Exponent blinding supposed to prevent side-channel attacks using multiple
+@@ -841,6 +844,9 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
+                  const unsigned char *input,
+                  unsigned char *output )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     size_t olen;
+
+@@ -1060,6 +1066,7 @@ cleanup:
+         return( MBEDTLS_ERR_RSA_PRIVATE_FAILED + ret );
+
+     return( 0 );
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+ }
+
+ #if defined(MBEDTLS_PKCS1_V21)
+@@ -1280,6 +1287,7 @@ int mbedtls_rsa_rsaes_pkcs1_v15_encrypt( mbedtls_rsa_context *ctx,
+ }
+ #endif /* MBEDTLS_PKCS1_V15 */
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ /*
+  * Add the message padding, then do an RSA operation
+  */
+@@ -1314,6 +1322,7 @@ int mbedtls_rsa_pkcs1_encrypt( mbedtls_rsa_context *ctx,
+             return( MBEDTLS_ERR_RSA_INVALID_PADDING );
+     }
+ }
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+
+ #if defined(MBEDTLS_PKCS1_V21)
+ /*
+diff --git a/library/ssl_ciphersuites.c b/library/ssl_ciphersuites.c
+index 518f7dd..3785b74 100644
+--- a/library/ssl_ciphersuites.c
++++ b/library/ssl_ciphersuites.c
+@@ -800,12 +800,13 @@ static const mbedtls_ssl_ciphersuite_t ciphersuite_definitions[] =
+ #endif /* MBEDTLS_GCM_C */
+
+ #if defined(MBEDTLS_CIPHER_MODE_CBC)
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+     { MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256, "TLS-RSA-WITH-AES-128-CBC-SHA256",
+       MBEDTLS_CIPHER_AES_128_CBC, MBEDTLS_MD_SHA256, MBEDTLS_KEY_EXCHANGE_RSA,
+       MBEDTLS_SSL_MAJOR_VERSION_3, MBEDTLS_SSL_MINOR_VERSION_3,
+       MBEDTLS_SSL_MAJOR_VERSION_3, MBEDTLS_SSL_MINOR_VERSION_3,
+       0 },
+-
++#endif
+     { MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256, "TLS-RSA-WITH-AES-256-CBC-SHA256",
+       MBEDTLS_CIPHER_AES_256_CBC, MBEDTLS_MD_SHA256, MBEDTLS_KEY_EXCHANGE_RSA,
+       MBEDTLS_SSL_MAJOR_VERSION_3, MBEDTLS_SSL_MINOR_VERSION_3,
+diff --git a/library/ssl_cli.c b/library/ssl_cli.c
+index afced7a..bbe881c 100644
+--- a/library/ssl_cli.c
++++ b/library/ssl_cli.c
+@@ -1265,6 +1265,9 @@ static int ssl_parse_supported_point_formats_ext( mbedtls_ssl_context *ssl,
+                                                   const unsigned char *buf,
+                                                   size_t len )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     size_t list_size;
+     const unsigned char *p;
+
+@@ -1301,6 +1304,7 @@ static int ssl_parse_supported_point_formats_ext( mbedtls_ssl_context *ssl,
+     mbedtls_ssl_send_alert_message( ssl, MBEDTLS_SSL_ALERT_LEVEL_FATAL,
+                                     MBEDTLS_SSL_ALERT_MSG_HANDSHAKE_FAILURE );
+     return( MBEDTLS_ERR_SSL_BAD_HS_SERVER_HELLO );
++#endif
+ }
+ #endif /* MBEDTLS_ECDH_C || MBEDTLS_ECDSA_C ||
+           MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED */
+@@ -1411,6 +1415,9 @@ static int ssl_parse_alpn_ext( mbedtls_ssl_context *ssl,
+ #if defined(MBEDTLS_SSL_PROTO_DTLS)
+ static int ssl_parse_hello_verify_request( mbedtls_ssl_context *ssl )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     const unsigned char *p = ssl->in_msg + mbedtls_ssl_hs_hdr_len( ssl );
+     int major_ver, minor_ver;
+     unsigned char cookie_len;
+@@ -1477,6 +1484,7 @@ static int ssl_parse_hello_verify_request( mbedtls_ssl_context *ssl )
+     MBEDTLS_SSL_DEBUG_MSG( 2, ( "<= parse hello verify request" ) );
+
+     return( 0 );
++#endif
+ }
+ #endif /* MBEDTLS_SSL_PROTO_DTLS */
+
+@@ -2107,6 +2115,9 @@ static int ssl_parse_server_psk_hint( mbedtls_ssl_context *ssl,
+                                       unsigned char **p,
+                                       unsigned char *end )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret = MBEDTLS_ERR_SSL_FEATURE_UNAVAILABLE;
+     size_t  len;
+     ((void) ssl);
+@@ -2141,6 +2152,7 @@ static int ssl_parse_server_psk_hint( mbedtls_ssl_context *ssl,
+     ret = 0;
+
+     return( ret );
++#endif
+ }
+ #endif /* MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED */
+
+diff --git a/library/x509.c b/library/x509.c
+index 2e0b0e8..4329612 100644
+--- a/library/x509.c
++++ b/library/x509.c
+@@ -745,6 +745,9 @@ int mbedtls_x509_get_ext( unsigned char **p, const unsigned char *end,
+  */
+ int mbedtls_x509_dn_gets( char *buf, size_t size, const mbedtls_x509_name *dn )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     size_t i, n;
+     unsigned char c, merge = 0;
+@@ -799,6 +802,7 @@ int mbedtls_x509_dn_gets( char *buf, size_t size, const mbedtls_x509_name *dn )
+     }
+
+     return( (int) ( size - n ) );
++#endif
+ }
+
+ /*
+@@ -807,6 +811,9 @@ int mbedtls_x509_dn_gets( char *buf, size_t size, const mbedtls_x509_name *dn )
+  */
+ int mbedtls_x509_serial_gets( char *buf, size_t size, const mbedtls_x509_buf *serial )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     size_t i, n, nr;
+     char *p;
+@@ -834,6 +841,7 @@ int mbedtls_x509_serial_gets( char *buf, size_t size, const mbedtls_x509_buf *se
+     }
+
+     return( (int) ( size - n ) );
++#endif
+ }
+
+ /*
+@@ -843,6 +851,9 @@ int mbedtls_x509_sig_alg_gets( char *buf, size_t size, const mbedtls_x509_buf *s
+                        mbedtls_pk_type_t pk_alg, mbedtls_md_type_t md_alg,
+                        const void *sig_opts )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     char *p = buf;
+     size_t n = size;
+@@ -879,6 +890,7 @@ int mbedtls_x509_sig_alg_gets( char *buf, size_t size, const mbedtls_x509_buf *s
+ #endif /* MBEDTLS_X509_RSASSA_PSS_SUPPORT */
+
+     return( (int)( size - n ) );
++#endif
+ }
+
+ /*
+diff --git a/library/x509_crt.c b/library/x509_crt.c
+index cddb4ef..ecf489c 100644
+--- a/library/x509_crt.c
++++ b/library/x509_crt.c
+@@ -523,6 +523,9 @@ static int x509_get_ns_cert_type( unsigned char **p,
+                                        const unsigned char *end,
+                                        unsigned char *ns_cert_type)
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     mbedtls_x509_bitstring bs = { 0, 0, NULL };
+
+@@ -536,6 +539,7 @@ static int x509_get_ns_cert_type( unsigned char **p,
+     /* Get actual bitstring */
+     *ns_cert_type = *bs.p;
+     return( 0 );
++#endif
+ }
+
+ static int x509_get_key_usage( unsigned char **p,
+@@ -1392,6 +1396,7 @@ cleanup:
+ }
+ #endif /* MBEDTLS_FS_IO */
+
++#if !defined(MBEDTLS_IOT_CORE_OPTIM)
+ static int x509_info_subject_alt_name( char **buf, size_t *size,
+                                        const mbedtls_x509_sequence *subject_alt_name )
+ {
+@@ -1520,6 +1525,7 @@ static int x509_info_ext_key_usage( char **buf, size_t *size,
+
+     return( 0 );
+ }
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+
+ /*
+  * Return an informational string about the certificate.
+@@ -1529,6 +1535,9 @@ static int x509_info_ext_key_usage( char **buf, size_t *size,
+ int mbedtls_x509_crt_info( char *buf, size_t size, const char *prefix,
+                    const mbedtls_x509_crt *crt )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     size_t n;
+     char *p;
+@@ -1656,6 +1665,7 @@ int mbedtls_x509_crt_info( char *buf, size_t size, const char *prefix,
+     MBEDTLS_X509_SAFE_SNPRINTF;
+
+     return( (int) ( size - n ) );
++#endif /* MBEDTLS_IOT_CORE_OPTIM */
+ }
+
+ struct x509_crt_verify_string {
+@@ -1690,6 +1700,9 @@ static const struct x509_crt_verify_string x509_crt_verify_strings[] = {
+ int mbedtls_x509_crt_verify_info( char *buf, size_t size, const char *prefix,
+                           uint32_t flags )
+ {
++#if defined(MBEDTLS_IOT_CORE_OPTIM)
++    return -1;
++#else
+     int ret;
+     const struct x509_crt_verify_string *cur;
+     char *p = buf;
+@@ -1713,6 +1726,7 @@ int mbedtls_x509_crt_verify_info( char *buf, size_t size, const char *prefix,
+     }
+
+     return( (int) ( size - n ) );
++#endif
+ }
+
+ #if defined(MBEDTLS_X509_CHECK_KEY_USAGE)
+-- 
+2.7.4
+

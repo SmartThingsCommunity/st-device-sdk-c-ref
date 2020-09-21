@@ -64,17 +64,17 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
      $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
      $ cd st-device-sdk-c-ref
      $ python setup.py
-         Usage: python setup.py CHIP_NAME
-     - - - - - - - - - - - - - - - - - - -
-         ex) python setup.py esp8266
-         ex) python setup.py esp32
-         ex) python setup.py esp32_v3.3
-         ex) python setup.py rtl8195
-         ex) python setup.py rtl8720c
-         ex) python setup.py rtl8721c
-         ex) python setup.py emw3166
-
-     $ python setup.py esp8266
+     Usage: python setup.py [BSP_NAME]
+     --------------------------------------------------
+     ex) python setup.py rtl8721c
+     ex) python setup.py rtl8720c
+     ex) python setup.py rtl8195
+     ex) python setup.py esp32_v3.3
+     ex) python setup.py emw3080
+     ex) python setup.py emw3166
+     ex) python setup.py esp8266
+     ex) python setup.py esp32
+     ex) python setup.py esp32s2
      ```
 
 2. Check the build configuration of a sample device application. If you want to use specific build options, you can directly modify the build configuration file(e.g. sdkconfig, sdkconfig.h) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option to configure them.
