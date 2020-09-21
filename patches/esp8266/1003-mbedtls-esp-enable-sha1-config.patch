@@ -21,22 +21,22 @@ Signed-off-by: Sanghee Kim <sh0130.kim@samsung.com>
 
 Change-Id: I70cf58a04b7b03251425aae9d606ab049d0fd7a0
 ---
- .../ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h       | 2 +-
+ components/mbedtls/port/include/mbedtls/esp_config.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-index e10a69b1..4bc2d3b4 100644
---- a/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-+++ b/components/ssl/mbedtls/port/esp8266/include/mbedtls/esp_config.h
-@@ -2526,7 +2526,7 @@
-  *            on it, and considering stronger message digests instead.
+diff --git a/components/mbedtls/port/include/mbedtls/esp_config.h b/components/mbedtls/port/include/mbedtls/esp_config.h
+index 53245cf..1aef136 100644
+--- a/components/mbedtls/port/include/mbedtls/esp_config.h
++++ b/components/mbedtls/port/include/mbedtls/esp_config.h
+@@ -1895,7 +1895,7 @@
   *
+  * This module is required for SSL/TLS and SHA1-signed certificates.
   */
 -//#define MBEDTLS_SHA1_C
 +#define MBEDTLS_SHA1_C
- 
+
  /**
   * \def MBEDTLS_SHA256_C
 -- 
-2.17.1
+2.7.4
 

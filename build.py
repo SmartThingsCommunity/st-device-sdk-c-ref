@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import platform
 import os
 import sys
 
@@ -21,8 +20,26 @@ def print_usage():
     print("                 or")
     print("       python build.py [BSP_NAME] [APP_NAME]")
     print("--------------------------------------------------")
-    print("  ex) python build.py apps/esp32/switch_example")
-    print("  ex) python build.py esp32 light_example")
+
+    try:
+        usage_buf = ""
+        for bsp_dir in os.listdir(os.path.join(STDK_REF_PATH, "bsp")):
+            if (os.path.isdir(os.path.join(STDK_REF_PATH, "bsp", bsp_dir))
+                   and os.path.isdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir))):
+                app_list = ""
+                for dir in os.listdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir)):
+                    if os.path.isdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir, dir)):
+                        app_list = app_list + dir + ", "
+                if app_list:
+                    usage_buf = usage_buf + "  " + format(bsp_dir, "12s") + ": " + app_list[:-2] + "\n"
+    except:
+        pass
+    else:
+        print("   [BSP_NAME] : [APP_NAME]")
+        print(usage_buf)
+    finally:
+        print("  ex) python build.py apps/esp32/switch_example")
+        print("  ex) python build.py esp32 light_example")
     print("")
 
 def find_build_script(bsp_name):
@@ -38,6 +55,7 @@ def find_build_script(bsp_name):
 if len(sys.argv) == 1:
     print_usage()
     exit()
+
 
 if os.path.exists(sys.argv[1]):
     # assume that input type is apps/[BSP_NAME]/[APP_NAME]
