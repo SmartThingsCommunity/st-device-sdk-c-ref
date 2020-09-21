@@ -525,6 +525,6 @@ Go to ***Add device*** and click ***My Testing Devices*** or ***Scan QR code***.
 ![add device 2](./res/add_device2.png)
 
 3. **Control device**  
-You can control test device from dash board action and device plug user interface
+You can control test device from dash board action and device plug user interface  
 ![device control 1](./res/device_control1.png)
 ![device control 2](./res/device_control2.png)
