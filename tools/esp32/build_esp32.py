@@ -37,10 +37,10 @@ def get_qrgen_image():
             except:
                 print("WARN: Failed to generate QR image for easysetup.")
             else:
-                if qrgen_output.find("Error"):
+                if "Error" in qrgen_output:
                     print(qrgen_output)
                     print("WARN: Failed to generate QR image for easysetup.")
-                    if qrgen_output.find("No module named"):
+                    if "No module named" in qrgen_output:
                         print("      To install module, run 'pip install " + qrgen_output.split()[-1] +"'")
                 else:
                     qrgen_image = qrgen_output.split()[1]
