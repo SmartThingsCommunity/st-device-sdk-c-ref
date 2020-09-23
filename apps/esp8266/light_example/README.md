@@ -1,4 +1,4 @@
-# SmartThings Device SDK Switch Example
+# SmartThings SDK for Direct Connected Devices for C - Light Example
 
 ## Introduction
 
@@ -15,23 +15,54 @@ Components and Capabilities are contained in device profile. You can create a de
 
 This example assumes the following components and capabilities are used. :  
 
-'main' component  
-- 'healthCheck' capability  
-- 'switch' capability  
-- 'switchLevel' capability  
-- 'colorTemperature' capability  
-- 'activityLightingMode' capability  
+`main` component  
+- `healthCheck` capability  
+- `switch` capability  
+- `switchLevel` capability  
+- `colorTemperature` capability  
+- `activityLightingMode` capability  
 
-'monitor' component  
-- 'dustSensor' capability  
+`monitor` component  
+- `dustSensor` capability  
 
-('healthCheck' capability is automatically added by Developer Workspace. It doesn't need handler at device side)
+(`healthCheck` capability is automatically added by Developer Workspace. It doesn't need handler at device side)
 
-## SmartThings Device SDK config
+## SmartThings SDK for Direct Connected Devices - Config
 If you want to use specific SmartThings Device SDK build options, you can directly modify the build configuration file. For this example, SmartThings Device SDK config is saved in 'sdkconfig' file. If you want to change this, please execute the following :
 ```sh
-# ./build.sh {app_path} {option}
+# python build.py {app_path} {option}
 $ cd ~/st-device-sdk-c-ref/
-$ ./build.sh app/esp8266/light_example menuconfig
+$ python build.py app/esp8266/light_example menuconfig
 ```
+
+## Test device schematics
+This example uses ESP32 GPIO like below.  
+Please refer below pictures for __ESP8266-WEMOS D1 mini__ and __ESP8266-DEVKITC__.  
+GPIOs for __ESP8266-WEMOS D1 mini__ will be used by default. You can switch it for __ESP8266-DEVKITC__ by uncommenting below `define` at [device_control.h](main/device_control.h)
+```c
+//#define CONFIG_TARGET_ESP8266_DEVKITC_V1
+```
+
+> Note: If your device's schematics doesn't match with belows.
+> Please modify GPIO defines for your device at [device_control.h](main/device_control.h)
+>
+> ```c
+> #define GPIO_INPUT_BUTTON 5
+> 
+> #define GPIO_OUTPUT_COLORLED_R 16
+> #define GPIO_OUTPUT_COLORLED_G 14
+> #define GPIO_OUTPUT_COLORLED_B 12
+> #define GPIO_OUTPUT_COLORLED_0 13
+> ```
+
+### ESP8266-WEMOS D1 mini  
+| ESP8266 WEMOS D1 mini                                                     |
+|-------------------------------------------------------------------|
+|![ESP8266_WEMOS_D1_MINI](../../../doc/res/Light_Example_ESP8266_D1_mini.png) |
+
+
+### ESP8266-DEVKITC  
+| ESP8266 DEVKITC                                                     |
+|-------------------------------------------------------------------|
+|![ESP8266_DEVKITC](../../../doc/res/Light_Example_ESP8266_DEVKITC.png) |
 
