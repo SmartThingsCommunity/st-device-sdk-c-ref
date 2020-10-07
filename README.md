@@ -1,8 +1,8 @@
-# SmartThings Device SDK Reference
+# SmartThings SDK for Direct Connected Devices for C
 
 [![License](https://img.shields.io/badge/licence-Apache%202.0-brightgreen.svg?style=flat)](LICENSE)
 
-The SmartThings Device SDK(STDK for short) Reference is the git repository of examples using the core device library that allow device applications to securely connect to the SmartThings Cloud. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
+Direct-connected devices connect directly to the SmartThings cloud. The SDK for Direct Connected Devices is equipped to manage all MQTT topics and onboarding requirements, freeing you to focus on the actions and attributes of your device. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
 
 It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
 
@@ -55,7 +55,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
 
 ### Build
 
-1. Download the STDK Reference source code. Basically, this STDK Reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.py` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
+1. Download the Device SDK Reference source code. Basically, this reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.py` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
 
    - Download the source code via `git clone`.
    - And then, run the `setup.py` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
