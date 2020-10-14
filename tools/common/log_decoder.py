@@ -122,8 +122,8 @@ class message_info:
     def get_arg_text(self):
         arg1_string = ""
         arg2_string = ""
-        return arg1_string + format(self.arg1, "10d")+" (0x"+format(self.arg1 & (2**32-1), "08X") +") | " + \
-               arg2_string + format(self.arg2, "10d")+" (0x"+format(self.arg2 & (2**32-1), "08X")+")"
+        return arg1_string + format(self.arg1, "10d")+"(0x"+format(self.arg1 & (2**32-1), "08X") +")|" + \
+               arg2_string + format(self.arg2, "10d")+"(0x"+format(self.arg2 & (2**32-1), "08X")+")"
     def get_time_text(self):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.time + tz_offset_sec))
     def printMessage(self):
@@ -132,7 +132,7 @@ class message_info:
         elif (self.log_level == 3): log_level_char = 'I'
         elif (self.log_level == 4): log_level_char = 'D'
         else: return
-        output = log_level_char+" |"+self.get_time_text()+"| " + format(self.get_logid_text(), "50s") + " | " + self.get_arg_text()
+        output = log_level_char+"|"+self.get_time_text()+"|" + self.get_arg_text() + "| " + self.get_logid_text()
         print(output)
         output_file.write(output + "\n")
 
