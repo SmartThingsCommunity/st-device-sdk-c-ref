@@ -1,4 +1,4 @@
-# SmartThings Device SDK Switch Example
+# SmartThings SDK for Direct Connected Devices for C - Switch Example
 
 ## Introduction
 
@@ -21,6 +21,25 @@ This example assumes the following component and capabilities are used. :
 
 ('healthCheck' capability is automatically added by Developer Workspace. It doesn't need handler at device side)
 
-## SmartThings Device SDK config
-If you want to use specific SmartThings Device SDK build options, you can directly modify the build configuration file. For this example, SmartThings Device SDK config is saved in 'sdkconfig.h' file.
+## SmartThings SDK for Direct Connected Devices - Config
+If you want to use specific SmartThings Device SDK build options, you can directly modify the build configuration file. For this example, SmartThings Device SDK config is saved in 'sdkconfig.h' file. If you want to change this, please execute the following :
+```sh
+$ cd ~/st-device-sdk-c-ref
+$ vim apps/rtl8720c/switch_example/sdkconfig.h
+```
 
+## Test device schematics
+This example uses RTL8720 GPIO like below.
+Please refer below picture for __Ameba RTL8720CM__.
+> Note: If your device's schematics doesn't match with belows.
+> Please modify GPIO defines for your device at [device_control.h](main/device_control.h)
+> ```c
+> #define GPIO_OUTPUT_MAINLED             PA_19
+> #define GPIO_OUTPUT_NOTIFICATION_LED    PA_23
+> #define GPIO_INPUT_BUTTON               PA_4
+> ```
+
+### Ameba RTL8720CM
+| Ameba RTL8720CM                                                       |
+|-----------------------------------------------------------------------|
+|![Ameba RTL8720CM](../../../doc/res/Switch_Example_AMEBA_RTL8720CM.png) |
