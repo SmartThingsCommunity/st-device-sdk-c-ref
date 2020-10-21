@@ -37,19 +37,18 @@ def find_setup_script(bsp_name):
     print_usage()
     exit()
 
-
 def update_submodule(path):
-    if (path and os.path.isdir(path)):
-        cwd = os.getcwd()
+    cwd = os.getcwd()
+    try:
+        print("Update submodule " + path)
         os.system("git submodule sync " + path)
         os.system("git submodule init " + path)
         os.system("git submodule update " + path)
         os.chdir(path)
         os.system("git reset --hard HEAD")
-        os.chdir(cwd)
-    else:
+    except:
         print("Failed to update submodule " + path)
-
+    os.chdir(cwd)
 
 update_submodule(STDK_CORE_PATH)
 
@@ -67,7 +66,8 @@ for item in REPLACE_LIST:
 setup_script = find_setup_script(BSP_NAME)
 
 BSP_PATH = os.path.join(STDK_REF_PATH, "bsp", BSP_NAME)
-update_submodule(BSP_PATH)
+if BSP_PATH and os.path.isdir(BSP_PATH):
+    update_submodule(BSP_PATH)
 
 setup_cmd = setup_script + " " + BSP_NAME
 for args in EXTRA_ARGS:
