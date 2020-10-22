@@ -4,7 +4,7 @@
 
 Direct-connected devices connect directly to the SmartThings cloud. The SDK for Direct Connected Devices is equipped to manage all MQTT topics and onboarding requirements, freeing you to focus on the actions and attributes of your device. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
 
-It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md).
+It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](./doc/getting_started.md).
 
 ## Directory layout
 
@@ -13,7 +13,7 @@ The reference git is delivered via the following directory structure :
 - `apps` : sample device applications for each chipset
 - `bsp` : An original chipset vendor's SDK is located.  If you use a chipset that has already been ported, this vendor's SDK can be easily downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
 - `doc` : documents
-- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
+- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/release/v1.4). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
 - `output` : build outputs will be placed
 - `patches` : patches to be applied in the original chipset vendor's SDK for resolving some problems
 - `tools` : scripts to be applied for each chipset
@@ -61,7 +61,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
    - And then, run the `setup.py` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
      ```sh
      $ cd ~
-     $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
+     $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git -b release/v1.4
      $ cd st-device-sdk-c-ref
      $ python setup.py
      Usage: python setup.py [BSP_NAME]
