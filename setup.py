@@ -35,7 +35,7 @@ def find_setup_script(bsp_name):
             return os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")
     print("Fail to find setup script")
     print_usage()
-    exit()
+    exit(1)
 
 def update_submodule(path):
     cwd = os.getcwd()
@@ -54,7 +54,7 @@ update_submodule(STDK_CORE_PATH)
 
 if len(sys.argv) == 1:
     print_usage()
-    exit()
+    exit(1)
 
 BSP_NAME = sys.argv[1]
 EXTRA_ARGS = sys.argv[2:]
@@ -75,6 +75,7 @@ for args in EXTRA_ARGS:
 ret_val = os.system(setup_cmd)
 if ret_val:
     print_usage()
+    exit(1)
 else:
     print("")
     print("======================================================================")
