@@ -6,7 +6,7 @@ SmartThings direct-connected device is Wi-Fi enabled device that uses the SmartT
 
 ## Getting started
 
-For information on detailed workflow, please refer to the [Getting Started](https://github.com/SmartThingsCommunity/st-device-sdk-c-ref/blob/master/doc/getting_started.md)
+For information on detailed workflow, please refer to the [Getting Started](../../../doc/getting_started.md)
 
 ## Components and Capabilities
 
