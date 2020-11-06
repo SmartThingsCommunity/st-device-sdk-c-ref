@@ -121,7 +121,14 @@ else:
 
 build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
 
-subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
+ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
+if "clean" in MAKE_OPTION.split(' '):
+    print("\nTip : To remove all previous build information,")
+    print("      'fullclean' is recommended instead of 'clean'.")
+    print("      For more information, run script with '--help' option.\n")
+if ret != 0:
+    exit(1)
+
 
 if set(MAKE_OPTION.split()).intersection(OUTPUT_OPTION_ARRAY):
     copy_output()
