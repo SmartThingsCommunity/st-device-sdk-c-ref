@@ -228,7 +228,7 @@ index 0e19c62..7d6e1c9
 +MiCO_SDK_CFLAGS             +=$(STDK_CFLAGS)
 +ST_IOT_CORE_DIR = $(COMPONENT_PATH)
 +include $(ST_IOT_CORE_DIR)/component.mk
-+INCLUDES += $(CPPFLAGS)
++MiCO_SDK_CFLAGS += $(CPPFLAGS)
 +INCLUDES += -I$(PROJECT_PATH)
 +IOT_CORE_EXCLUDE_C += $(ST_IOT_CORE_DIR)/easysetup/http/lwip_httpd/fsdata_custom.c
 +IOT_CORE_C += $(foreach srcdir,$(COMPONENT_SRCDIRS),$(wildcard $(ST_IOT_CORE_DIR)/$(srcdir)/*.c))
