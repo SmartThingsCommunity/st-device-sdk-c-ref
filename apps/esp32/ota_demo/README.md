@@ -10,7 +10,7 @@ Because this application is based on _switch_example_ . you could find more deta
 
 Change configuration
 -------------------
-These compile options will enable HTTPS and MBEDTLS feature to connect OTA server.   
+These compile options will enable HTTPS and MBEDTLS feature to connect OTA server.
 `stdkconfig`
 ```c
 // Enable option for HTTPS
@@ -26,7 +26,7 @@ CONFIG_STDK_IOT_CORE_NET_MBEDTLS=y
 
 Import certificate
 -------------------
-This application requires _root.pem_, _public_key.pem_ which is used for https connection and firmware signature validation.   
+This application requires _root.pem_, _public_key.pem_ which is used for https connection and firmware signature validation.
 You can find how to create these file from [here](../../../doc/ota_demo.md#preparing-certificate)
 
 ```sh
@@ -38,82 +38,82 @@ $ cp public_key.pem [st-device-sdk-c-ref path]/apps/esp32/ota_demo/main
 
 Register capability callback
 -------------------
-This code init handle and add command callback for **Firmware Update** capability.   
-`ota_demo.c`
+This code init handle and add command callback for **Firmware Update** capability.
+`main.c`
 ```c
-// create handle for capability
-ota_cap_handle = st_cap_handle_init(ctx, "main", "firmwareUpdate", cap_current_version_init_cb, NULL);
+// create ota data for capability
+cap_ota_data = caps_ota_initialize(ctx, "main", NULL, NULL);
 
 // set command callback
-iot_err = st_cap_cmd_set_cb(ota_cap_handle, "updateFirmware", update_firmware_cmd_cb, NULL);
-if (iot_err)
-    printf("fail to set cmd_cb for updateFirmware");
+cap_ota_data->cmd_update_firmware_usr_cb = cap_update_cmd_cb;
 ```
 ***
 
 Send currentVersion
 -------------------
-This code will update `currentVersion` attribute by sending event.   
-`ota_demo.c`
+This code will update `currentVersion` attribute by sending event.
+`main.c`
 ```c
-void cap_current_version_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
-{
-    ...
-	init_evt = st_cap_attr_create_string("currentVersion", OTA_FIRMWARE_VERSION, NULL);
+char *firmware_version = get_current_firmware_version();
 
-	sequence_no = st_cap_attr_send(handle, evt_num, &init_evt);
-    ...
-}
+cap_ota_data->set_currentVersion(cap_ota_data, firmware_version);
 ```
 ***
 
 Lookup available new firmware
 -----------------------------
-This code will lookup available new firmware by reading OTA server's `versioninfo.json` and send `availableVersion` event.   
-`ota_demo.c`
+This code will lookup available new firmware by reading OTA server's `versioninfo.json` and send `availableVersion` event.
+`main.c`
 ```c
-static void ota_polling_task_func(void *arg)
+
+void ota_polling_task(void *arg)
 {
-	while (1) {
+    while (1) {
         ...
-		esp_err_t ret = ota_https_read_version_info(&read_data, &read_data_len);
-		if (ret == ESP_OK) {
-			...
-			esp_err_t err = ota_api_get_available_version(read_data, read_data_len, &available_version);
-			...
-			cap_available_version_set(available_version);
-            	...
-		}
+        ota_check_for_update((void *)arg);
         ...
-	}
+    }
+}
+
+void ota_check_for_update(void *user_data)
+{
+    ...
+    ota_err_t ret = _read_version_info_from_server(&read_data, &read_data_len);
+    if (ret == OTA_OK) {
+        ...
+        ret = _get_available_version(read_data, read_data_len, current_version, &available_version);
+        ...
+        if (available_version) {
+            caps_data->set_availableVersion(caps_data, available_version);
+            caps_data->attr_availableVersion_send(caps_data);
+        ...
+        }
+    }
 }
 ```
 ***
 
 Run firmware update
 -------------------
-This code will run firmware update by receiving `updateFirmware` command.   
-`ota_demo.c`
+This code will run firmware update by receiving `updateFirmware` command.
+`main.c`
 ```c
-static void ota_task_func(void * pvParameter)
+static void ota_update_task(void * pvParameter)
 {
-	printf("Starting OTA...\n");
+    printf("\n Starting OTA...\n");
 
-	esp_err_t ret = ota_https_update_device();
-	if (ret != ESP_OK) {
-		printf("Firmware Upgrades Failed (%d) \n", ret);
-		_task_fatal_error();
-	}
+    ```
+    ota_err_t ret = ota_update_device();
+    ```
 
-	printf("Restart system!\n");
-	esp_restart();
+    printf("Prepare to restart system!");
+    ota_restart_device();
 }
 
-void update_firmware_cmd_cb(IOT_CAP_HANDLE *handle,
-			iot_cap_cmd_data_t *cmd_data, void *usr_data)
+static void cap_update_cmd_cb(struct caps_ota_data *caps_data)
 {
 	ota_nvs_flash_init();
-	xTaskCreate(&ota_task_func, "ota_task_func", 8096, NULL, 5, &ota_task_handle);
+	xTaskCreate(&ota_update_task, "ota_update_task", 8096, NULL, 5, &ota_task_handle);
 }
 ```
 
