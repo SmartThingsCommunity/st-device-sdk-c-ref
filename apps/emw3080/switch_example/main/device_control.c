@@ -46,7 +46,7 @@ void change_switch_state(int switch_state)
     if (switch_state == SWITCH_OFF) {
         MicoGpioOutputLow(GPIO_OUTPUT_MAINLED);
     } else {
-        MicoGpioOutputLow(GPIO_OUTPUT_MAINLED);
+        MicoGpioOutputHigh(GPIO_OUTPUT_MAINLED);
     }
 }
 
@@ -155,7 +155,6 @@ void iot_gpio_init(void)
 
 	//notify led init
 	MicoGpioInitialize(GPIO_OUTPUT_NOTIFICATION_LED, OUTPUT_PUSH_PULL);
-	MicoGpioOutputHigh(GPIO_OUTPUT_NOTIFICATION_LED);
 	MicoGpioOutputHigh(GPIO_OUTPUT_NOTIFICATION_LED);
 
 	//button init
