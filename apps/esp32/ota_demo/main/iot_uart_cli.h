@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright (c) 2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,27 @@
  *
  ****************************************************************************/
 
-typedef enum ota_err_type {
-    OTA_OK                 = 0,
-    OTA_FAIL               = -1,
-    OTA_ERR_INVALID_ARG  = -2,
-    OTA_ERR_NO_MEM        = -3,
-    OTA_ERR_INVALID_SIZE = -4
-} ota_err_t;
+#ifndef _IOT_ESP_UART_CLI_H_
+#define _IOT_ESP_UART_CLI_H_
 
-void ota_nvs_flash_init();
-void ota_check_for_update(void *user_data);
-void ota_restart_device();
-ota_err_t ota_update_device();
-int ota_get_polling_period_day();
-ota_err_t ota_api_get_firmware_version_load(unsigned char *device_info, unsigned int device_info_len, char **firmware_version);
+#define ARRAY_SIZE(x) (int)(sizeof(x)/sizeof(x[0]))
+#define CLI_TASK_PRIORITY (5)
+#define CLI_TASK_SIZE    (8192)
+#define MAX_UART_LINE_SIZE    (1024)
+typedef void (* command_function_t)(char *string);
+
+typedef struct cli_command {
+    char *command;
+    char *help_string;
+    command_function_t command_fn;
+} cli_cmd_t;
+
+typedef struct cli_command_list {
+    cli_cmd_t* cmd;
+    struct cli_command_list* next;
+} cli_cmd_list_t;
+
+void uart_cli_main();
+void cli_register_command(cli_cmd_t* cmd);
+
+#endif /* _IOT_ESP_UART_CLI_H_ */
