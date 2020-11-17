@@ -24,18 +24,24 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
+#include "st_dev.h"
 #include "cJSON.h"
 #include "string.h"
 #include "ota_util.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "caps_firmwareUpdate.h"
 
 #include "mbedtls/sha256.h"
 #include "mbedtls/rsa.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/ssl.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <esp_https_ota.h>
+#include <esp_ota_ops.h>
+#include <esp_log.h>
 
 #define CONFIG_OTA_SERVER_URL "https://192.168.1.3:4443/"
 #define CONFIG_FIRMWARE_VERSOIN_INFO_URL CONFIG_OTA_SERVER_URL"version_info.json"
@@ -82,12 +88,81 @@ void ota_nvs_flash_init()
 	ESP_ERROR_CHECK( err );
 }
 
+static const char name_deviceInfo[] = "deviceInfo";
+static const char name_version[] = "firmwareVersion";
+
+ota_err_t ota_api_get_firmware_version_load(unsigned char *device_info,
+		unsigned int device_info_len, char **firmware_version)
+{
+	ota_err_t ret = OTA_OK;
+	cJSON *root = NULL;
+	cJSON *profile = NULL;
+	cJSON *item = NULL;
+	char *version = NULL;
+	char *data = NULL;
+	size_t str_len = 0;
+
+	if (!device_info || device_info_len == 0)
+		return OTA_ERR_INVALID_ARG;
+
+	data = malloc((size_t) device_info_len + 1);
+	if (!data) {
+		return OTA_ERR_NO_MEM;
+	}
+
+	memcpy(data, device_info, device_info_len);
+	data[device_info_len] = '\0';
+
+	root = cJSON_Parse((char *)data);
+	profile = cJSON_GetObjectItem(root, name_deviceInfo);
+	if (!profile) {
+		ret = OTA_FAIL;
+		goto load_out;
+	}
+
+	/* version */
+	item = cJSON_GetObjectItem(profile, name_version);
+	if (!item) {
+		ret = OTA_FAIL;
+		goto load_out;
+	}
+	str_len = strlen(cJSON_GetStringValue(item));
+	version = malloc(str_len + 1);
+	if (!version) {
+		ret = OTA_ERR_NO_MEM;
+		goto load_out;
+	}
+	strncpy(version, cJSON_GetStringValue(item), str_len);
+	version[str_len] = '\0';
+
+	*firmware_version = version;
+
+	if (root)
+		cJSON_Delete(root);
+
+	free(data);
+
+	return ret;
+
+load_out:
+
+	if (firmware_version)
+		free(firmware_version);
+
+	if (root)
+		cJSON_Delete(root);
+	if (data)
+		free(data);
+
+	return ret;
+}
+
 static const char name_versioninfo[] = "versioninfo";
 static const char name_latest[] = "latest";
 static const char name_upgrade[] = "upgrade";
 static const char name_polling[] = "polling";
 
-esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_info_len, char **new_version)
+static ota_err_t _get_available_version(char *update_info, unsigned int update_info_len, char *firmware_version, char **new_version)
 {
 	cJSON *root = NULL;
 	cJSON *profile = NULL;
@@ -98,17 +173,17 @@ esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_i
 
 	bool is_new_version = false;
 
-	esp_err_t ret = ESP_OK;
+	ota_err_t ret = OTA_OK;
 
 	if (!update_info) {
 		printf("Invalid parameter \n");
-		return ESP_ERR_INVALID_ARG;
+		return OTA_ERR_INVALID_ARG;
 	}
 
 	data = malloc((size_t) update_info_len + 1);
 	if (!data) {
 		printf("Couldn't allocate memory to add version info\n");
-		return ESP_ERR_NO_MEM;
+		return OTA_ERR_NO_MEM;
 	}
 	memcpy(data, update_info, update_info_len);
 	data[update_info_len] = '\0';
@@ -116,14 +191,14 @@ esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_i
 	root = cJSON_Parse((char *)data);
 	profile = cJSON_GetObjectItem(root, name_versioninfo);
 	if (!profile) {
-		ret = ESP_FAIL;
+		ret = OTA_FAIL;
 		goto clean_up;
 	}
 
 	/* polling */
 	item = cJSON_GetObjectItem(profile, name_polling);
 	if (!item) {
-		ret = ESP_FAIL;
+		ret = OTA_FAIL;
 		goto clean_up;
 	}
 	polling_day = atoi(cJSON_GetStringValue(item));
@@ -136,7 +211,7 @@ esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_i
 	{
 		char *upgrade = cJSON_GetArrayItem(array, i)->valuestring;
 
-		if (strcmp(upgrade, OTA_FIRMWARE_VERSION) == 0) {
+		if (strcmp(upgrade, firmware_version) == 0) {
 			is_new_version = true;
 			break;
 		}
@@ -150,7 +225,7 @@ esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_i
 		item = cJSON_GetObjectItem(profile, name_latest);
 		if (!item) {
 			printf("IOT_ERROR_UNINITIALIZED \n");
-			ret = ESP_FAIL;
+			ret = OTA_FAIL;
 			goto clean_up;
 		}
 
@@ -158,7 +233,7 @@ esp_err_t ota_api_get_available_version(char *update_info, unsigned int update_i
 		latest_version = malloc(str_len + 1);
 		if (!latest_version) {
 			printf("Couldn't allocate memory to add latest version\n");
-			ret = ESP_ERR_NO_MEM;
+			ret = OTA_ERR_NO_MEM;
 			goto clean_up;
 		}
 		strncpy(latest_version, cJSON_GetStringValue(item), str_len);
@@ -175,40 +250,6 @@ clean_up:
 		free(data);
 
 	return ret;
-}
-
-esp_err_t _http_event_handler(esp_http_client_event_t *evt)
-{
-	switch(evt->event_id) {
-		case HTTP_EVENT_ERROR:
-			printf("HTTP_EVENT_ERROR\n");
-			break;
-		case HTTP_EVENT_ON_CONNECTED:
-			printf("HTTP_EVENT_ON_CONNECTED\n");
-			break;
-		case HTTP_EVENT_HEADER_SENT:
-			printf("HTTP_EVENT_HEADER_SENT\n");
-			break;
-		case HTTP_EVENT_ON_HEADER:
-			printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s\n", evt->header_key, evt->header_value);
-			break;
-		case HTTP_EVENT_ON_DATA:
-			//printf("HTTP_EVENT_ON_DATA, len=%d \n", evt->data_len);
-			break;
-		case HTTP_EVENT_ON_FINISH:
-			printf("HTTP_EVENT_ON_FINISH\n");
-			break;
-		case HTTP_EVENT_DISCONNECTED:
-			printf("HTTP_EVENT_DISCONNECTED\n");
-			break;
-	}
-	return ESP_OK;
-}
-
-static void _http_cleanup(esp_http_client_handle_t client)
-{
-	esp_http_client_close(client);
-	esp_http_client_cleanup(client);
 }
 
 static void _print_sha256 (const uint8_t *image_hash, const char *label)
@@ -267,7 +308,7 @@ static int _pk_verify(const unsigned char *sig, const unsigned char *hash)
 	}
 
 	if ((ret = mbedtls_pk_verify(&pk, MBEDTLS_MD_SHA256, hash, OTA_CRYPTO_SHA256_LEN, sig, OTA_SIGNATURE_SIZE)) != 0 ) {
-		printf("\n Invaild firmware : 0x%04X\n", ret);
+		printf("Invalid firmware : 0x%04X\n", ret);
 		goto clean_up;
 	}
 
@@ -332,11 +373,30 @@ clean_up:
 	return ret;
 }
 
-esp_err_t ota_https_update_device()
+static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
-	printf("ota_https_update_device \n");
+	switch(evt->event_id) {
+		case HTTP_EVENT_ERROR:
+			printf("HTTP_EVENT_ERROR\n");
+			break;
+		default:
+			break;
+	}
+	return ESP_OK;
+}
 
-	esp_err_t ret = ESP_FAIL;
+static void _http_cleanup(esp_http_client_handle_t client)
+{
+	esp_http_client_close(client);
+	esp_http_client_cleanup(client);
+}
+
+static ota_err_t _update_device()
+{
+	printf("_update_device \n");
+
+	ota_err_t ret = OTA_FAIL;
+	esp_err_t result = ESP_FAIL;
 
 	unsigned int content_len;
 	unsigned int firmware_len;
@@ -351,31 +411,31 @@ esp_err_t ota_https_update_device()
 	mbedtls_sha256_init( &ctx );
 	if (mbedtls_sha256_starts_ret( &ctx, 0) != 0 ) {
 		printf("Failed to initialise api \n");
-		return ESP_FAIL;
+		return ret;
 	}
 
 	esp_http_client_handle_t client = esp_http_client_init(&config);
 	if (client == NULL) {
 		printf("Failed to initialise HTTP connection\n");
-		return ESP_FAIL;
+		return ret;
 	}
 
 	if (esp_http_client_get_transport_type(client) != HTTP_TRANSPORT_OVER_SSL) {
 		printf("Transport is not over HTTPS\n");
-		return ESP_FAIL;
+		return ret;
 	}
 
-	ret = esp_http_client_open(client, 0);
-	if (ret != ESP_OK) {
+	result = esp_http_client_open(client, 0);
+	if (result != ESP_OK) {
 		esp_http_client_cleanup(client);
-		printf("Failed to open HTTP connection: %d \n", ret);
+		printf("Failed to open HTTP connection: %d \n", result);
 		return ret;
 	}
 	content_len = esp_http_client_fetch_headers(client);
 	if (content_len <= OTA_DEFAULT_SIGNATURE_BUF_SIZE) {
 		printf("content size error \n");
 		_http_cleanup(client);
-		return ESP_FAIL;
+		return ret;
 	}
 
 	firmware_len = content_len - (OTA_DEFAULT_SIGNATURE_BUF_SIZE);
@@ -387,14 +447,14 @@ esp_err_t ota_https_update_device()
 	if (update_partition == NULL) {
 		printf("Passive OTA partition not found\n");
 		_http_cleanup(client);
-		return ESP_FAIL;
+		return ret;
 	}
 	printf("Writing to partition subtype %d at offset 0x%x \n",
 			 update_partition->subtype, update_partition->address);
 
-	ret = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
-	if (ret != ESP_OK) {
-		printf("esp_ota_begin failed, error=%d", ret);
+	result = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
+	if (result != ESP_OK) {
+		printf("esp_ota_begin failed, error=%d", result);
 		_http_cleanup(client);
 		return ret;
 	}
@@ -419,7 +479,7 @@ esp_err_t ota_https_update_device()
 		printf("Couldn't allocate memory to add sig buffer\n");
 		free(upgrade_data_buf);
 		_http_cleanup(client);
-		return ESP_ERR_NO_MEM;
+		return OTA_ERR_NO_MEM;
 	}
 	memset(sig, '\0', OTA_DEFAULT_SIGNATURE_BUF_SIZE);
 
@@ -475,7 +535,6 @@ esp_err_t ota_https_update_device()
 
 	if (mbedtls_sha256_finish_ret( &ctx, md) != 0) {
 		printf("Failed getting HASH \n");
-		ret = ESP_FAIL;
 		goto clean_up;
 	}
 	mbedtls_sha256_free(&ctx);
@@ -483,26 +542,27 @@ esp_err_t ota_https_update_device()
 	/* Check firmware validation */
 	if (_check_firmware_validation((const unsigned char *)md, sig, sig_len) != true) {
 		printf("Signature verified NOK\n");
-		ret = ESP_FAIL;
 		goto clean_up;
 	}
 
-	ret = esp_ota_end(update_handle);
+	result = esp_ota_end(update_handle);
 	if (ota_write_err != ESP_OK) {
 		printf("esp_ota_write failed! err=0x%d\n", ota_write_err);
 		goto clean_up;
-   	} else if (ret != ESP_OK) {
-		printf("esp_ota_end failed! err=0x%d. Image is invalid\n", ret);
+   	} else if (result != ESP_OK) {
+		printf("esp_ota_end failed! err=0x%d. Image is invalid\n", result);
 		goto clean_up;
 	}
 
-	ret = esp_ota_set_boot_partition(update_partition);
-	if (ret != ESP_OK) {
-		printf("esp_ota_set_boot_partition failed! err=0x%d\n", ret);
+	result = esp_ota_set_boot_partition(update_partition);
+	if (result != ESP_OK) {
+		printf("esp_ota_set_boot_partition failed! err=0x%d\n", result);
 		goto clean_up;
 	}
 
 	printf("esp_ota_set_boot_partition succeeded\n");
+
+    ret = OTA_OK;
 
 clean_up:
 
@@ -517,11 +577,12 @@ clean_up:
 	return ret;
 }
 
-#define OTA_VERSION_INFO_BUF_SIZE 1024
 
-esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version_info_len)
+#define OTA_VERSION_INFO_BUF_SIZE 2048
+
+static ota_err_t _read_version_info_from_server(char **version_info, unsigned int *version_info_len)
 {
-	esp_err_t ret = ESP_FAIL;
+	ota_err_t ret = OTA_FAIL;
 
 	esp_http_client_config_t config = {
 		.url = CONFIG_FIRMWARE_VERSOIN_INFO_URL,
@@ -543,8 +604,8 @@ esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version
 	ret = esp_http_client_open(client, 0);
 	if (ret != ESP_OK) {
 		esp_http_client_cleanup(client);
-		printf("Failed to open HTTP connection: %d", ret);
-		return ret;
+		printf("Failed to open HTTP connection: %d \n", ret);
+		return OTA_FAIL;
 	}
 	esp_http_client_fetch_headers(client);
 
@@ -552,7 +613,7 @@ esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version
 	if (!upgrade_data_buf) {
 		esp_http_client_cleanup(client);
 		printf("Couldn't allocate memory to upgrade data buffer\n");
-		return ESP_ERR_NO_MEM;
+		return OTA_ERR_NO_MEM;
 	}
 
 	unsigned int total_read_len = 0;
@@ -562,7 +623,7 @@ esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version
 		esp_http_client_cleanup(client);
 		free(upgrade_data_buf);
 		printf("Couldn't allocate memory to read data buffer\n");
-		return ESP_ERR_NO_MEM;
+		return OTA_ERR_NO_MEM;
 	}
 	memset(read_data_buf, '\0', OTA_VERSION_INFO_BUF_SIZE);
 	char *ptr = read_data_buf;
@@ -590,8 +651,6 @@ esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version
 		}
 	}
 
-	printf("Written image length %d\n", total_read_len);
-
 	_http_cleanup(client);
 
 	free(upgrade_data_buf);
@@ -599,10 +658,63 @@ esp_err_t ota_https_read_version_info(char **version_info, unsigned int *version
 	if (total_read_len == 0) {
 		printf("read error\n");
 		free(read_data_buf);
-		return ESP_ERR_INVALID_SIZE;
+		return OTA_ERR_INVALID_SIZE;
 	}
 
 	*version_info = read_data_buf;
 	*version_info_len = total_read_len;
-	return ESP_OK;
+
+    ret = OTA_OK;
+
+	return ret;
+}
+
+void ota_check_for_update(void *user_data)
+{
+    caps_firmwareUpdate_data_t *caps_data = (caps_firmwareUpdate_data_t *)user_data;
+
+    if (!caps_data || !caps_data->currentVersion_value) {
+        printf("Data is NULL.. \n");
+        return;
+    }
+
+    char *read_data = NULL;
+    unsigned int read_data_len = 0;
+
+    ota_err_t ret = _read_version_info_from_server(&read_data, &read_data_len);
+    if (ret == OTA_OK) {
+        char *available_version = NULL;
+        char* current_version = caps_data->currentVersion_value;
+
+        ret = _get_available_version(read_data, read_data_len, current_version, &available_version);
+
+        if (read_data)
+            free(read_data);
+
+        if (ret != OTA_OK) {
+            printf("Cannot find new version: %d\n", ret);
+            return;
+        }
+
+        if (available_version) {
+            caps_data->set_availableVersion_value(caps_data, available_version);
+            caps_data->attr_availableVersion_send(caps_data);
+
+            free(available_version);
+        }
+    }
+}
+
+void ota_restart_device()
+{
+    esp_restart();
+}
+
+ota_err_t ota_update_device()
+{
+    ota_err_t ret = OTA_OK;
+
+    ret = _update_device();
+
+    return ret;
 }
