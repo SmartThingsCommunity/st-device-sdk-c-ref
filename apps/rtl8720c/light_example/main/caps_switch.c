@@ -145,11 +145,11 @@ caps_switch_data_t *caps_switch_initialize(IOT_CTX *ctx, const char *component, 
         err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_on.name, caps_switch_cmd_on_cb, caps_data);
         if (err) {
             printf("fail to set cmd_cb for on of switch\n");
-        }
+    }
         err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switch.cmd_off.name, caps_switch_cmd_off_cb, caps_data);
         if (err) {
             printf("fail to set cmd_cb for off of switch\n");
-        }
+    }
     } else {
         printf("fail to init switch handle\n");
     }
