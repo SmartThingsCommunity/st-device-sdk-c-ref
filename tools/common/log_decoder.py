@@ -116,14 +116,14 @@ class message_info:
         for line in header_file_lines:
             if "0x"+format(self.log_id, "04x").lower() in line.lower() :
                 msg_enum = line.split('=')[0].replace("IOT_DUMP_","").strip() #.replace("_","] ",1)
-                comment = line[line.find("/*"):].replace("/*", ":").strip().replace("*/","")
-                return msg_enum+" "+comment
+                comment = line[line.find("/*"):].strip().replace("/*", "").replace("*/","")
+                return format(msg_enum, "42s") + " | " + comment
         return "unknown_id-/"+format(self.log_id, "04X")+"/"
     def get_arg_text(self):
         arg1_string = ""
         arg2_string = ""
-        return arg1_string + format(self.arg1, "10d")+"(0x"+format(self.arg1 & (2**32-1), "08X") +")|" + \
-               arg2_string + format(self.arg2, "10d")+"(0x"+format(self.arg2 & (2**32-1), "08X")+")"
+        return arg1_string + format(self.arg1, "10d")+" (0x"+format(self.arg1 & (2**32-1), "08X") +")|" + \
+               arg2_string + format(self.arg2, "10d")+" (0x"+format(self.arg2 & (2**32-1), "08X")+")"
     def get_time_text(self):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.time + tz_offset_sec))
     def printMessage(self):

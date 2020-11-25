@@ -1,24 +1,8 @@
 From d22b2115ce145e5a8082ff6a8589d55f92c88353 Mon Sep 17 00:00:00 2001
 From: Jaehoon You <jaehoon.you@samsung.com>
 Date: Fri, 6 Sep 2019 15:38:29 +0900
-Subject: [PATCH 2/2] st_iot_core: add SSL_CTX_load_verify_buffer()
+Subject: [PATCH] st_iot_core: add SSL_CTX_load_verify_buffer()
 
-[Model] STDK
-[BinType]
-[Customer]
-
-[Issue#]
-[Request]
-[Occurrence Version]
-
-[Problem]
-[Cause & Measure]
-[Checking Method]
-
-[Team]
-[Developer] Jaehoon You
-[Solution company] Samsung
-[Change Type] N/A
 
 Change-Id: I0937c34ce83fc6998dc75957b948dddc3c31dc3a
 Signed-off-by: Jaehoon You <jaehoon.you@samsung.com>
