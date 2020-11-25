@@ -50,11 +50,11 @@ def find_build_script(bsp_name):
             return os.path.join("tools", bsp_name, "build_"+bsp_name+".sh")
     print("Fail to find build script")
     print_usage()
-    exit()
+    exit(1)
 
 if len(sys.argv) == 1:
     print_usage()
-    exit()
+    exit(1)
 
 
 if os.path.exists(sys.argv[1]):
@@ -66,7 +66,7 @@ else:
     if len(sys.argv) < 3:
         print("Error : Fail to find app path")
         print_usage()
-        exit()
+        exit(1)
     BSP_NAME = sys.argv[1]
     APP_NAME = sys.argv[2]
     EXTRA_ARGS = sys.argv[3:]
@@ -82,3 +82,4 @@ for args in EXTRA_ARGS:
 ret_val = os.system(build_cmd)
 if ret_val:
     print_usage()
+    exit(1)

@@ -68,6 +68,11 @@ def generate_output(ref_path, bsp_name, app_name, output_file_list, debug_file_l
 
     generate_build_info(output_path)
 
+    latest_output_path = os.path.join(ref_path, "output", bsp_name,
+            "iotcore_" + app_name + "_latest")
+    shutil.rmtree(latest_output_path, ignore_errors=True)
+    shutil.copytree(output_path, latest_output_path)
+
     print("-------------------------------------------------")
     print("binary path : " + output_path)
     print("-------------------------------------------------")

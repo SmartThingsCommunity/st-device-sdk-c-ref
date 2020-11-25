@@ -15,7 +15,7 @@ EXTRA_ARGS = sys.argv[3:]
 
 BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", BSP_NAME)
 PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", BSP_NAME)
-APP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "apps", "esp32", APP_NAME)
+APP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "apps", "esp32s2", APP_NAME)
 COMMON_TOOLS_PATH = os.path.join(os.environ["STDK_REF_PATH"], "tools", "common")
 
 os.environ["IDF_PATH"] = BSP_PATH
@@ -121,14 +121,7 @@ else:
 
 build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
 
-ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
-if "clean" in MAKE_OPTION.split(' '):
-    print("\nTip : To remove all previous build information,")
-    print("      'fullclean' is recommended instead of 'clean'.")
-    print("      For more information, run script with '--help' option.\n")
-if ret != 0:
-    exit(1)
-
+subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
 
 if set(MAKE_OPTION.split()).intersection(OUTPUT_OPTION_ARRAY):
     copy_output()

@@ -3,22 +3,8 @@ From: Jaehoon You <jaehoon.you@samsung.com>
 Date: Mon, 9 Sep 2019 13:56:12 +0900
 Subject: [PATCH] st_iot_core: add freertos header path
 
-[Model] STDK
-[BinType]
-[Customer]
-
-[Issue#]
-[Request]
-[Occurrence Version]
-
-[Problem] os/freertos/iot_os_util_freertos.c:19:22: fatal error: FreeRTOS.h: No such file or directory
-[Cause & Measure] freertos header path was omitted in esp32.
-[Checking Method]
-
-[Team]
-[Developer] Jaehoon You
-[Solution company] Samsung
-[Change Type] N/A
+os/freertos/iot_os_util_freertos.c:19:22: fatal error: FreeRTOS.h: No such file or directory
+freertos header path was omitted in esp32.
 
 Change-Id: Ic4304f87ffb887bd1849c599d3f6fee79cba795e
 Signed-off-by: Jaehoon You <jaehoon.you@samsung.com>
