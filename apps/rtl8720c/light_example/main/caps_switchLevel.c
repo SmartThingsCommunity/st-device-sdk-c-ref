@@ -134,7 +134,7 @@ caps_switchLevel_data_t *caps_switchLevel_initialize(IOT_CTX *ctx, const char *c
         err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_switchLevel.cmd_setLevel.name, caps_switchLevel_cmd_setLevel_cb, caps_data);
         if (err) {
             printf("fail to set cmd_cb for setLevel of switchLevel\n");
-        }
+    }
     } else {
         printf("fail to init switchLevel handle\n");
     }
