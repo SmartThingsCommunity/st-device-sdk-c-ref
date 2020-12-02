@@ -140,7 +140,7 @@ caps_activityLightingMode_data_t *caps_activityLightingMode_initialize(IOT_CTX *
         err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_activityLightingMode.cmd_setLightingMode.name, caps_activityLightingMode_cmd_setLightingMode_cb, caps_data);
         if (err) {
             printf("fail to set cmd_cb for setLightingMode of activityLightingMode\n");
-        }
+    }
     } else {
         printf("fail to init activityLightingMode handle\n");
     }

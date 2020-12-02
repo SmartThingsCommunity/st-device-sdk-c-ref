@@ -134,7 +134,7 @@ caps_colorTemperature_data_t *caps_colorTemperature_initialize(IOT_CTX *ctx, con
         err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_colorTemperature.cmd_setColorTemperature.name, caps_colorTemperature_cmd_setColorTemperature_cb, caps_data);
         if (err) {
             printf("fail to set cmd_cb for setColorTemperature of colorTemperature\n");
-        }
+    }
     } else {
         printf("fail to init colorTemperature handle\n");
     }
