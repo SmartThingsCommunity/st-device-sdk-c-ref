@@ -16,28 +16,30 @@
  *
  ****************************************************************************/
 
-#include "caps/iot_caps_helper_threeAxis.h"
-#include "external/JSON.h"
+#include "caps/iot_caps_helper_activityLightingMode.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct caps_threeAxis_data {
+typedef struct caps_activityLightingMode_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
     void *cmd_data;
 
-    JSON_H *threeAxis_value;
+    char *lightingMode_value;
 
-    const JSON_H *(*get_threeAxis_value)(struct caps_threeAxis_data *caps_data);
-    void (*set_threeAxis_value)(struct caps_threeAxis_data *caps_data, int x, int y, int z);
-    void (*attr_threeAxis_send)(struct caps_threeAxis_data *caps_data);
+    const char *(*get_lightingMode_value)(struct caps_activityLightingMode_data *caps_data);
+    void (*set_lightingMode_value)(struct caps_activityLightingMode_data *caps_data, const char *value);
+    int (*attr_lightingMode_str2idx)(const char *value);
+    void (*attr_lightingMode_send)(struct caps_activityLightingMode_data *caps_data);
 
-    void (*init_usr_cb)(struct caps_threeAxis_data *caps_data);
-} caps_threeAxis_data_t;
+    void (*init_usr_cb)(struct caps_activityLightingMode_data *caps_data);
 
-caps_threeAxis_data_t *caps_threeAxis_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
+    void (*cmd_setLightingMode_usr_cb)(struct caps_activityLightingMode_data *caps_data);
+} caps_activityLightingMode_data_t;
+
+caps_activityLightingMode_data_t *caps_activityLightingMode_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
 #ifdef __cplusplus
 }
 #endif

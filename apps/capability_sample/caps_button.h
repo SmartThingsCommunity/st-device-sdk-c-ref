@@ -17,7 +17,7 @@
  ****************************************************************************/
 
 #include "caps/iot_caps_helper_button.h"
-#include "JSON.h"
+#include "external/JSON.h"
 
 #ifdef __cplusplus
 extern "C" {
