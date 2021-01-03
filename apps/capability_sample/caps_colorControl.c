@@ -57,7 +57,7 @@ static void caps_colorControl_attr_color_send(caps_colorControl_data_t *caps_dat
             NULL);
 
     value[1].type = IOT_CAP_VAL_TYPE_NUMBER;
-    value[1].number = caps_data->hue_value;
+    value[1].number = caps_data->saturation_value;
 
     cap_evt[1] = st_cap_create_attr(caps_data->handle,
             (char *) caps_helper_colorControl.attr_saturation.name,
