@@ -35,6 +35,5 @@ git submodule update --init --recursive
 git submodule foreach --recursive git reset --hard
 
 apply_patch ${BSP_PATH} ${PATCH_PATH}
-apply_patch ${BSP_PATH}/components/json/cJSON ${PATCH_PATH}/cJSON
 apply_patch ${BSP_PATH}/components/mbedtls/mbedtls ${PATCH_PATH}/mbedtls
 
