@@ -1,0 +1,32 @@
+From 8cd8a0f16683160791fa4b426c70ed1d9f009f26 Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Tue, 2 Feb 2021 19:20:41 +0900
+Subject: [PATCH] mbedtls: Kconfig: add option for MBEDTLS_SSL_ASYNC_PRIVATE
+
+For certificate-based onboarding
+---
+ components/mbedtls/Kconfig | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/components/mbedtls/Kconfig b/components/mbedtls/Kconfig
+index 7514d7621..68b5902fe 100644
+--- a/components/mbedtls/Kconfig
++++ b/components/mbedtls/Kconfig
+@@ -462,6 +462,14 @@ menu "mbedTLS"
+         help
+             Enable the RIPEMD-160 hash algorithm.
+ 
++    config MBEDTLS_SSL_ASYNC_PRIVATE
++        bool "Enable asynchronous external private key"
++        default n
++        help
++	    This allows you to configure an SSL connection to call
++	    an external cryptographic module to perform private key operations
++	    instead of performing the operation inside the library.
++
+     menu "Certificates"
+ 
+         config MBEDTLS_PEM_PARSE_C
+-- 
+2.17.1
+
