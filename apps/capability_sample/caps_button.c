@@ -122,6 +122,9 @@ static void caps_button_set_button_value(caps_button_data_t *caps_data, const ch
 static void caps_button_attr_button_send(caps_button_data_t *caps_data)
 {
     int sequence_no = -1;
+    IOT_EVENT *attr = NULL;
+    iot_cap_val_t value;
+    iot_cap_attr_option_t attr_option = { 0 };
 
     if (!caps_data || !caps_data->handle) {
         printf("fail to get handle\n");
@@ -132,12 +135,16 @@ static void caps_button_attr_button_send(caps_button_data_t *caps_data)
         return;
     }
 
-    ST_CAP_SEND_ATTR_STRING(caps_data->handle,
-            (char *)caps_helper_button.attr_button.name,
-            caps_data->button_value,
-            NULL,
-            NULL,
-            sequence_no);
+    value.type = IOT_CAP_VAL_TYPE_STRING;
+    value.string = caps_data->button_value;
+
+    attr_option.state_change = true;
+
+    attr = st_cap_create_attr_with_option(caps_data->handle, (char *)caps_helper_button.attr_button.name, &value, NULL, NULL, &attr_option);
+    if (attr != NULL){
+        sequence_no = st_cap_send_attr(&attr, 1);
+        st_cap_free_attr(attr);
+    }
 
     if (sequence_no < 0)
         printf("fail to send button value\n");
@@ -145,7 +152,6 @@ static void caps_button_attr_button_send(caps_button_data_t *caps_data)
         printf("Sequence number return : %d\n", sequence_no);
 
 }
-
 
 static int caps_button_get_numberOfButtons_value(caps_button_data_t *caps_data)
 {

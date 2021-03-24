@@ -23,8 +23,8 @@ def print_usage():
 
     try:
         usage_buf = ""
-        for bsp_dir in os.listdir(os.path.join(STDK_REF_PATH, "bsp")):
-            if (os.path.isdir(os.path.join(STDK_REF_PATH, "bsp", bsp_dir))
+        for bsp_dir in os.listdir(os.path.join(STDK_REF_PATH, "apps")):
+            if (os.path.isdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir))
                    and os.path.isdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir))):
                 app_list = ""
                 for dir in os.listdir(os.path.join(STDK_REF_PATH, "apps", bsp_dir)):
