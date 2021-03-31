@@ -1,0 +1,37 @@
+From 23bfbd1ba6ff0e4f845c6279242b743e6b3a1e40 Mon Sep 17 00:00:00 2001
+From: Sanghee Kim <sh0130.kim@samsung.com>
+Date: Tue, 2 Feb 2021 17:58:02 +0900
+Subject: [PATCH] mbedtls: esp: add MBEDTLS_SSL_ASYNC_PRIVATE in configuration
+
+It has been added from v2.11.0.
+---
+ .../mbedtls/port/include/mbedtls/esp_config.h       | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/components/mbedtls/port/include/mbedtls/esp_config.h b/components/mbedtls/port/include/mbedtls/esp_config.h
+index 7cc51003..617670cc 100644
+--- a/components/mbedtls/port/include/mbedtls/esp_config.h
++++ b/components/mbedtls/port/include/mbedtls/esp_config.h
+@@ -726,6 +726,19 @@
+  */
+ #define MBEDTLS_SSL_ALL_ALERT_MESSAGES
+ 
++/**
++ * \def MBEDTLS_SSL_ASYNC_PRIVATE
++ *
++ * Enable asynchronous external private key operations in SSL. This allows
++ * you to configure an SSL connection to call an external cryptographic
++ * module to perform private key operations instead of performing the
++ * operation inside the library.
++ *
++ */
++#ifdef CONFIG_MBEDTLS_SSL_ASYNC_PRIVATE
++#define MBEDTLS_SSL_ASYNC_PRIVATE
++#endif
++
+ /** \def MBEDTLS_SSL_ENCRYPT_THEN_MAC
+  *
+  * Enable support for Encrypt-then-MAC, RFC 7366.
+-- 
+2.17.1
+

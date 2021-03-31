@@ -516,7 +516,7 @@ The SmartThings App should be used to control an IoT device that is running with
 
 1. **Enable developer mode**  
 You need to enable the ***Developer Mode*** in the SmartThings app before start testing.  
-Please refer [here](https://smartthings.developer.samsung.com/docs/testing/developer-mode.htm) for more details.  
+Please refer [here](https://smartthings.developer.samsung.com/docs/testing/developer-mode.html) for more details.  
 ![developer mode](./res/developer_mode.png)
 
 2. **Add device**  
