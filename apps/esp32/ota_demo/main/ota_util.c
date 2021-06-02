@@ -34,6 +34,7 @@
 #include "mbedtls/rsa.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/ssl.h"
+#include "mbedtls/error.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -279,44 +280,64 @@ static int _crypto_sha256(const unsigned char *src, size_t src_len, unsigned cha
 
 static int _pk_verify(const unsigned char *sig, const unsigned char *hash)
 {
-	int ret;
+    int ret;
 
-	mbedtls_pk_context pk;
+    mbedtls_pk_context pk;
 
-	unsigned char *public_key = (unsigned char *) public_key_start;
-	unsigned int public_key_len = public_key_end - public_key_start;
+    unsigned char *public_key = (unsigned char *) public_key_start;
+    unsigned int public_key_len = public_key_end - public_key_start;
+    unsigned char *public_key_buffer = NULL;
 
-	mbedtls_pk_init( &pk );
+    public_key_buffer = (unsigned char *)malloc(public_key_len + 1);
+    if (!public_key_buffer) {
+        printf("Couldn't allocate memory \n");
+        return -1;
+    }
 
-	ret = mbedtls_pk_parse_public_key( &pk, (const unsigned char *)public_key, public_key_len );
-	if (ret != 0) {
-		printf("Parse error: 0x%04X\n", ret);
-		goto clean_up;
-	}
+    memcpy(public_key_buffer, public_key, public_key_len);
+    public_key_buffer[public_key_len] = '\0';
 
-	if (!mbedtls_pk_can_do( &pk, MBEDTLS_PK_RSA))
-	{
-		printf("Failed! Key is not an RSA key\n");
-		ret = MBEDTLS_ERR_SSL_PK_TYPE_MISMATCH;
-		goto clean_up;
-	}
+    mbedtls_pk_init( &pk );
 
-	ret = mbedtls_rsa_check_pubkey(mbedtls_pk_rsa(pk));
-	if (ret != 0) {
-		printf("Check pubkey failed: 0x%04X\n", ret);
-		goto clean_up;
-	}
+    ret = mbedtls_pk_parse_public_key( &pk, (const unsigned char *)public_key_buffer, public_key_len + 1 );
+    if (ret != 0) {
+        char error_buf[100];
+        mbedtls_strerror( ret, error_buf, 100);
+        printf( "parse error -0x%04x - %s \n", -ret, error_buf );
+        goto clean_up;
+    }
 
-	if ((ret = mbedtls_pk_verify(&pk, MBEDTLS_MD_SHA256, hash, OTA_CRYPTO_SHA256_LEN, sig, OTA_SIGNATURE_SIZE)) != 0 ) {
-		printf("Invalid firmware : 0x%04X\n", ret);
-		goto clean_up;
-	}
+    if (!mbedtls_pk_can_do( &pk, MBEDTLS_PK_RSA))
+    {
+    	printf("Failed! Key is not an RSA key\n");
+    	ret = MBEDTLS_ERR_SSL_PK_TYPE_MISMATCH;
+    	goto clean_up;
+    }
+
+    ret = mbedtls_rsa_check_pubkey(mbedtls_pk_rsa(pk));
+    if (ret != 0) {
+        char error_buf[100];
+        mbedtls_strerror( ret, error_buf, 100);
+        printf( "parse error -0x%04x - %s \n", -ret, error_buf );
+        goto clean_up;
+    }
+
+    if ((ret = mbedtls_pk_verify(&pk, MBEDTLS_MD_SHA256, hash, OTA_CRYPTO_SHA256_LEN, sig, OTA_SIGNATURE_SIZE)) != 0 ) {
+        char error_buf[100];
+        mbedtls_strerror( ret, error_buf, 100);
+        printf( "parse error -0x%04x - %s \n", -ret, error_buf );
+        goto clean_up;
+    }
 
 clean_up:
 
-	mbedtls_pk_free( &pk );
+    if (public_key_buffer) {
+        free(public_key_buffer);
+    }
 
-	return ret;
+    mbedtls_pk_free( &pk );
+
+    return ret;
 }
 
 static bool _check_firmware_validation(const unsigned char *sha256, unsigned char *sig_data, unsigned int sig_len)
