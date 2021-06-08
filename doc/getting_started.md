@@ -340,11 +340,11 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
      The mapping between `iot_nvd_t` and real storage path name can be found at `iot_bsp_nv_data_XXX.c` for [each bsp's porting layer](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/master/src/port/bsp).  
      [stdk-keygen.py](https://github.com/SmartThingsCommunity/st-device-sdk-c/tree/master/tools/keygen#commercial) also supports batch creation by reading csv formatted series of device serial number.
 
-     | Data Path     | Description                   | Examples                 |
-     | :------------ | :---------------------------- | :----------------------- |
-     | PublicKey     | Client (= Device) Public key  | device.pubkey.b64        |
-     | PrivateKey    | Client (= Device) Private key | device.seckey.b64        |
-     | SerialNum     | Device Serial Number          | SN12345678F              |
+     | Data Path     | Description                   | Detail                              | Examples                 |
+     | :------------ | :---------------------------- | :---------------------------------- | :----------------------- |
+     | PublicKey     | Client (= Device) Public key  | base64 encoded ED25519 Public Key   | device.pubkey.b64        |
+     | PrivateKey    | Client (= Device) Private key | base64 encoded ED25519 Privated Key | device.seckey.b64        |
+     | SerialNum     | Device Serial Number          | alphanumberic string (8~30)         | SN12345678F              |
 
      > **Note :**
      >
