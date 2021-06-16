@@ -75,6 +75,7 @@ Basically, this release builds on the environments of chipset vendor's SDKs.
      ex) python setup.py esp8266
      ex) python setup.py esp32
      ex) python setup.py esp32s2
+     ex) python setup.py esp32c2
      ```
 
 2. Check the build configuration of a sample device application. If you want to use specific build options, you can directly modify the build configuration file(e.g. sdkconfig, sdkconfig.h) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option to configure them.
