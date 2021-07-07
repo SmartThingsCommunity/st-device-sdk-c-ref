@@ -28,3 +28,6 @@
 [submodule "bsp/emw3080/mico-os"]
 	path = bsp/emw3080/mico-os
 	url = https://github.com/MXCHIP/mico-os
+[submodule "bsp/esp32c3"]
+	path = bsp/esp32c3
+	url = https://github.com/espressif/esp-idf.git
