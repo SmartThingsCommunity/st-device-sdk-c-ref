@@ -9,10 +9,10 @@ It has been added from v2.11.0.
  1 file changed, 13 insertions(+)
 
 diff --git a/components/mbedtls/port/include/mbedtls/esp_config.h b/components/mbedtls/port/include/mbedtls/esp_config.h
-index 9c6323276..1bea5f1c4 100644
+index 85f2abe37..cb2c7f3fe 100644
 --- a/components/mbedtls/port/include/mbedtls/esp_config.h
 +++ b/components/mbedtls/port/include/mbedtls/esp_config.h
-@@ -786,6 +786,19 @@
+@@ -1042,6 +1042,19 @@
   */
  #define MBEDTLS_SSL_ALL_ALERT_MESSAGES
  
@@ -29,9 +29,9 @@ index 9c6323276..1bea5f1c4 100644
 +#define MBEDTLS_SSL_ASYNC_PRIVATE
 +#endif
 +
- /** \def MBEDTLS_SSL_ENCRYPT_THEN_MAC
+ /**
+  * \def MBEDTLS_SSL_DEBUG_ALL
   *
-  * Enable support for Encrypt-then-MAC, RFC 7366.
 -- 
 2.17.1
 
