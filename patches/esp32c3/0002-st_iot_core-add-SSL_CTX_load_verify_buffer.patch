@@ -1,0 +1,68 @@
+From d22b2115ce145e5a8082ff6a8589d55f92c88353 Mon Sep 17 00:00:00 2001
+From: Jaehoon You <jaehoon.you@samsung.com>
+Date: Fri, 6 Sep 2019 15:38:29 +0900
+Subject: [PATCH] st_iot_core: add SSL_CTX_load_verify_buffer()
+
+
+Change-Id: I0937c34ce83fc6998dc75957b948dddc3c31dc3a
+Signed-off-by: Jaehoon You <jaehoon.you@samsung.com>
+---
+ components/openssl/include/internal/ssl_x509.h | 12 ++++++++++++
+ components/openssl/library/ssl_x509.c          | 18 ++++++++++++++++++
+ 2 files changed, 30 insertions(+)
+
+diff --git a/components/openssl/include/internal/ssl_x509.h b/components/openssl/include/internal/ssl_x509.h
+index 877c4fb..9c2d206 100644
+--- a/components/openssl/include/internal/ssl_x509.h
++++ b/components/openssl/include/internal/ssl_x509.h
+@@ -88,6 +88,18 @@ int SSL_CTX_add_client_CA(SSL_CTX *ctx, X509 *x);
+ int SSL_add_client_CA(SSL *ssl, X509 *x);
+ 
+ /**
++ * @brief add CA client certification into the CTX
++ *
++ * @param ctx - SSL context point
++ * @param buffer - a point pointed to the certification context memory point
++ *
++ * @return result
++ *     0 : failed
++ *     1 : OK
++ */
++int SSL_CTX_load_verify_buffer(SSL_CTX *ctx, const unsigned char* buffer, long len);
++
++/**
+  * @brief load certification into the SSL
+  *
+  * @param ssl - SSL point
+diff --git a/components/openssl/library/ssl_x509.c b/components/openssl/library/ssl_x509.c
+index 0b49bb8..f3ac248 100644
+--- a/components/openssl/library/ssl_x509.c
++++ b/components/openssl/library/ssl_x509.c
+@@ -192,6 +192,24 @@ int SSL_add_client_CA(SSL *ssl, X509 *x)
+ }
+ 
+ /**
++ * @brief add CA client certification into the CTX
++ */
++int SSL_CTX_load_verify_buffer(SSL_CTX *ctx, const unsigned char* buffer, long len)
++{
++    SSL_ASSERT1(ctx);
++    SSL_ASSERT1(buffer);
++
++    X509* cacrt = d2i_X509(NULL, buffer, len);
++
++    if (cacrt) {
++        SSL_CTX_add_client_CA(ctx, cacrt);
++        return 1;
++    } else {
++        return 0;
++    }
++}
++
++/**
+  * @brief set the SSL context certification
+  */
+ int SSL_CTX_use_certificate(SSL_CTX *ctx, X509 *x)
+-- 
+2.7.4
+
