@@ -183,7 +183,7 @@ char *cap_enum_button_state()
 
 static void capability_init()
 {
-    cap_button_data = caps_button_initialize(ctx, "main", NULL, NULL);
+    cap_button_data = caps_button_initialize(ctx, "main", NULL, NULL); //Undefined reference to "caps_button_initialize" error occured.
     if (cap_button_data) {
         const char *button_init_value = caps_helper_button.attr_button.value_pushed;
         cap_button_data->set_button_value(cap_button_data, button_init_value);
