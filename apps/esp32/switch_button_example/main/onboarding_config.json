@@ -1,0 +1,19 @@
+{
+  "onboardingConfig": {
+    "deviceOnboardingId": "switch_button",
+    "mnId": "fcig",
+    "setupId": "003",
+    "vid": "ST_10069837-111f-44d7-8b83-e5d32837cbd3",
+    "deviceTypeId": "Others",
+    "ownershipValidationTypes": [
+      "JUSTWORKS"
+    ],
+    "identityType": "ED25519",
+    "deviceIntegrationProfileKey": {
+      "id": "0a160e65-a13e-408c-8788-8a8a125654ca",
+      "majorVersion": 0,
+      "minorVersion": 1
+    },
+    "productId": "41e6a3fa-0220-4125-b3e2-61638961360d"
+  }
+}
