@@ -18,6 +18,7 @@ This example assumes the following component and capabilities are used. :
 `main` component  
 - `healthCheck` capability  
 - `switch` capability  
+- `button` capability
 
 (`healthCheck` capability is automatically added by Developer Workspace. It doesn't need handler at device side)
 
