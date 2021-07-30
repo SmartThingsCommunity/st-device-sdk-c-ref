@@ -1,4 +1,4 @@
-# SmartThings SDK for Direct Connected Devices for C - Switch Example
+# SmartThings SDK for Direct Connected Devices for C - Switch Button Example
 
 ## Introduction
 
@@ -18,6 +18,7 @@ This example assumes the following component and capabilities are used. :
 `main` component  
 - `healthCheck` capability  
 - `switch` capability  
+- `button` capability 
 
 (`healthCheck` capability is automatically added by Developer Workspace. It doesn't need handler at device side)
 
@@ -26,7 +27,7 @@ If you want to use specific SmartThings Device SDK build options, you can direct
 ```sh
 # python build.py {app_path} {option}
 $ cd ~/st-device-sdk-c-ref/
-$ python build.py app/esp32/switch_example menuconfig
+$ python build.py app/esp32/switch_button_example menuconfig
 ```
 
 ## Test device schematics
