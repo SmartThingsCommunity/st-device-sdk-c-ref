@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,59 @@
 
 #include "st_dev.h"
 #include "caps_imageCapture.h"
+
+static bool caps_imageCapture_get_encrypted_value(caps_imageCapture_data_t *caps_data)
+{
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return false;
+    }
+    return caps_data->encrypted_value;
+}
+
+static void caps_imageCapture_set_encrypted_value(caps_imageCapture_data_t *caps_data, bool value)
+{
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return;
+    }
+    caps_data->encrypted_value = value;
+}
+
+static void caps_imageCapture_attr_encrypted_send(caps_imageCapture_data_t *caps_data)
+{
+    IOT_EVENT *cap_evt = NULL;
+    uint8_t evt_num = 1;
+    iot_cap_val_t value;
+    int sequence_no = -1;
+
+    if (!caps_data || !caps_data->handle) {
+        printf("fail to get handle\n");
+        return;
+    }
+
+    value.type = IOT_CAP_VAL_TYPE_BOOLEAN;
+    value.boolean = caps_data->encrypted_value;
+
+    cap_evt = st_cap_create_attr(caps_data->handle,
+            (char *)caps_helper_imageCapture.attr_encrypted.name,
+            &value,
+            NULL,
+            NULL);
+
+    if (!cap_evt) {
+        printf("fail to create cap_evt\n");
+        return;
+    }
+
+    sequence_no = st_cap_send_attr(&cap_evt, evt_num);
+    if (sequence_no < 0)
+        printf("fail to send encrypted value\n");
+
+    printf("Sequence number return : %d\n", sequence_no);
+    st_cap_free_attr(cap_evt);
+}
+
 
 static const char *caps_imageCapture_get_image_value(caps_imageCapture_data_t *caps_data)
 {
@@ -136,6 +189,7 @@ static void caps_imageCapture_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
     caps_imageCapture_data_t *caps_data = usr_data;
     if (caps_data && caps_data->init_usr_cb)
         caps_data->init_usr_cb(caps_data);
+    caps_imageCapture_attr_encrypted_send(caps_data);
     caps_imageCapture_attr_image_send(caps_data);
     caps_imageCapture_attr_captureTime_send(caps_data);
 }
@@ -156,6 +210,9 @@ caps_imageCapture_data_t *caps_imageCapture_initialize(IOT_CTX *ctx, const char 
     caps_data->init_usr_cb = init_usr_cb;
     caps_data->usr_data = usr_data;
 
+    caps_data->get_encrypted_value = caps_imageCapture_get_encrypted_value;
+    caps_data->set_encrypted_value = caps_imageCapture_set_encrypted_value;
+    caps_data->attr_encrypted_send = caps_imageCapture_attr_encrypted_send;
     caps_data->get_image_value = caps_imageCapture_get_image_value;
     caps_data->set_image_value = caps_imageCapture_set_image_value;
     caps_data->attr_image_send = caps_imageCapture_attr_image_send;
