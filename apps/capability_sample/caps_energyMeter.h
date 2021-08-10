@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ typedef struct caps_energyMeter_data {
     void (*attr_energy_send)(struct caps_energyMeter_data *caps_data);
 
     void (*init_usr_cb)(struct caps_energyMeter_data *caps_data);
+
+    void (*cmd_resetEnergyMeter_usr_cb)(struct caps_energyMeter_data *caps_data);
 } caps_energyMeter_data_t;
 
 caps_energyMeter_data_t *caps_energyMeter_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data);
