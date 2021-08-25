@@ -11,7 +11,7 @@ Subject: [PATCH] Enable stdk compile in emw3080, with MoCOS and MoCIP
  MiCO/net/mbedtls/library/platform.c         |  6 +--
  MiCO/net/mbedtls/port/net.c                 |  5 ++-
  MiCO/net/mbedtls/port/porting_layer.c       | 12 +++---
- MiCO/net/stdk/config.mk                     | 60 +++++++++++++++++++++++++++++
+ MiCO/net/stdk/config.mk                     | 65 +++++++++++++++++++++++++++++
  MiCO/net/stdk/stdk.mk                       | 20 ++++++++++
  MiCO/net/stdk/sys/socket.h                  | 18 +++++++++
  MiCO/system/system.mk                       |  2 +-
@@ -20,7 +20,7 @@ Subject: [PATCH] Enable stdk compile in emw3080, with MoCOS and MoCIP
  libraries/utilities/json_c/cJSON.c          |  2 +-
  makefiles/mico_target_config.mk             | 31 ++++++++++++---
  makefiles/micoder_host_cmd.mk               |  2 +-
- 16 files changed, 190 insertions(+), 28 deletions(-)
+ 16 files changed, 195 insertions(+), 28 deletions(-)
  create mode 100644 MiCO/iot_main.c
  create mode 100644 MiCO/mico_config.h
  create mode 100644 MiCO/net/stdk/config.mk
@@ -212,10 +212,12 @@ new file mode 100644
 index 0000000..cbe9b23
 --- /dev/null
 +++ b/MiCO/net/stdk/config.mk
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,65 @@
 +########################################
 +# Config
 +########################################
++
++include $(PROJECT_PATH)/usr_config.mk
 +
 +#/* For STDK */
 +CONFIG_STDK_IOT_CORE=y
@@ -225,7 +227,6 @@ index 0000000..cbe9b23
 +CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
 +CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3080=y
 +CONFIG_STDK_IOT_CORE_OS_SUPPORT_MOCOS=y
-+CONFIG_SAMSUNG_BUILD_ENG=y
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE),y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE
@@ -259,10 +260,15 @@ index 0000000..cbe9b23
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_MOCOS
 +endif
 +
-+ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
-+STDK_CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
 +endif
 +
@@ -271,7 +277,6 @@ index 0000000..cbe9b23
 +endif
 +
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519
-+STDK_CFLAGS += -DCONFIG_SAMSUNG_RUN_TIME_STATS
 +CONFIG_STDK_IOT_CORE_SECURITY_BACKEND_SOFTWARE=y
 diff --git a/MiCO/net/stdk/stdk.mk b/MiCO/net/stdk/stdk.mk
 new file mode 100644
