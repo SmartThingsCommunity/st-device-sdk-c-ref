@@ -2,7 +2,7 @@
   "onboardingConfig": {
     "deviceOnboardingId": "NAME",
     "mnId": "MNID",
-    "setupId": "000",
+    "setupId": "999",
     "vid": "VID",
     "deviceTypeId": "TYPE",
     "ownershipValidationTypes": [
