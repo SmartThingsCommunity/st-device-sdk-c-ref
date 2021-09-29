@@ -2,146 +2,156 @@
 
 [![License](https://img.shields.io/badge/licence-Apache%202.0-brightgreen.svg?style=flat)](LICENSE)
 
-Direct-connected devices connect directly to the SmartThings cloud. The SDK for Direct Connected Devices is equipped to manage all MQTT topics and onboarding requirements, freeing you to focus on the actions and attributes of your device. To facilitate the development of device application in an original chipset SDK, the core device library and the examples were separated into two git repositories. That is, if you want to use the core device library in your original chipset SDK that installed before, you may simply link it to develop a device application in your existing development environment.
+Easily integrate your Direct Connected Device using the Direct Connected Devices SDK. The SDK manages all MQTT topics and onboarding requirements, freeing you to focus on the Capabilities of your device.
 
-It is distributed in source form and written in C99 for the purpose of portability to most platforms. If you want to know the overall workflow of using this SDK, please refer to the [Getting Started](./doc/getting_started.md).
+> To facilitate development of device applications in an original chipset SDK, the [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c) and supporting examples are separated into two git repositories:
+the [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c) and the Direct Connected Devices SDK repository. If you want to use the IoT core device library in your original chipset SDK that you previously installed, link the core device library to develop a device application in your existing development environment.
 
-## Directory layout
+The Direct Connected Devices SDK is distributed in source form and written in C99 for the purpose of portability to most platforms. For a complete overview of the development process and workflow, please refer to the [Direct Connected Devices](https://developer-preview.smartthings.com/docs/devices/direct-connected/get-started) documentation.
 
-The reference git is delivered via the following directory structure :
+## Directory Structure and Overview
 
-- `apps` : sample device applications for each chipset
-- `bsp` : An original chipset vendor's SDK is located.  If you use a chipset that has already been ported, this vendor's SDK can be easily downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
-- `doc` : documents
-- `iot-core` : [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script(e.g. `setup.py`).
-- `output` : build outputs will be placed
-- `patches` : patches to be applied in the original chipset vendor's SDK for resolving some problems
-- `tools` : scripts to be applied for each chipset
+- `apps`: Contains sample device applications for various chipsets.
+- `bsp`: Contains the original chipset vendors' SDKs.  If you use a chipset that has already been ported, this vendor's SDK can easily be downloaded as a submodule in this directory through the predefined script `setup.py`.
+- `doc`: Documentation.
+- `iot-core`: Contains the [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c). It can also be downloaded as a submodule in this directory through the predefined script `setup.py`.
+- `output`: Where build outputs will be placed.
+- `patches` : Patches to be applied to the original chipset vendors' SDKs for resolving various problems.
+- `tools`: Various scripts to be applied for each chipset.
 
-## Building a sample device application
+## Build a Sample Device Application
 
-Basically, this release builds on the environments of chipset vendor's SDKs.
+The Direct Connected Devices SDK builds on the environments of each chipset vendor's SDK, providing an all-in-one development package.
 
 ### Prerequisites
 
-- Install the toolchain defined in the chipset SDK you use. If there is no environmental comment, it is basically only described for 64-bit Ubuntu-based.
-  - Example for ESP8266 (Ubuntu/Debian quickstart)
-    - Setup [ESP8266 Toolchain for Linux](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html) according to the available Expressif website.
-      In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into `~/esp/xtensa-lx106-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+Install the toolchain defined in the chipset SDK you use according to the directions below. If no development environment is described for your chipset, it is assumed to only be applicable for 64-bit Ubuntu-based environments.
 
-  - Example for ESP32
-    - Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
-    - Setup ESP32 toolchain by using `setup.py`
+#### For ESP8266 (Ubuntu/Debian Quickstart):
+1. Set up the ESP8266 Toolchain for Linux according to the [Espressif documentation](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html).
+2. In order to use the pre-supplied SDK build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into the `~/esp/xtensa-lx106-elf/` directory as directed in the Expressif documentation linked above.
 
-  - Example for ESP32_v3.3(legacy) (Ubuntu/Debian quickstart)
-    - Setup [ESP32 Toolchain for Linux](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain) according to the available Expressif website.
-      In order to use the pre-supplied build script(e.g. `build.py`), please extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) into `~/esp/xtensa-esp32-elf/` directory like the original Expressif guide. And according to the above Espressif guideline, you will need to add the toochain path to your PATH environment variable in ~/.profile file. But it is not necessary if you use the pre-supplied build script. Because that path is automatically exported in the build script.
+> The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
-  - Example for RTL8195
+#### For ESP32:
+1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+2. Set up the ESP32 toolchain with `setup.py`
 
-    - Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
-    - Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
-      Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
+#### For ESP32_v3.3 (Legacy - Ubuntu/Debian Quickstart):
+1. Set up the ESP32 Toolchain for Linux according to the [Espressif documentation](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain).
+1. In order to use the pre-supplied build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) to `~/esp/xtensa-esp32-elf/` as directed in the original Expressif documentation.
 
-      > Note :
-      >
-      > You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
+> The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
-  - Example for EMW3166
+#### For RTL8195:
 
-    - Setup [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the available MXCHIP website.
-    - Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA)
-      In order to use the pre-supplied build script(e.g. `build.py`), please set `mico config --global MICODER /path_of_the_toolchain`
+For Windows systems:
+
+1. Install the [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
+1. Upgrade [DAP firmware](https://www.amebaiot.com/en/change-dap-firmware/). The recommended DAP firmware is `DAP_FW_Ameba_V12_1_3-2M.bin`.
+
+> The above steps are applicable for a Windows PC for downloading a binary. You must build the source code on Cygwin or linux for this chipset.
+
+#### For EMW3166:
+
+1. Set up the [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the MXCHIP documentation.
+1. Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA). In order to use the pre-supplied build script `build.py`, set `mico config --global MICODER /path_of_the_toolchain`
 
 ### Build
 
-1. Download the Device SDK Reference source code. Basically, this reference will download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.py` script. If a chipset vendor's SDK does not exist as git format, you can manually copy it under the `bsp` directory.
+1. Download the Direct Connected Device SDK source code as shown in the example below and run `setup.py`.
 
-   - Download the source code via `git clone`.
-   - And then, run the `setup.py` to automatically download submodules to the `bsp` directory. At this time, the IoT core device library is also downloaded to the `iot-core` directory.
-     ```sh
-     $ cd ~
-     $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
-     $ cd st-device-sdk-c-ref
-     $ python setup.py
-     Usage: python setup.py [BSP_NAME]
-     --------------------------------------------------
-     ex) python setup.py rtl8721c
-     ex) python setup.py rtl8720c
-     ex) python setup.py rtl8195
-     ex) python setup.py esp32_v3.3
-     ex) python setup.py emw3080
-     ex) python setup.py emw3166
-     ex) python setup.py esp8266
-     ex) python setup.py esp32
-     ex) python setup.py esp32s2
-     ex) python setup.py esp32c3
-     ```
+> `setup.py` will automatically download the ported original chipset vendor's SDKs as submodules in the `bsp` directory through the `setup.py` script. If a chipset vendor's SDK does not exist in git format, you can manually copy it to the `bsp` directory. At this time, the IoT Core Device Library will also be downloaded to the `iot-core` directory.
 
-2. Check the build configuration of a sample device application. If you want to use specific build options, you can directly modify the build configuration file(e.g. sdkconfig, sdkconfig.h) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option to configure them.
+ ```sh
+ $ cd ~
+ $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
+ $ cd st-device-sdk-c-ref
+ $ python setup.py
+ Usage: python setup.py [BSP_NAME]
+ --------------------------------------------------
+ ex) python setup.py rtl8721c
+ ex) python setup.py rtl8720c
+ ex) python setup.py rtl8195
+ ex) python setup.py esp32_v3.3
+ ex) python setup.py emw3080
+ ex) python setup.py emw3166
+ ex) python setup.py esp8266
+ ex) python setup.py esp32
+ ex) python setup.py esp32s2
+ ex) python setup.py esp32c3
+ ```
 
-   - If you just want to use the default build configuration, you can skip this step.
-   - Example for ESP8266
-     > Note :
-     > The `menuconfig` option is just supported on the Espressif chipset.
+2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the build configuration file (e.g. `sdkconfig`, `sdkconfig.h`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
+
+> If you want to use the default build configuration, you can skip this step.
+
+   - ESP8266 Example:
+     > Note that the `menuconfig` option is only supported on the Espressif chipset.
      ```sh
      # python build.py {app_path} {option}
      $ cd ~/st-device-sdk-c-ref
      $ python build.py apps/esp32/switch_example menuconfig
      ```
 
-3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in the `output/{chip_name}/`.
+3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in `output/{chip_name}/`.
 
    ```sh
    $ python build.py apps/esp32/switch_example          # python build.py {app_path}
 
    ```
 
-### flash & monitor
+### Flash and Monitor
 
-Serial port needs to be matched to the computer environment for serial port flashing and monitoring.
+The serial port of your device must to be matched to the computer environment for serial port flashing and monitoring. This data is described in the build configuration file (`sdkconfig`)
 
-- Example for ESP8266/ESP32
-  - Baud rate 115200 for flashing or 74880 for monitoring, Data bit 8, Parity None, Stop bits 1
-  - These data are described in the build configuration file(e.g.  sdkconfig)
-- Example for RTL8195
-  - Baud rate 115200, Data bit 8, Parity None, Stop bits 1
-- Example for EMW3166
-  - Baud rate 9600 for flashing(user uart) and 115200 for monitoring(USB uart), Data bit 8, Parity None, Stop bits 1
 
-Flashing can be done according to the method supported by chipset SDK.
+|Chipset|Buad Rate for Flashing|Baud Rate for Monitoring|Data Bit|Parity|Stop Bits|
+|-------|----------------------|------------------------|--------|------|---|
+|ESP8266/ESP32|115200|74880|8|None|1|
+|RTL8195|115200|115200|8|None|1|
+|EMW3166|9600 (user UART)|115200 (USB UART)|8|None|1|
 
-- Example for ESP8266/ESP32
+#### Flashing
 
-  You can flash the executables into a target device via `build.py` with additional option. Actually, you don't need to run `python build.py esp8266 st_switch` before running `python build.py esp8266 st_switch flash`, this will automatically rebuild anything which needs it.
+Flashing can be done according to the method outlined by the applicable chipset SDK.
 
-  - options
-    - clean : clean previous build outputs
-      ```sh
-      # python build.py {app_path} {options}
-      $ python build.py apps/esp32/switch_example clean
-      ```
-    - flash : download executable binaries to the device
-    - monitor : monitor the serial output of device. this option can be used with flash option.
-      ```sh
-      # python build.py {app_path} {options}
-      $ python build.py apps/esp32/switch_example flash monitor
-      ```
+##### ESP8266/ESP32 Example:
 
-- Example for RTL8195
+You can flash the executables into a target device via `build.py` with additional options.
 
-  In order to flash the RTL chipset binary, you have to proceed steps below at Windows PC, even though you build the source code on Linux environment.
-  - Connect Ameba RTL8195 to Windows PC, you can find removable disk named MBED.
-  - Just copy `ram_all.bin` in `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
-  - After copy successfully, please reset Ameba RTL8195 target and monitor
+> You do not need to run `python build.py esp8266 st_switch` before running `python build.py esp8266 st_switch flash`; this will automatically rebuild anything which needs it.
 
-- Example for EMW3166
+Available Options:
 
-  In order to flash the MXCHIP emw3166 chipset binary, you have to proceed steps below at Windows PC, with a terminal support Ymodem transmission.
-  - Connect user uart(PB7-tx, PB6-rx) of emw3166 to Windows PC with a USB-TTL convertor, and connect USB uart for power.
-  - Create serial session with flashing config (Baud rate 9600) to connect user uart port, then hold 'BOOT' and press 'RESET' to enable flashing
-  - Tansfer binary file in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` with Ymodem on terminal
-  - After sending successfully, press 'RESET' on MiCOKit-3166 target and monitor with USB uart
+- **clean**: clean previous build outputs
+  ```sh
+  # python build.py {app_path} {options}
+  $ python build.py apps/esp32/switch_example clean
+  ```
+- **flash**: download executable binaries to the device
+- **monitor**: monitor the serial output of device. this option can be used with flash option.
+  ```sh
+  # python build.py {app_path} {options}
+  $ python build.py apps/esp32/switch_example flash monitor
+  ```
+
+##### RTL8195 Example:
+
+> In order to flash the RTL chipset binary, the steps below must be performed on a Windows PC, even if you build the source code on a Linux environment.
+
+1. Connect Ameba RTL8195 to a Windows PC; a removable disk `MBED` will appear.
+1. Copy `ram_all.bin` from `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
+1. After successfully copying, reset Ameba RTL8195 target and monitor.
+
+##### EMW3166 Example
+
+> In order to flash the MXCHIP emw3166 chipset binary, the steps below must be performed on a Windows PC with a terminal that supports Ymodem transmission.
+
+1. Connect user UART (PB7-tx, PB6-rx) of emw3166 to a Windows PC with a USB-TTL convertor. Then connect USB UART power.
+1. Create a serial session with flashing config (Baud rate 9600) to connect the user UART port, then hold 'BOOT' and press 'RESET' to enable flashing.
+1. Transfer the binary file located in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` using Ymodem on your terminal.
+1. After transfer is successful, press 'RESET' on MiCOKit-3166 target and monitor with USB UART.
 
 ## License
 
