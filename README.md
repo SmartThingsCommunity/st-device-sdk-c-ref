@@ -148,7 +148,7 @@ Available Options:
 
 > In order to flash the MXCHIP emw3166 chipset binary, the steps below must be performed on a Windows PC with a terminal that supports Ymodem transmission.
 
-1. Connect user UART (PB7-tx, PB6-rx) of emw3166 to a Windows PC with a USB-TTL convertor. Then connect USB UART power.
+1. Connect user UART (PB7-tx, PB6-rx) of emw3166 to a Windows PC with a USB-TTL converter. Then connect USB UART power.
 1. Create a serial session with flashing config (Baud rate 9600) to connect the user UART port, then hold 'BOOT' and press 'RESET' to enable flashing.
 1. Transfer the binary file located in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` using Ymodem on your terminal.
 1. After transfer is successful, press 'RESET' on MiCOKit-3166 target and monitor with USB UART.
