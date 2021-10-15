@@ -7,12 +7,12 @@ Change-Id: Idc8679f4bf8383e179919046a9b2f1f1d47633be
 Signed-off-by: Kai Lv <kai.lv@samsung.com>
 ---
  .../GCC-RELEASE/application.mk                     | 330 +++++++++++++--------
- .../GCC-RELEASE/config.mk                          |  67 +++++
+ .../GCC-RELEASE/config.mk                          |  69 +++++
  .../GCC-RELEASE/rlx8195A-symbol-v02-img2.ld        |   2 +-
  .../inc/FreeRTOSConfig.h                           |   4 +-
  .../realtek_ameba1_va0_example/inc/platform_opts.h |   6 +-
  project/realtek_ameba1_va0_example/src/main.c      |  31 +-
- 6 files changed, 304 insertions(+), 136 deletions(-)
+ 6 files changed, 306 insertions(+), 136 deletions(-)
  create mode 100644 project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
 
 diff --git a/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk b/project/realtek_ameba1_va0_example/GCC-RELEASE/application.mk
@@ -457,7 +457,7 @@ new file mode 100644
 index 0000000..d5e78f1
 --- /dev/null
 +++ b/project/realtek_ameba1_va0_example/GCC-RELEASE/config.mk
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,69 @@
 +########################################
 +# Config
 +########################################
@@ -471,9 +471,6 @@ index 0000000..d5e78f1
 +CONFIG_STDK_IOT_CORE_BSP_SUPPORT_RTL8195=y
 +CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
 +CONFIG_STDK_IOT_CORE_CRYPTO_SUPPORT_ED25519=y
-+
-+CONFIG_SAMSUNG_BUILD_ENG=y
-+CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG=
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE),y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE
@@ -515,10 +512,15 @@ index 0000000..d5e78f1
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_SUPPORT_STNV_PARTITION
 +endif
 +
-+ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
-+CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN), y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO), y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR), y)
 +CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
 +endif
 +

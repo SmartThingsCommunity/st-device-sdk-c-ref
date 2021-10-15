@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 #include "caps/iot_caps_helper_fanOscillationMode.h"
+#include "external/JSON.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +28,13 @@ typedef struct caps_fanOscillationMode_data {
     void *usr_data;
     void *cmd_data;
 
+    char **supportedFanOscillationModes_value;
+    int supportedFanOscillationModes_arraySize;
     char *fanOscillationMode_value;
 
+    const char **(*get_supportedFanOscillationModes_value)(struct caps_fanOscillationMode_data *caps_data);
+    void (*set_supportedFanOscillationModes_value)(struct caps_fanOscillationMode_data *caps_data, const char **value, int arraySize);
+    void (*attr_supportedFanOscillationModes_send)(struct caps_fanOscillationMode_data *caps_data);
     const char *(*get_fanOscillationMode_value)(struct caps_fanOscillationMode_data *caps_data);
     void (*set_fanOscillationMode_value)(struct caps_fanOscillationMode_data *caps_data, const char *value);
     int (*attr_fanOscillationMode_str2idx)(const char *value);

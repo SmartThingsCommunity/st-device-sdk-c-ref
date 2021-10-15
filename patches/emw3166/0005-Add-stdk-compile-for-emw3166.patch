@@ -10,11 +10,11 @@ Signed-off-by: qin.li <qin.li@samsung.com>
  MiCO/iot_main.c                                   | 23 +++++++++
  MiCO/mico_config.h                                | 16 ++++++
  MiCO/system/system.mk                             |  2 +-
- makefiles/config.mk                               | 60 +++++++++++++++++++++++
+ makefiles/config.mk                               | 65 +++++++++++++++++++++++
  makefiles/mico_target_config.mk                   | 44 ++++++++++++++---
  makefiles/micoder_host_cmd.mk                     |  2 +-
  platform/MCU/STM32F4xx/peripherals/platform_rng.c | 16 +++---
- 8 files changed, 153 insertions(+), 16 deletions(-)
+ 8 files changed, 158 insertions(+), 16 deletions(-)
  create mode 100644 MiCO/iot_main.c
  create mode 100644 MiCO/mico_config.h
  create mode 100644 makefiles/config.mk
@@ -113,10 +113,12 @@ new file mode 100644
 index 0000000..13011a2
 --- /dev/null
 +++ b/makefiles/config.mk
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,65 @@
 +########################################
 +# Config
 +########################################
++
++include $(PROJECT_PATH)/usr_config.mk
 +
 +#/* For STDK */
 +CONFIG_STDK_IOT_CORE=y
@@ -126,8 +128,6 @@ index 0000000..13011a2
 +CONFIG_LWIP_USE_HTTPD_FOR_EASYSETUP=y
 +CONFIG_STDK_IOT_CORE_BSP_SUPPORT_EMW3166=y
 +CONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS=y
-+CONFIG_SAMSUNG_BUILD_ENG=y
-+CONFIG_STDK_IOT_CORE_LOG_LEVEL_DEBUG=y
 +
 +ifeq ($(CONFIG_STDK_IOT_CORE),y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE
@@ -161,10 +161,15 @@ index 0000000..13011a2
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_OS_SUPPORT_FREERTOS
 +endif
 +
-+ifeq ($(CONFIG_SAMSUNG_BUILD_ENG),y)
-+STDK_CFLAGS += -DCONFIG_SAMSUNG_BUILD_ENG
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_WARN
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_INFO
++endif
++
++ifeq ($(CONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR), y)
 +STDK_CFLAGS += -DCONFIG_STDK_IOT_CORE_LOG_LEVEL_ERROR
 +endif
 +
