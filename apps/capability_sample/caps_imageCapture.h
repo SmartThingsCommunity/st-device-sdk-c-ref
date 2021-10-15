@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,13 @@ typedef struct caps_imageCapture_data {
     void *usr_data;
     void *cmd_data;
 
+    bool encrypted_value;
     char *image_value;
     char *captureTime_value;
 
+    bool (*get_encrypted_value)(struct caps_imageCapture_data *caps_data);
+    void (*set_encrypted_value)(struct caps_imageCapture_data *caps_data, bool value);
+    void (*attr_encrypted_send)(struct caps_imageCapture_data *caps_data);
     const char *(*get_image_value)(struct caps_imageCapture_data *caps_data);
     void (*set_image_value)(struct caps_imageCapture_data *caps_data, const char *value);
     void (*attr_image_send)(struct caps_imageCapture_data *caps_data);

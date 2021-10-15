@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,69 @@
 
 #include "st_dev.h"
 #include "caps_fanOscillationMode.h"
+
+static const char **caps_fanOscillationMode_get_supportedFanOscillationModes_value(caps_fanOscillationMode_data_t *caps_data)
+{
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return NULL;
+    }
+    return (const char **)caps_data->supportedFanOscillationModes_value;
+}
+
+static void caps_fanOscillationMode_set_supportedFanOscillationModes_value(caps_fanOscillationMode_data_t *caps_data, const char **value, int arraySize)
+{
+    int i;
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return;
+    }
+    if (caps_data->supportedFanOscillationModes_value) {
+        for (i = 0; i < caps_data->supportedFanOscillationModes_arraySize; i++) {
+            free(caps_data->supportedFanOscillationModes_value[i]);
+        }
+        free(caps_data->supportedFanOscillationModes_value);
+    }
+    caps_data->supportedFanOscillationModes_value = malloc(sizeof(char *) * arraySize);
+    if (!caps_data->supportedFanOscillationModes_value) {
+        printf("fail to malloc for supportedFanOscillationModes_value\n");
+        caps_data->supportedFanOscillationModes_arraySize = 0;
+        return;
+    }
+    for (i = 0; i < arraySize; i++) {
+        caps_data->supportedFanOscillationModes_value[i] = strdup(value[i]);
+    }
+
+    caps_data->supportedFanOscillationModes_arraySize = arraySize;
+}
+
+static void caps_fanOscillationMode_attr_supportedFanOscillationModes_send(caps_fanOscillationMode_data_t *caps_data)
+{
+    int sequence_no = -1;
+
+    if (!caps_data || !caps_data->handle) {
+        printf("fail to get handle\n");
+        return;
+    }
+    if (!caps_data->supportedFanOscillationModes_value) {
+        printf("value is NULL\n");
+        return;
+    }
+
+    ST_CAP_SEND_ATTR_STRINGS_ARRAY(caps_data->handle,
+            (char *)caps_helper_fanOscillationMode.attr_supportedFanOscillationModes.name,
+            caps_data->supportedFanOscillationModes_value,
+            caps_data->supportedFanOscillationModes_arraySize,
+            NULL,
+            NULL,
+            sequence_no);
+
+    if (sequence_no < 0)
+        printf("fail to send supportedFanOscillationModes value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
+}
+
 
 static int caps_fanOscillationMode_attr_fanOscillationMode_str2idx(const char *value)
 {
@@ -110,6 +173,7 @@ static void caps_fanOscillationMode_init_cb(IOT_CAP_HANDLE *handle, void *usr_da
     caps_fanOscillationMode_data_t *caps_data = usr_data;
     if (caps_data && caps_data->init_usr_cb)
         caps_data->init_usr_cb(caps_data);
+    caps_fanOscillationMode_attr_supportedFanOscillationModes_send(caps_data);
     caps_fanOscillationMode_attr_fanOscillationMode_send(caps_data);
 }
 
@@ -129,6 +193,9 @@ caps_fanOscillationMode_data_t *caps_fanOscillationMode_initialize(IOT_CTX *ctx,
     caps_data->init_usr_cb = init_usr_cb;
     caps_data->usr_data = usr_data;
 
+    caps_data->get_supportedFanOscillationModes_value = caps_fanOscillationMode_get_supportedFanOscillationModes_value;
+    caps_data->set_supportedFanOscillationModes_value = caps_fanOscillationMode_set_supportedFanOscillationModes_value;
+    caps_data->attr_supportedFanOscillationModes_send = caps_fanOscillationMode_attr_supportedFanOscillationModes_send;
     caps_data->get_fanOscillationMode_value = caps_fanOscillationMode_get_fanOscillationMode_value;
     caps_data->set_fanOscillationMode_value = caps_fanOscillationMode_set_fanOscillationMode_value;
     caps_data->attr_fanOscillationMode_str2idx = caps_fanOscillationMode_attr_fanOscillationMode_str2idx;

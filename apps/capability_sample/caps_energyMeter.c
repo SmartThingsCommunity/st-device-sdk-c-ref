@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019-2020 Samsung Electronics All Rights Reserved.
+ * Copyright 2019-2021 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,16 @@ static void caps_energyMeter_attr_energy_send(caps_energyMeter_data_t *caps_data
 }
 
 
+static void caps_energyMeter_cmd_resetEnergyMeter_cb(IOT_CAP_HANDLE *handle, iot_cap_cmd_data_t *cmd_data, void *usr_data)
+{
+    caps_energyMeter_data_t *caps_data = (caps_energyMeter_data_t *)usr_data;
+
+    printf("called [%s] func with num_args:%u\n", __func__, cmd_data->num_args);
+
+    if (caps_data && caps_data->cmd_resetEnergyMeter_usr_cb)
+        caps_data->cmd_resetEnergyMeter_usr_cb(caps_data);
+}
+
 static void caps_energyMeter_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 {
     caps_energyMeter_data_t *caps_data = usr_data;
@@ -93,6 +103,7 @@ static void caps_energyMeter_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
 caps_energyMeter_data_t *caps_energyMeter_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data)
 {
     caps_energyMeter_data_t *caps_data = NULL;
+    int err;
 
     caps_data = malloc(sizeof(caps_energyMeter_data_t));
     if (!caps_data) {
@@ -114,7 +125,12 @@ caps_energyMeter_data_t *caps_energyMeter_initialize(IOT_CTX *ctx, const char *c
     if (ctx) {
         caps_data->handle = st_cap_handle_init(ctx, component, caps_helper_energyMeter.id, caps_energyMeter_init_cb, caps_data);
     }
-    if (!caps_data->handle) {
+    if (caps_data->handle) {
+        err = st_cap_cmd_set_cb(caps_data->handle, caps_helper_energyMeter.cmd_resetEnergyMeter.name, caps_energyMeter_cmd_resetEnergyMeter_cb, caps_data);
+        if (err) {
+            printf("fail to set cmd_cb for resetEnergyMeter of energyMeter\n");
+    }
+    } else {
         printf("fail to init energyMeter handle\n");
     }
 
