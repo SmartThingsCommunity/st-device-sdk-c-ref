@@ -34,7 +34,7 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 > The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
 #### For ESP32:
-1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-1-install-prerequisites) for your build system OS.
 2. Set up the ESP32 toolchain with `setup.py`
 
 #### For ESP32_v3.3 (Legacy - Ubuntu/Debian Quickstart):
