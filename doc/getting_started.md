@@ -125,7 +125,7 @@ You must setup a toolchain according to each chipset you selected.
 
 **Example for ESP32** :
 
-- Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#setting-up-development-environment).
+- Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-4-set-up-the-environment-variables).
 
 - Setup ESP32 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
   ```sh
