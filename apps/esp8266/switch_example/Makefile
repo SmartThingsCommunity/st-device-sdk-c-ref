@@ -7,5 +7,7 @@ PROJECT_NAME := switch_example
 
 EXTRA_COMPONENT_DIRS := ${IDF_PATH}/../../iot-core
 
+CFLAGS += -Wno-unused-const-variable
+
 include $(IDF_PATH)/make/project.mk
 

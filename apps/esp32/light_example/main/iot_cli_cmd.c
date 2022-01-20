@@ -25,7 +25,7 @@
 
 #include "st_dev.h"
 
-extern IOT_CTX *ctx;
+extern IOT_CTX *iot_ctx;
 
 static int _cli_copy_nth_arg(char* dest, char* src, int size, int n)
 {
@@ -66,7 +66,7 @@ static int _cli_copy_nth_arg(char* dest, char* src, int size, int n)
 static void _cli_cmd_cleanup(char *string)
 {
     printf("clean-up data with reboot option");
-    st_conn_cleanup(ctx, true);
+    st_conn_cleanup(iot_ctx, true);
 }
 
 extern void button_event(IOT_CAP_HANDLE *handle, int type, int count);
@@ -86,7 +86,7 @@ static void _cli_cmd_butten_event(char *string)
     }
 
     printf("button_event : count %d, type %d\n", count, type);
-    button_event(ctx, type, count);
+    button_event(iot_ctx, type, count);
 }
 
 extern int monitor_enable;
