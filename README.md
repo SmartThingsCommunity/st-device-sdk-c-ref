@@ -29,12 +29,12 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 
 #### For ESP8266 (Ubuntu/Debian Quickstart):
 1. Set up the ESP8266 Toolchain for Linux according to the [Espressif documentation](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html).
-2. In order to use the pre-supplied SDK build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-linux64-1.22.0-100-ge567ec7-5.2.0.tar.gz) into the `~/esp/xtensa-lx106-elf/` directory as directed in the Expressif documentation linked above.
+2. In order to use the pre-supplied SDK build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz) into the `~/esp/xtensa-lx106-elf/` directory as directed in the Expressif documentation linked above.
 
 > The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
 #### For ESP32:
-1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-1-install-prerequisites) for your build system OS.
 2. Set up the ESP32 toolchain with `setup.py`
 
 #### For ESP32_v3.3 (Legacy - Ubuntu/Debian Quickstart):
@@ -86,7 +86,7 @@ For Windows systems:
 
 > If you want to use the default build configuration, you can skip this step.
 
-   - ESP8266 Example:
+   - ESP32 Example:
      > Note that the `menuconfig` option is only supported on the Espressif chipset.
      ```sh
      # python build.py {app_path} {option}
@@ -120,7 +120,7 @@ Flashing can be done according to the method outlined by the applicable chipset 
 
 You can flash the executables into a target device via `build.py` with additional options.
 
-> You do not need to run `python build.py esp8266 st_switch` before running `python build.py esp8266 st_switch flash`; this will automatically rebuild anything which needs it.
+> You do not need to run `python build.py esp32 st_switch` before running `python build.py esp32 st_switch flash`; this will automatically rebuild anything which needs it.
 
 Available Options:
 
