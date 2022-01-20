@@ -43,7 +43,7 @@ $ git clone https://github.com/SmartThingsCommunity/st-device-sdk-c-ref.git
 >
 > For the rest of this document, we will assume the above path (`~/st-device-sdk-c-ref`) is the default reference source code.
 
-You can use a script to automatically download the `IoT Core Device Library` and `a chipset vendor's SDK` (e.g. `esp8266`) as follows:
+You can use a script to automatically download the `IoT Core Device Library` and `a chipset vendor's SDK` (e.g. `esp32`) as follows:
 
 ```sh
 $ cd ~/st-device-sdk-c-ref
@@ -61,7 +61,7 @@ Usage: python setup.py [BSP_NAME]
   ex) python setup.py esp32s2
 
 
-$ python setup.py esp8266
+$ python setup.py esp32
 ```
 
 ### Create device identity
@@ -125,7 +125,7 @@ You must setup a toolchain according to each chipset you selected.
 
 **Example for ESP32** :
 
-- Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html#setting-up-development-environment).
+- Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-4-set-up-the-environment-variables).
 
 - Setup ESP32 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
   ```sh
@@ -289,8 +289,8 @@ You have set up the environment and registered a device, so now it is time to de
 An easy way to get started is to branch out one of the example projects provided in the git repository. We will use the "switch_example" application from the SmartThings Device SDK Reference directory here.
 
 ```sh
-# Full path of the ESP8266
-~/st-device-sdk-c-ref/apps/esp8266/switch_example/
+# Full path of the ESP32
+~/st-device-sdk-c-ref/apps/esp32/switch_example/
 ```
 
 ### Update device information
@@ -402,7 +402,7 @@ Major APIs are like below:
   - st_cap_free_attr()
   - st_cap_send_attr()
 
-***Main function example for ESP8266*** :
+***Main function example for ESP32*** :
 
 ```sh
 void app_main(void)
@@ -447,7 +447,7 @@ void app_main(void)
     // create a handle to process capability and initialize capability info
     capability_init();
 
-    gpio_init();
+    iot_gpio_init();
     register_iot_cli_cmd();
     uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);
@@ -463,25 +463,24 @@ void app_main(void)
 Go to the root directory of the SmartThings Device SDK Reference git repo. and execute the build script(build.py) with the below parameter.
 
 ```sh
-# Example for ESP8266
+# Example for ESP32
 $ cd ~/st-device-sdk-c-ref/
-$ python build.py apps/esp8266/switch_example             # python build.py {app_directory}
+$ python build.py apps/esp32/switch_example             # python build.py {app_directory}
 ```
 
 After compiling, following results can be seen. In fact, as you know, we have to flash these results according to the binary download method that exists per chipset.
 
 ```sh
-# Example for ESP8266
+# Example for ESP32
 $ cd ~/st-device-sdk-c-ref/
 $ tree output/ -L 3
 output/
-`-- esp8266
-    ├── iotcore_switch_example_20200729_65a1678_0a8cbe1
-    │   ├── address_info.txt
+`-- esp32
+    ├── iotcore_switch_example_20211223_e242418_20aab5c
     │   ├── bootloader.bin
     │   ├── debug
     │   ├── ota_data_initial.bin
-    │   ├── partitions.2MB.bin
+    │   ├── partition-table.bin
     │   └── switch_example.bin
 
 ```
@@ -489,10 +488,10 @@ output/
 In case of Espressif chipset (e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries (e.g. app, bootloader, and init data bin) to the chipset.
 
 ```sh
-# Example for ESP8266
+# Example for ESP32
 # python build.py {app_directory} {option}
 $ cd ~/st-device-sdk-c-ref/
-$ python build.py apps/esp8266/switch_example flash
+$ python build.py apps/esp32/switch_example flash
 ```
 
 The serial port needs to be matched to the computer environment for serial port flashing. For example, the settings for serial port flashing can be configured with `menuconfig` option in Espressif. If the serial port setting does not match your environment, please execute the following:
@@ -500,13 +499,13 @@ The serial port needs to be matched to the computer environment for serial port 
 > Note :
 > The `menuconfig` option is only supported on the Espressif chipset. If you use a different chipset, please set it according to the selected original chipset guide.
 ```sh
-# Example for ESP8266
+# Example for ESP32
 # python build.py {app_directory} {option}
 $ cd ~/st-device-sdk-c-ref
-$ python build.py apps/esp8266/switch_example menuconfig
+$ python build.py apps/esp32/switch_example menuconfig
 ```
 
-Plus, You don't need to run `python build.py appes/esp8266/switch_example` before running `python build.py appes/esp8266/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
+Plus, You don't need to run `python build.py appes/esp32/switch_example` before running `python build.py appes/esp32/switch_example flash`, this will automatically rebuild everything that needs to be built before flashing.
 
 For more details about flashing and monitoring, please refer to the [README](../README.md#flash--monitor) file.
 
