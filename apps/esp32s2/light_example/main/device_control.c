@@ -24,9 +24,57 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-static int rgb_color_red = 255;
-static int rgb_color_green = 0;
-static int rgb_color_blue = 0;
+
+#include "esp_log.h"
+#include "driver/rmt.h"
+#include "led_strip.h"
+
+
+static int red_value;
+static int green_value;
+static int blue_value;
+
+#ifdef CONFIG_LED_RMT
+static led_strip_t *strip;
+static int onoff_state;
+
+static const char *TAG = "led_strip";
+
+static void led_strip_init() {
+    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(CONFIG_RMT_TX_GPIO, CONFIG_RMT_TX_CHANNEL);
+    config.clk_div = 2;
+
+    ESP_ERROR_CHECK(rmt_config(&config));
+    ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
+
+    led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(1, (led_strip_dev_t)config.channel);
+    strip = led_strip_new_rmt_ws2812(&strip_config);
+    if (!strip) {
+        ESP_LOGE(TAG, "install WS2812 driver failed");
+    }
+    ESP_ERROR_CHECK(strip->clear(strip, 100));
+}
+
+static void led_strip_update() {
+    if (onoff_state == SWITCH_ON) {
+        ESP_ERROR_CHECK(strip->set_pixel(strip, 0, red_value, green_value, blue_value));
+    } else {
+        ESP_ERROR_CHECK(strip->set_pixel(strip, 0, 0, 0, 0));
+    }
+    ESP_ERROR_CHECK(strip->refresh(strip, 100));
+}
+
+static void led_strip_onoff(int onoff) {
+    onoff_state = onoff;
+    led_strip_update();
+}
+
+static void led_strip_set_rgb(int red, int green, int blue) {
+    red_value = red;
+    green_value = green;
+    blue_value = blue;
+}
+#endif //CONFIG_LED_RMT
 
 static void update_rgb_from_color_temp(int color_temp, int *red, int *green, int *blue)
 {
@@ -65,21 +113,25 @@ static void update_rgb_from_color_temp(int color_temp, int *red, int *green, int
 
 void change_switch_state(int switch_state)
 {
+#ifdef CONFIG_LED_GPIO 
     if (switch_state == SWITCH_OFF) {
         gpio_set_level(GPIO_OUTPUT_COLORLED_R, COLOR_LED_OFF);
         gpio_set_level(GPIO_OUTPUT_COLORLED_G, COLOR_LED_OFF);
         gpio_set_level(GPIO_OUTPUT_COLORLED_B, COLOR_LED_OFF);
     } else {
-        gpio_set_level(GPIO_OUTPUT_COLORLED_R, (rgb_color_red > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
-        gpio_set_level(GPIO_OUTPUT_COLORLED_G, (rgb_color_green > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
-        gpio_set_level(GPIO_OUTPUT_COLORLED_B, (rgb_color_blue > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
+        gpio_set_level(GPIO_OUTPUT_COLORLED_R, (red_value > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
+        gpio_set_level(GPIO_OUTPUT_COLORLED_G, (green_value > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
+        gpio_set_level(GPIO_OUTPUT_COLORLED_B, (blue_value > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
     }
+#else
+    led_strip_onoff(switch_state);
+#endif
 }
 
 void update_color_info(int color_temp)
 {
     update_rgb_from_color_temp(color_temp,
-                               &rgb_color_red, &rgb_color_green, &rgb_color_blue);
+                               &red_value, &green_value, &blue_value);
 }
 
 void change_switch_level(int level)
@@ -193,6 +245,7 @@ void iot_gpio_init(void)
     io_conf.pull_down_en = 1;
     io_conf.pull_up_en = 0;
 
+#ifdef CONFIG_LED_GPIO
     io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_COLORLED_R;
     gpio_config(&io_conf);
     io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_COLORLED_G;
@@ -201,6 +254,7 @@ void iot_gpio_init(void)
     gpio_config(&io_conf);
     io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_COLORLED_0;
     gpio_config(&io_conf);
+#endif
 
     io_conf.intr_type = GPIO_INTR_ANYEDGE;
     io_conf.mode = GPIO_MODE_INPUT;
@@ -212,9 +266,14 @@ void iot_gpio_init(void)
     gpio_set_intr_type(GPIO_INPUT_BUTTON, GPIO_INTR_ANYEDGE);
 
     gpio_install_isr_service(0);
-
+#ifdef CONFIG_LED_GPIO
     gpio_set_level(GPIO_OUTPUT_COLORLED_R, 1);
     gpio_set_level(GPIO_OUTPUT_COLORLED_G, 0);
     gpio_set_level(GPIO_OUTPUT_COLORLED_B, 0);
     gpio_set_level(GPIO_OUTPUT_COLORLED_0, 0);
+#else
+    led_strip_init();
+    led_strip_set_rgb(DEFAULT_RED_VALUE, DEFAULT_GREEN_VALUE, DEFAULT_BLUE_VALUE);
+    led_strip_onoff(SWITCH_ON);
+#endif
 }
