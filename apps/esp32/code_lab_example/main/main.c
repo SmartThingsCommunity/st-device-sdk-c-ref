@@ -228,8 +228,8 @@ void app_main(void)
     //create a iot context
     iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
     if (iot_ctx != NULL) {
-        iot_err = st_conn_set_noti_cb(iot_ctx, iot_noti_cb, NULL);
-        if (iot_err)
+        err = st_conn_set_noti_cb(iot_ctx, iot_noti_cb, NULL);
+        if (err)
             printf("fail to set notification callback function\n");
     } else {
         printf("fail to create the iot_context\n");
