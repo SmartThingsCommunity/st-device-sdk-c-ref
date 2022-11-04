@@ -183,7 +183,7 @@ Click the _DEFINE DEVICE PROFILE_ &rightarrow; _ADD A DEVICE PROFILE_ and then f
 
 &nbsp;
 
-The "[Health Check](https://smartthings.developer.samsung.com/docs/devices/health.html)" capability is automatically added for all direct connected devices. Please leave it and add your capabilities  
+The "[Health Check](https://developer.smartthings.com/docs/devices/capabilities/capabilities-reference#healthCheck)" capability is automatically added for all direct connected devices. Please leave it and add your capabilities  
 
 &nbsp;
 
@@ -209,7 +209,7 @@ You can define device’s category and its regional availability.
 ### Deploy your device to test
 
 You can start testing by deploying your device to test from _Test_ &rightarrow; _Test Devices_ or _Overview_ page.  You will be able to see your device in the SmartThings mobile app when in Developer Mode only when after it has been deployed for testing.
-- [SmartThings Device Publishing Process](https://smartthings.developer.samsung.com/docs/devices/publishing/publishing-basics.html)
+- [SmartThings Device Publishing Process](https://developer.smartthings.com/docs/devices/direct-connected/publish)
 
 ![deplay to test](./res/deploy_to_test_switch.png)
 
@@ -515,7 +515,7 @@ The SmartThings App should be used to control an IoT device that is running with
 
 1. **Enable developer mode**  
 You need to enable the ***Developer Mode*** in the SmartThings app before start testing.  
-Please refer [here](https://smartthings.developer.samsung.com/docs/testing/developer-mode.html) for more details.  
+Please refer [here](https://developer.smartthings.com/docs/devices/test-your-device#enable-developer-mode-in-the-smartthings-app) for more details.  
 ![developer mode](./res/developer_mode.png)
 
 2. **Add device**  
