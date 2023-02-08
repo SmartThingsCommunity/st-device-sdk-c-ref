@@ -21,5 +21,11 @@ set(STDK_INCLUDE_PATH
         "$ENV{IDF_PATH}/components/bootloader_support/include"
     )
 
-add_subdirectory($ENV{STDK_CORE_PATH} iotcore)
+
+set(CORE_PATH $ENV{STDK_CORE_PATH})
+if(NOT CORE_PATH)
+    message("WARNING : environment variable 'STDK_CORE_PATH' is not set.")
+    set(CORE_PATH "$ENV{IDF_PATH}/../../iot-core")
+endif()
+add_subdirectory(${CORE_PATH} iotcore)
 target_link_libraries(${COMPONENT_LIB} PUBLIC iotcore)
