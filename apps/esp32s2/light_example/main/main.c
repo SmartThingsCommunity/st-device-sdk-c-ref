@@ -46,7 +46,7 @@ extern const uint8_t device_info_end[]        asm("_binary_device_info_json_end"
 static iot_status_t g_iot_status = IOT_STATUS_IDLE;
 static iot_stat_lv_t g_iot_stat_lv;
 
-IOT_CTX* ctx = NULL;
+IOT_CTX* iot_ctx = NULL;
 
 //#define SET_PIN_NUMBER_CONFRIM
 
@@ -126,7 +126,7 @@ static void cap_lightMode_cmd_cb(struct caps_activityLightingMode_data *caps_dat
 
 static void capability_init()
 {
-    cap_switch_data = caps_switch_initialize(ctx, "main", NULL, NULL);
+    cap_switch_data = caps_switch_initialize(iot_ctx, "main", NULL, NULL);
     if (cap_switch_data) {
         const char *switch_init_value = caps_helper_switch.attr_switch.value_on;
 
@@ -136,7 +136,7 @@ static void capability_init()
         cap_switch_data->set_switch_value(cap_switch_data, switch_init_value);
     }
 
-    cap_switchLevel_data = caps_switchLevel_initialize(ctx, "main", NULL, NULL);
+    cap_switchLevel_data = caps_switchLevel_initialize(iot_ctx, "main", NULL, NULL);
     if (cap_switchLevel_data) {
         int switch_init_level = 50;
 
@@ -146,7 +146,7 @@ static void capability_init()
         cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.unit_percent);
     }
 
-    cap_colorTemp_data = caps_colorTemperature_initialize(ctx, "main", NULL, NULL);
+    cap_colorTemp_data = caps_colorTemperature_initialize(iot_ctx, "main", NULL, NULL);
     if (cap_colorTemp_data) {
         int colorTemp_init_value = 2000;
 
@@ -155,7 +155,7 @@ static void capability_init()
         cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp_init_value);
     }
 
-    cap_lightMode_data = caps_activityLightingMode_initialize(ctx, "main", NULL, NULL);
+    cap_lightMode_data = caps_activityLightingMode_initialize(iot_ctx, "main", NULL, NULL);
     if (cap_lightMode_data) {
         const char *init_lightMode = caps_helper_activityLightingMode.attr_lightingMode.value_cozy;
         cap_lightMode_data->set_lightingMode_value(cap_lightMode_data, init_lightMode);
@@ -163,7 +163,7 @@ static void capability_init()
         cap_lightMode_data->cmd_setLightingMode_usr_cb = cap_lightMode_cmd_cb;
     }
 
-    cap_dustSensor_data = caps_dustSensor_initialize(ctx, "monitor", NULL, NULL);
+    cap_dustSensor_data = caps_dustSensor_initialize(iot_ctx, "monitor", NULL, NULL);
     if (cap_dustSensor_data) {
         cap_dustSensor_data->set_dustLevel_value(cap_dustSensor_data, 0);
         cap_dustSensor_data->set_fineDustLevel_value(cap_dustSensor_data, 0);
@@ -222,7 +222,7 @@ static void connection_start(void)
 #endif
 
     // process on-boarding procedure. There is nothing more to do on the app side than call the API.
-    err = st_conn_start(ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
+    err = st_conn_start(iot_ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
     if (err) {
         printf("fail to start connection. err:%d\n", err);
     }
@@ -256,7 +256,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
         switch(count) {
             case 1:
                 if (g_iot_status == IOT_STATUS_NEED_INTERACT) {
-                    st_conn_ownership_confirm(ctx, true);
+                    st_conn_ownership_confirm(iot_ctx, true);
                     noti_led_mode = LED_ANIMATION_MODE_IDLE;
                     change_switch_state(get_switch_state());
                 } else {
@@ -277,7 +277,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
                 break;
             case 5:
                 /* clean-up provisioning & registered data with reboot option*/
-                st_conn_cleanup(ctx, true);
+                st_conn_cleanup(iot_ctx, true);
                 break;
             default:
                 led_blink(get_switch_state(), 100, count);
@@ -286,7 +286,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
     } else if (type == BUTTON_LONG_PRESS) {
         printf("Button long press, iot_status: %d\n", g_iot_status);
         led_blink(get_switch_state(), 100, 3);
-        st_conn_cleanup(ctx, false);
+        st_conn_cleanup(iot_ctx, false);
         xTaskCreate(connection_start_task, "connection_task", 2048, NULL, 10, NULL);
     }
 }
@@ -361,9 +361,9 @@ void app_main(void)
     int iot_err;
 
     // create a iot context
-    ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
-    if (ctx != NULL) {
-        iot_err = st_conn_set_noti_cb(ctx, iot_noti_cb, NULL);
+    iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
+    if (iot_ctx != NULL) {
+        iot_err = st_conn_set_noti_cb(iot_ctx, iot_noti_cb, NULL);
         if (iot_err)
             printf("fail to set notification callback function\n");
     } else {

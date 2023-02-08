@@ -16,6 +16,9 @@
  *
  ****************************************************************************/
 
+#define DEFAULT_RED_VALUE 32 //MAX 255
+#define DEFAULT_GREEN_VALUE 32 //MAX 255
+#define DEFAULT_BLUE_VALUE 32 //MAX 255
 
 #define GPIO_INPUT_BUTTON 9
 
