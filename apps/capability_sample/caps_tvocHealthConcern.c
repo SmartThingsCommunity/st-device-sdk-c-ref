@@ -27,7 +27,7 @@ static int caps_tvocHealthConcern_attr_tvocHealthConcern_str2idx(const char *val
 {
     int index;
 
-    for (index = 0; index < CAP_ENUM_MOTIONSENSOR_MOTION_VALUE_MAX; index++) {
+    for (index = 0; index < CAP_ENUM_TVOCHEALTHCONCERN_VALUE_MAX; index++) {
         if (!strcmp(value, caps_helper_tvocHealthConcern.attr_tvocHealthConcern.values[index])) {
             return index;
         }
