@@ -269,7 +269,7 @@ static int _crypto_sha256(const unsigned char *src, size_t src_len, unsigned cha
 
 	printf("src: %d@%p, dst: %p", src_len, src, dst);
 
-	ret = mbedtls_sha256_ret(src, src_len, dst, 0);
+	ret = mbedtls_sha256(src, src_len, dst, 0);
 	if (ret) {
 		printf("mbedtls_sha256_ret = -0x%04X", -ret);
 		return ret;
@@ -430,7 +430,7 @@ static ota_err_t _update_device()
 
 	mbedtls_sha256_context ctx;
 	mbedtls_sha256_init( &ctx );
-	if (mbedtls_sha256_starts_ret( &ctx, 0) != 0 ) {
+	if (mbedtls_sha256_starts( &ctx, 0) != 0 ) {
 		printf("Failed to initialise api \n");
 		return ret;
 	}
@@ -471,7 +471,7 @@ static ota_err_t _update_device()
 		return ret;
 	}
 	printf("Writing to partition subtype %d at offset 0x%x \n",
-			 update_partition->subtype, update_partition->address);
+			 update_partition->subtype, (unsigned int)update_partition->address);
 
 	result = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
 	if (result != ESP_OK) {
@@ -537,7 +537,7 @@ static ota_err_t _update_device()
 		}
 
 		if (data_read > 0) {
-			if (mbedtls_sha256_update_ret(&ctx, (const unsigned char *)upgrade_data_buf, data_read) != 0) {
+			if (mbedtls_sha256_update(&ctx, (const unsigned char *)upgrade_data_buf, data_read) != 0) {
 				printf("Failed getting HASH \n");
 			}
 
@@ -554,7 +554,7 @@ static ota_err_t _update_device()
 
 	unsigned char md[OTA_CRYPTO_SHA256_LEN] = {0,};
 
-	if (mbedtls_sha256_finish_ret( &ctx, md) != 0) {
+	if (mbedtls_sha256_finish( &ctx, md) != 0) {
 		printf("Failed getting HASH \n");
 		goto clean_up;
 	}
