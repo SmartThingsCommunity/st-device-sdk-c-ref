@@ -55,8 +55,11 @@ For Windows systems:
 #### For EMW3166:
 
 1. Set up the [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the MXCHIP documentation.
-1. Install [MiCO Cube](http://developer.mxchip.com/developer/md/bWljby1oYW5kYm9vay8yLk1pQ09fdG9vbHMvc2VjX2xpbmtfcGFnZS9NaUNPX0N1YmVfRW5nbGlzaC5tZA). In order to use the pre-supplied build script `build.py`, set `mico config --global MICODER /path_of_the_toolchain`
-
+1. Install MiCO Cube. In order to use the pre-supplied build script `build.py`, set `mico config --global MICODER /path_of_the_toolchain`
+ ```sh
+ $ pip install mico-cube
+ $ mico config --global MICODER /path_of_the toolchain
+ ```
 ### Build
 
 1. Download the Direct Connected Device SDK source code as shown in the example below and run `setup.py`.
