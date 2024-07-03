@@ -7,7 +7,7 @@ Easily integrate your Direct Connected Device using the Direct Connected Devices
 > To facilitate development of device applications in an original chipset SDK, the [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c) and supporting examples are separated into two git repositories:
 the [IoT core device library](https://github.com/SmartThingsCommunity/st-device-sdk-c) and the Direct Connected Devices SDK repository. If you want to use the IoT core device library in your original chipset SDK that you previously installed, link the core device library to develop a device application in your existing development environment.
 
-The Direct Connected Devices SDK is distributed in source form and written in C99 for the purpose of portability to most platforms. For a complete overview of the development process and workflow, please refer to the [Direct Connected Devices](https://developer-preview.smartthings.com/docs/devices/direct-connected/get-started) documentation.
+The Direct Connected Devices SDK is distributed in source form and written in C99 for the purpose of portability to most platforms. For a complete overview of the development process and workflow, please refer to the [Direct Connected Devices](https://developer.smartthings.com/docs/devices/direct-connected/get-started) documentation.
 
 ## Directory Structure and Overview
 
