@@ -18,7 +18,7 @@ This document contains
 
 Adding **Firmware Update** capability to project
 ---------------------------------------------
-SmartThings Device SDK enabled device could communicate with SmartThings mobile application by adding **Firmware Update** capability to project at [Developer Workspace](https://smartthings.developer.samsung.com/workspace/)
+SmartThings Device SDK enabled device could communicate with SmartThings mobile application by adding **Firmware Update** capability to project at [Developer Workspace](https://developer.smartthings.com/workspace/)
 
 <img src="./res/adding_firmwareUpdate.png" width=480>
 
