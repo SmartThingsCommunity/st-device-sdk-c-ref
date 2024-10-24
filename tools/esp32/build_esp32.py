@@ -13,13 +13,12 @@ BSP_NAME = sys.argv[1]
 APP_NAME = sys.argv[2]
 EXTRA_ARGS = sys.argv[3:]
 
-BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", BSP_NAME)
-PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", BSP_NAME)
+BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", "esp32")
+PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", "esp32")
 APP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "apps", "esp32", APP_NAME)
 COMMON_TOOLS_PATH = os.path.join(os.environ["STDK_REF_PATH"], "tools", "common")
 
 os.environ["IDF_PATH"] = BSP_PATH
-
 
 def get_qrgen_image():
     qrgen_script = os.path.join(os.environ["STDK_REF_PATH"], "iot-core", "tools", "qrgen", "stdk-qrgen.py")
@@ -119,9 +118,10 @@ if "SHELL" in os.environ:
 else:
     export_cmd = "export.bat"
 
+reconfigure_target_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " -DIDF_TARGET=" + BSP_NAME + " reconfigure"
 build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
 
-ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
+ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + reconfigure_target_cmd + " && " + build_cmd, shell=True)
 if "clean" in MAKE_OPTION.split(' '):
     print("\nTip : To remove all previous build information,")
     print("      'fullclean' is recommended instead of 'clean'.")

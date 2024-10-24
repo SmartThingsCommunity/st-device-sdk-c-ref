@@ -43,6 +43,8 @@ def print_usage():
     print("")
 
 def find_build_script(bsp_name):
+    if "esp32" in bsp_name:
+        bsp_name = "esp32"
     if os.path.exists(os.path.join("tools", bsp_name, "build_"+bsp_name+".py")):
         return "python " + os.path.join("tools", bsp_name, "build_"+bsp_name+".py")
     if "SHELL" in os.environ:
