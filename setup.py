@@ -29,14 +29,16 @@ def print_usage():
 
 
 def find_setup_script(bsp_name):
-	if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")):
-		return "python " + os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")
-	if "SHELL" in os.environ:
-		if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")):
-			return os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")
-	print("Fail to find setup script")
-	print_usage()
-	exit(1)
+        if "esp32" in bsp_name:
+            bsp_name = "esp32"
+        if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")):
+                return "python " + os.path.join("tools", bsp_name, "setup_" + bsp_name + ".py")
+        if "SHELL" in os.environ:
+                if os.path.exists(os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")):
+                    return os.path.join("tools", bsp_name, "setup_" + bsp_name + ".sh")
+        print("Fail to find setup script")
+        print_usage()
+        exit(1)
 
 def update_submodule(path):
 	cwd = os.getcwd()
@@ -50,6 +52,13 @@ def update_submodule(path):
 	except:
 		print("Failed to update submodule " + path)
 	os.chdir(cwd)
+
+def update_bsp_submodule(bsp_name):
+        if "esp32" in bsp_name:
+            bsp_name = "esp32"
+        BSP_PATH = os.path.join(STDK_REF_PATH, "bsp", bsp_name)
+        if BSP_PATH and os.path.isdir(BSP_PATH):
+            update_submodule(BSP_PATH)
 
 update_submodule(STDK_CORE_PATH)
 
@@ -65,10 +74,7 @@ for item in REPLACE_LIST:
 		BSP_NAME = item[1]
 
 setup_script = find_setup_script(BSP_NAME)
-
-BSP_PATH = os.path.join(STDK_REF_PATH, "bsp", BSP_NAME)
-if BSP_PATH and os.path.isdir(BSP_PATH):
-	update_submodule(BSP_PATH)
+update_bsp_submodule(BSP_NAME)
 
 setup_cmd = setup_script + " " + BSP_NAME
 for args in EXTRA_ARGS:

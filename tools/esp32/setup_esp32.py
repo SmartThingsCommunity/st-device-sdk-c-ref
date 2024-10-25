@@ -6,8 +6,8 @@ import shutil
 
 BSP_NAME = sys.argv[1]
 CORE_PATH = os.path.join(os.environ["STDK_CORE_PATH"])
-BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", BSP_NAME)
-PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", BSP_NAME)
+BSP_PATH = os.path.join(os.environ["STDK_REF_PATH"], "bsp", "esp32")
+PATCH_PATH = os.path.join(os.environ["STDK_REF_PATH"], "patches", "esp32")
 
 CONFIG_PATH = os.path.join(BSP_PATH, "components", "iot-core_config")
 
