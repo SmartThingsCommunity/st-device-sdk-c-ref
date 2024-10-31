@@ -105,27 +105,30 @@ if not (os.path.exists(BSP_PATH) and os.path.exists(APP_PATH)):
 
 shutil.copy(os.path.join(os.environ["STDK_CORE_PATH"], "src", "Kconfig"), os.path.join(BSP_PATH, "components", "iot-core_config", "Kconfig"))
 
-if EXTRA_ARGS:
-    MAKE_OPTION = ""
-    for args in EXTRA_ARGS:
-        MAKE_OPTION = MAKE_OPTION + " " + args
-else:
-    MAKE_OPTION = "build"
-
 os.chdir(BSP_PATH)
 if "SHELL" in os.environ:
     export_cmd = ". ./export.sh"
 else:
     export_cmd = "export.bat"
 
-reconfigure_target_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " -DIDF_TARGET=" + BSP_NAME + " reconfigure"
-build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
+if EXTRA_ARGS:
+    MAKE_OPTION = ""
+    for args in EXTRA_ARGS:
+        MAKE_OPTION = MAKE_OPTION + " " + args
+    build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
+    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
+else:
+    MAKE_OPTION = "build"
+    replace_stdk_target_config_cmd = "sed -i '/CONFIG_STDK_IOT_CORE_BSP_SUPPORT_ESP32/c\CONFIG_STDK_IOT_CORE_BSP_SUPPORT_" + BSP_NAME.upper() + "=y' ./sdkconfig"
+    reconfigure_target_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " -DIDF_TARGET=" + BSP_NAME + " reconfigure"
+    build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
+    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + replace_stdk_target_config_cmd + " && " + reconfigure_target_cmd + " && " + build_cmd, shell=True)
 
-ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + reconfigure_target_cmd + " && " + build_cmd, shell=True)
 if "clean" in MAKE_OPTION.split(' '):
     print("\nTip : To remove all previous build information,")
     print("      'fullclean' is recommended instead of 'clean'.")
     print("      For more information, run script with '--help' option.\n")
+
 if ret != 0:
     exit(1)
 
