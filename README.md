@@ -52,14 +52,6 @@ For Windows systems:
 
 > The above steps are applicable for a Windows PC for downloading a binary. You must build the source code on Cygwin or linux for this chipset.
 
-#### For EMW3166:
-
-1. Set up the [MiCoder Toolchain for Linux](http://firmware.mxchip.com/MiCoder_v1.1.Linux.tar.gz) according to the MXCHIP documentation.
-1. Install MiCO Cube. In order to use the pre-supplied build script `build.py`, set `mico config --global MICODER /path_of_the_toolchain`
- ```sh
- $ pip install mico-cube
- $ mico config --global MICODER /path_of_the toolchain
- ```
 ### Build
 
 1. Download the Direct Connected Device SDK source code as shown in the example below and run `setup.py`.
@@ -77,8 +69,6 @@ For Windows systems:
  ex) python setup.py rtl8720c
  ex) python setup.py rtl8195
  ex) python setup.py esp32_v3.3
- ex) python setup.py emw3080
- ex) python setup.py emw3166
  ex) python setup.py esp8266
  ex) python setup.py esp32
  ex) python setup.py esp32s2
@@ -113,7 +103,6 @@ The serial port of your device must to be matched to the computer environment fo
 |-------|----------------------|------------------------|--------|------|---|
 |ESP8266/ESP32|115200|74880|8|None|1|
 |RTL8195|115200|115200|8|None|1|
-|EMW3166|9600 (user UART)|115200 (USB UART)|8|None|1|
 
 #### Flashing
 
@@ -146,15 +135,6 @@ Available Options:
 1. Connect Ameba RTL8195 to a Windows PC; a removable disk `MBED` will appear.
 1. Copy `ram_all.bin` from `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
 1. After successfully copying, reset Ameba RTL8195 target and monitor.
-
-##### EMW3166 Example
-
-> In order to flash the MXCHIP emw3166 chipset binary, the steps below must be performed on a Windows PC with a terminal that supports Ymodem transmission.
-
-1. Connect user UART (PB7-tx, PB6-rx) of emw3166 to a Windows PC with a USB-TTL converter. Then connect USB UART power.
-1. Create a serial session with flashing config (Baud rate 9600) to connect the user UART port, then hold 'BOOT' and press 'RESET' to enable flashing.
-1. Transfer the binary file located in `output/emw3166/iotcore_xxx/xxx@MK3166.bin` using Ymodem on your terminal.
-1. After transfer is successful, press 'RESET' on MiCOKit-3166 target and monitor with USB UART.
 
 ## License
 
