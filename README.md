@@ -43,15 +43,6 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 
 > The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
-#### For RTL8195:
-
-For Windows systems:
-
-1. Install the [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
-1. Upgrade [DAP firmware](https://www.amebaiot.com/en/change-dap-firmware/). The recommended DAP firmware is `DAP_FW_Ameba_V12_1_3-2M.bin`.
-
-> The above steps are applicable for a Windows PC for downloading a binary. You must build the source code on Cygwin or linux for this chipset.
-
 ### Build
 
 1. Download the Direct Connected Device SDK source code as shown in the example below and run `setup.py`.
@@ -65,9 +56,6 @@ For Windows systems:
  $ python setup.py
  Usage: python setup.py [BSP_NAME]
  --------------------------------------------------
- ex) python setup.py rtl8721c
- ex) python setup.py rtl8720c
- ex) python setup.py rtl8195
  ex) python setup.py esp32_v3.3
  ex) python setup.py esp8266
  ex) python setup.py esp32
@@ -102,7 +90,6 @@ The serial port of your device must to be matched to the computer environment fo
 |Chipset|Buad Rate for Flashing|Baud Rate for Monitoring|Data Bit|Parity|Stop Bits|
 |-------|----------------------|------------------------|--------|------|---|
 |ESP8266/ESP32|115200|74880|8|None|1|
-|RTL8195|115200|115200|8|None|1|
 
 #### Flashing
 
@@ -127,14 +114,6 @@ Available Options:
   # python build.py {app_path} {options}
   $ python build.py apps/esp32/switch_example flash monitor
   ```
-
-##### RTL8195 Example:
-
-> In order to flash the RTL chipset binary, the steps below must be performed on a Windows PC, even if you build the source code on a Linux environment.
-
-1. Connect Ameba RTL8195 to a Windows PC; a removable disk `MBED` will appear.
-1. Copy `ram_all.bin` from `output/rtl8195/iotcore_xxx/ram_all.bin` to MBED.
-1. After successfully copying, reset Ameba RTL8195 target and monitor.
 
 ## License
 

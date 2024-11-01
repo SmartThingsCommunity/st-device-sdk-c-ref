@@ -13,15 +13,6 @@
 [submodule "bsp/esp8266"]
 	path = bsp/esp8266
 	url = https://github.com/espressif/ESP8266_RTOS_SDK.git
-[submodule "bsp/rtl8195"]
-	path = bsp/rtl8195
-	url = https://github.com/ambiot/amb1_sdk.git
-[submodule "bsp/rtl8720c"]
-	path = bsp/rtl8720c
-	url = https://github.com/ambiot/ambz2_sdk.git
-[submodule "bsp/rtl8721c"]
-	path = bsp/rtl8721c
-	url = https://github.com/ambiot/ambd_sdk.git
 [submodule "bsp/esp32c3"]
 	path = bsp/esp32c3
 	url = https://github.com/espressif/esp-idf.git

@@ -50,9 +50,6 @@ $ cd ~/st-device-sdk-c-ref
 $ python setup.py
 Usage: python setup.py [BSP_NAME]
 --------------------------------------------------
-  ex) python setup.py rtl8721c
-  ex) python setup.py rtl8720c
-  ex) python setup.py rtl8195
   ex) python setup.py esp32_v3.3
   ex) python setup.py esp8266
   ex) python setup.py esp32
