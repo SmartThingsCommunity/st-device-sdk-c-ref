@@ -50,8 +50,6 @@ $ cd ~/st-device-sdk-c-ref
 $ python setup.py
 Usage: python setup.py [BSP_NAME]
 --------------------------------------------------
-  ex) python setup.py esp32_v3.3
-  ex) python setup.py esp8266
   ex) python setup.py esp32
   ex) python setup.py esp32s2
 
@@ -107,17 +105,6 @@ If you create a device identity with a command with an option like above,  You c
 
 You must setup a toolchain according to each chipset you selected.
 
-**Example for ESP8266** :
-
-- Setup [ESP8266 Toolchain](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html#setup-toolchain).
-
-- Setup ESP8266 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
-  ```sh
-  $ cd ~/st-device-sdk-c-ref
-  $ python setup.py esp8266
-  ```
-
-
 **Example for ESP32** :
 
 - Setup [ESP32 Development Environment](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-4-set-up-the-environment-variables).
@@ -127,29 +114,6 @@ You must setup a toolchain according to each chipset you selected.
   $ cd ~/st-device-sdk-c-ref
   $ python setup.py esp32
   ```
-
-**Example for ESP32_v3.3 (legacy)** :
-
-- Setup [ESP32 Toolchain](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain).
-
-- Setup ESP32 v3.3 environment for the _SmartThings SDK for Direct Connected Devices_ by running `setup.py`
-  ```sh
-  $ cd ~/st-device-sdk-c-ref
-  $ python setup.py esp32_v3.3
-  ```
-
-
-**Example for RTL8195**
-
-- Install [mbed Microcontroller](https://os.mbed.com/handbook/Windows-serial-configuration) to use the USB serial port on Windows.
-- Upgrade [DAP F/W](https://www.amebaiot.com/en/change-dap-firmware/)
-  Recommended DAP F/W is the `DAP_FW_Ameba_V12_1_3-2M.bin`
-
-> **Note :**
->
-> You have to proceed the above steps at Windows PC for downloading a binary. But you have to build the source code on the cygwin or linux for this chipset.
-
-
 
 ## Register a Device
 
@@ -480,7 +444,7 @@ output/
 
 ```
 
-In case of Espressif chipset (e.g. ESP8266, ESP32), you can now run the following command to flash the entire binaries (e.g. app, bootloader, and init data bin) to the chipset.
+In case of Espressif chipset (e.g. ESP32), you can now run the following command to flash the entire binaries (e.g. app, bootloader, and init data bin) to the chipset.
 
 ```sh
 # Example for ESP32

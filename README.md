@@ -27,21 +27,9 @@ The Direct Connected Devices SDK builds on the environments of each chipset vend
 
 Install the toolchain defined in the chipset SDK you use according to the directions below. If no development environment is described for your chipset, it is assumed to only be applicable for 64-bit Ubuntu-based environments.
 
-#### For ESP8266 (Ubuntu/Debian Quickstart):
-1. Set up the ESP8266 Toolchain for Linux according to the [Espressif documentation](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html).
-2. In order to use the pre-supplied SDK build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz) into the `~/esp/xtensa-lx106-elf/` directory as directed in the Expressif documentation linked above.
-
-> The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
-
 #### For ESP32:
 1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-1-install-prerequisites) for your build system OS.
 2. Set up the ESP32 toolchain with `setup.py`
-
-#### For ESP32_v3.3 (Legacy - Ubuntu/Debian Quickstart):
-1. Set up the ESP32 Toolchain for Linux according to the [Espressif documentation](https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html#setup-toolchain).
-1. In order to use the pre-supplied build script `build.py`, extract [the toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) to `~/esp/xtensa-esp32-elf/` as directed in the original Expressif documentation.
-
-> The Espressif documentation linked above directs you to add the toochain path to your `PATH` environment variable in your `~/.profile`. This step *not* necessary if you use the pre-supplied build script `build.py` - the path is automatically exported when using the build script.
 
 ### Build
 
@@ -56,8 +44,6 @@ Install the toolchain defined in the chipset SDK you use according to the direct
  $ python setup.py
  Usage: python setup.py [BSP_NAME]
  --------------------------------------------------
- ex) python setup.py esp32_v3.3
- ex) python setup.py esp8266
  ex) python setup.py esp32
  ex) python setup.py esp32s2
  ex) python setup.py esp32c3
@@ -89,13 +75,13 @@ The serial port of your device must to be matched to the computer environment fo
 
 |Chipset|Buad Rate for Flashing|Baud Rate for Monitoring|Data Bit|Parity|Stop Bits|
 |-------|----------------------|------------------------|--------|------|---|
-|ESP8266/ESP32|115200|74880|8|None|1|
+|ESP32|115200|74880|8|None|1|
 
 #### Flashing
 
 Flashing can be done according to the method outlined by the applicable chipset SDK.
 
-##### ESP8266/ESP32 Example:
+##### ESP32 Example:
 
 You can flash the executables into a target device via `build.py` with additional options.
 
