@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2021 Samsung Electronics All Rights Reserved.
+ * Copyright 2019 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,66 +24,13 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-#include "esp_log.h"
-#include "driver/rmt.h"
-#include "led_strip.h"
-
-#ifdef CONFIG_LED_RMT
-static led_strip_t *strip;
-static int red_value;
-static int green_value;
-static int blue_value;
-static int onoff_state;
-
-static const char *TAG = "led_strip";
-
-static void led_strip_init() {
-    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(CONFIG_RMT_TX_GPIO, CONFIG_RMT_TX_CHANNEL);
-    config.clk_div = 2;
-
-    ESP_ERROR_CHECK(rmt_config(&config));
-    ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
-
-    led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(1, (led_strip_dev_t)config.channel);
-    strip = led_strip_new_rmt_ws2812(&strip_config);
-    if (!strip) {
-        ESP_LOGE(TAG, "install WS2812 driver failed");
-    }
-    ESP_ERROR_CHECK(strip->clear(strip, 100));
-}
-
-static void led_strip_update() {
-    if (onoff_state == SWITCH_ON) {
-        ESP_ERROR_CHECK(strip->set_pixel(strip, 0, red_value, green_value, blue_value));
-    } else {
-        ESP_ERROR_CHECK(strip->set_pixel(strip, 0, 0, 0, 0));
-    }
-    ESP_ERROR_CHECK(strip->refresh(strip, 100));
-}
-
-static void led_strip_onoff(int onoff) {
-    onoff_state = onoff;
-    led_strip_update();
-}
-
-static void led_strip_set_rgb(int red, int green, int blue) {
-    red_value = red;
-    green_value = green;
-    blue_value = blue;
-}
-#endif //CONFIG_LED_RMT
-
 void change_switch_state(int switch_state)
 {
-#ifdef CONFIG_LED_GPIO
     if (switch_state == SWITCH_OFF) {
         gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_OFF);
     } else {
         gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_ON);
     }
-#else
-    led_strip_onoff(switch_state);
-#endif
 }
 
 int get_button_event(int* button_event_type, int* button_event_count)
@@ -188,11 +135,9 @@ void iot_gpio_init(void)
 
 	io_conf.intr_type = GPIO_INTR_DISABLE;
 	io_conf.mode = GPIO_MODE_OUTPUT;
+	io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_MAINLED;
 	io_conf.pull_down_en = 1;
 	io_conf.pull_up_en = 0;
-
-#ifdef CONFIG_LED_GPIO
-	io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_MAINLED;
 	gpio_config(&io_conf);
 	io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_MAINLED_0;
 	gpio_config(&io_conf);
@@ -201,7 +146,6 @@ void iot_gpio_init(void)
 	gpio_config(&io_conf);
 	io_conf.pin_bit_mask = 1 << GPIO_OUTPUT_NOUSE2;
 	gpio_config(&io_conf);
-#endif
 
 
 	io_conf.intr_type = GPIO_INTR_ANYEDGE;
@@ -215,14 +159,8 @@ void iot_gpio_init(void)
 
 	gpio_install_isr_service(0);
 
-#ifdef CONFIG_LED_GPIO
 	gpio_set_level(GPIO_OUTPUT_MAINLED, MAINLED_GPIO_ON);
 	gpio_set_level(GPIO_OUTPUT_MAINLED_0, 0);
-#else
-    led_strip_init();
-    led_strip_set_rgb(DEFAULT_RED_VALUE, DEFAULT_GREEN_VALUE, DEFAULT_BLUE_VALUE);
-    led_strip_onoff(SWITCH_ON);
-#endif
 }
 
 

@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2021 Samsung Electronics All Rights Reserved.
+ * Copyright 2019 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,28 @@
  *
  ****************************************************************************/
 
-#define DEFAULT_RED_VALUE 32 //MAX 255
-#define DEFAULT_GREEN_VALUE 32 //MAX 255
-#define DEFAULT_BLUE_VALUE 32 //MAX 255
 
-#define GPIO_INPUT_BUTTON 9
+//#define CONFIG_TARGET_WEMOS_D1_R32
+#ifdef CONFIG_TARGET_WEMOS_D1_R32
 
-#define GPIO_OUTPUT_MAINLED 0
-#define GPIO_OUTPUT_MAINLED_0 4 /* use as ground */
+#define GPIO_INPUT_BUTTON 18
 
-#define GPIO_OUTPUT_NOUSE1 1
-#define GPIO_OUTPUT_NOUSE2 2
+#define GPIO_OUTPUT_MAINLED 16
+#define GPIO_OUTPUT_MAINLED_0 26 /* use as ground */
+
+#define GPIO_OUTPUT_NOUSE1 17
+#define GPIO_OUTPUT_NOUSE2 25
+#else // ESP32_DEVKITC_V4
+
+#define GPIO_INPUT_BUTTON 0
+
+#define GPIO_OUTPUT_MAINLED 12
+#define GPIO_OUTPUT_MAINLED_0 26 /* use as ground */
+
+#define GPIO_OUTPUT_NOUSE1 14
+#define GPIO_OUTPUT_NOUSE2 27
+
+#endif
 
 enum switch_onoff_state {
     SWITCH_OFF = 0,
