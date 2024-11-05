@@ -120,9 +120,9 @@ if EXTRA_ARGS:
 else:
     MAKE_OPTION = "build"
     replace_stdk_target_config_cmd = "sed -i '/CONFIG_STDK_IOT_CORE_BSP_SUPPORT_ESP32/c\CONFIG_STDK_IOT_CORE_BSP_SUPPORT_" + BSP_NAME.upper() + "=y' ./sdkconfig"
-    reconfigure_target_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " -DIDF_TARGET=" + BSP_NAME + " reconfigure"
+    replace_target_config_cmd = "sed -i '/CONFIG_IDF_TARGET=/c\CONFIG_IDF_TARGET=\"" + BSP_NAME + "\"' ./sdkconfig"
     build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
-    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + replace_stdk_target_config_cmd + " && " + reconfigure_target_cmd + " && " + build_cmd, shell=True)
+    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + replace_stdk_target_config_cmd + " && " + replace_target_config_cmd + " && " + build_cmd, shell=True)
 
 if "clean" in MAKE_OPTION.split(' '):
     print("\nTip : To remove all previous build information,")

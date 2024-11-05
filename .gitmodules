@@ -4,9 +4,3 @@
 [submodule "bsp/esp32"]
 	path = bsp/esp32
 	url = https://github.com/espressif/esp-idf.git
-[submodule "bsp/esp32s2"]
-	path = bsp/esp32s2
-	url = https://github.com/espressif/esp-idf.git
-[submodule "bsp/esp32c3"]
-	path = bsp/esp32c3
-	url = https://github.com/espressif/esp-idf.git
