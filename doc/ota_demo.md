@@ -128,33 +128,33 @@ This demo server will provide two types of contents. because these contents are 
         text = colored('Usage: python ./firmware_sign.py FIRMWARE_NAME PRIVATE_KEY_NAME', 'green')
         print(text)
         print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        print('ex) python ./firmware_sign.py ota_demo.bin root.key \n')
+        print('ex) python ./firmware_sign.py ota_demo.bin root.key ')
         exit()
 
     def ota_update_signature(signature_name, firmware_name, out_file):
-        print info, "Updating signature "
+        print (info, "Updating signature ")
 
         try:
             fd = open(out_file, 'wb+')
         except IOError:
-            print error, "File does not exist"
+            print (error, "File does not exist")
             return False
 
         try:
             sign_fd = open(signature_name, 'rb+')
         except IOError:
-            print error, 'Signature does not exist'
+            print (error, 'Signature does not exist')
             fd.close
             return False
 
         # write signature's header
-        fd.write("\xFF\xFF\xFF\xFF\x00\x00")
+        fd.write(binascii.unhexlify('FFFFFFFF0000'))
 
         # write signature
         fd.write(sign_fd.read())
 
         # write footer
-        fd.write("\x00\x00\xFF\xFF\xFF\xFF")
+        fd.write(binascii.unhexlify('0000FFFFFFFF'))
 
         fd.close
         sign_fd.close
@@ -162,12 +162,12 @@ This demo server will provide two types of contents. because these contents are 
 
     def ota_check_firmware_validation(firmware_name):
 
-        print info, "Checking firmware validation..."
+        print (info, "Checking firmware validation...")
 
         try:
             file = open(firmware_name, 'rb+')
         except IOError:
-            print error, 'File does not exist'
+            print (error, 'File does not exist')
             exit()
 
         file.seek(-OTA_FOOTER_SIZE,2)
@@ -179,7 +179,7 @@ This demo server will provide two types of contents. because these contents are 
         if first_footer != 0xffff or second_footer != 0xffff:
             file.close
         else :
-            print info, "Firmware is already signed \n", 
+            print (info, "Firmware is already signed")
             file.close
             exit()
 
@@ -220,7 +220,7 @@ This demo server will provide two types of contents. because these contents are 
 
             text = colored('signed_'+firmware_name, 'yellow')
             print('- - - - - - - - - - - - - - - - - - - - - - - - - -')
-            print "OTA signging Completed!!  (Output :", text,")"
+            print ("OTA signging Completed!!  (Output :", text,")")
             print('- - - - - - - - - - - - - - - - - - - - - - - - - -')
 
         # clear all data
