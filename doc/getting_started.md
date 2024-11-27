@@ -121,6 +121,17 @@ Now that the programming environment is setup, you need to create project and re
 
 First, please sign in to the [Developer Workspace](https://developer.smartthings.com/workspace/) with a Samsung Account.
 
+If you have a plan to commercialize a product, I recommend creating an organizational workspace instead of a private workspace.
+You cannot request the certification in private workspace.
+
+If you find the person mark at the top-right in Developer Workspace, you can get the link of the request form for an organization workspace.
+- If you need new organization, selcet Create New Organization in Type of Organization Change
+- If you want to join or remove an existing organization, select Add User to Existing Organization or Remove User from Existing Organization
+
+MNid can be found next to the organization name at the top right of the developer workspace page that is a member of the organization.
+
+Once the application is completed, the progress status will be sent to the email address you applied for.
+
 ![sign in](./res/sign_in.png)
 
 ### Create a new project
@@ -136,7 +147,7 @@ To create project for direct connected device. Please select select _New Project
 
 A device profile contains the components, capabilities, and metadata (ID, name, etc.). This information defines the actions and attributes that an IoT device can perform.
 
-Click the _DEFINE DEVICE PROFILE_ &rightarrow; _ADD A DEVICE PROFILE_ and then fill out required information (e.g. Basic infor, Component & Capability, UI display)
+Click the _DEFINE DEVICE PROFILE_ &rightarrow; _CREATE DEVICE PROFILE_ or _ADD A DEVICE PROFILE_ and then fill out required information (e.g. Basic infor, Component & Capability, UI display)
 
 ![create device profile](./res/create-device-profile.gif)
 
@@ -207,6 +218,8 @@ Copy public key string from keygen output (`nFN5x***uQusQ****ZHoBSFaAoP9***kNdLn
 
 ### Generate Device QR code
 Using device QR code could be helpful while device onboarding. QR code should have format like below. (Please refer here for more details)
+
+This link is [QR code design template] (https://developer.smartthings.com/docs/devices/direct-connected/publish#qr-code-design-template).
 
 **{Your mnId}**: 4-digit alphanumeric mnId of your account  
 **{Device onboardingId}**: 3-digit number Onboarding ID, you can find it from your developer workspace project “Device Onboarding” > “Other Info” page  
@@ -331,7 +344,8 @@ Your IoT device needs two pieces of information when connecting to the SmartThin
          "id": "DIP_UUID",
          "majorVersion": 0,
          "minorVersion": 1
-       }
+       },
+       "productId": "PRODUCT_ID_UUID"
      }
    }
    ```
@@ -481,8 +495,8 @@ Please refer [here](https://developer.smartthings.com/docs/devices/direct-connec
 Go to ***Add device*** and click ***My Testing Devices*** or ***Scan QR code***. You can now see and add your self-published devices.  
 ![add device 1](./res/add_device1.png)
 ![add device 2](./res/add_device2.png)
+![add device 3](./res/add_device3.png)
 
 3. **Control device**  
 You can control test device from dash board action and device plug user interface  
 ![device control 1](./res/device_control1.png)
-![device control 2](./res/device_control2.png)
