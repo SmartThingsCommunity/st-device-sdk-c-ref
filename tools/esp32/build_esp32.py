@@ -119,10 +119,13 @@ if EXTRA_ARGS:
     ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
 else:
     MAKE_OPTION = "build"
-    replace_stdk_target_config_cmd = "sed -i '/CONFIG_STDK_IOT_CORE_BSP_SUPPORT_ESP32/c\CONFIG_STDK_IOT_CORE_BSP_SUPPORT_" + BSP_NAME.upper() + "=y' ./sdkconfig"
-    replace_target_config_cmd = "sed -i '/CONFIG_IDF_TARGET=/c\CONFIG_IDF_TARGET=\"" + BSP_NAME + "\"' ./sdkconfig"
+    if os.path.exists(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME)):
+        shutil.copy(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME), os.path.join(APP_PATH, "sdkconfig"))
+    else:
+        print(f"No sdkconfig for {BSP_NAME}")
+        exit(1)
     build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
-    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + replace_stdk_target_config_cmd + " && " + replace_target_config_cmd + " && " + build_cmd, shell=True)
+    ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
 
 if "clean" in MAKE_OPTION.split(' '):
     print("\nTip : To remove all previous build information,")
