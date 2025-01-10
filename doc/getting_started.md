@@ -51,7 +51,6 @@ $ python setup.py
 Usage: python setup.py [BSP_NAME]
 --------------------------------------------------
   ex) python setup.py esp32
-  ex) python setup.py esp32s2
 
 
 $ python setup.py esp32

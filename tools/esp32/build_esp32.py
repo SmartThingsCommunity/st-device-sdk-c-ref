@@ -111,6 +111,13 @@ if "SHELL" in os.environ:
 else:
     export_cmd = "export.bat"
 
+# Copy each chipset sdkconfig to default sdkconfig
+if os.path.exists(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME)):
+    shutil.copy(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME), os.path.join(APP_PATH, "sdkconfig"))
+else:
+    print(f"No sdkconfig for {BSP_NAME}")
+    exit(1)
+
 if EXTRA_ARGS:
     MAKE_OPTION = ""
     for args in EXTRA_ARGS:
@@ -119,13 +126,11 @@ if EXTRA_ARGS:
     ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
 else:
     MAKE_OPTION = "build"
-    if os.path.exists(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME)):
-        shutil.copy(os.path.join(APP_PATH, "sdkconfig." + BSP_NAME), os.path.join(APP_PATH, "sdkconfig"))
-    else:
-        print(f"No sdkconfig for {BSP_NAME}")
-        exit(1)
     build_cmd = "python " + os.path.join(BSP_PATH, "tools", "idf.py") + " " + MAKE_OPTION
     ret = subprocess.call(export_cmd + " && cd " + APP_PATH + " && " + build_cmd, shell=True)
+
+# Copy back final sdkconfig to each chipset sdkconfig
+shutil.copy(os.path.join(APP_PATH, "sdkconfig"), os.path.join(APP_PATH, "sdkconfig." + BSP_NAME))
 
 if "clean" in MAKE_OPTION.split(' '):
     print("\nTip : To remove all previous build information,")
