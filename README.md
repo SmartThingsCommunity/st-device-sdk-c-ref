@@ -45,11 +45,10 @@ Install the toolchain defined in the chipset SDK you use according to the direct
  Usage: python setup.py [BSP_NAME]
  --------------------------------------------------
  ex) python setup.py esp32
- ex) python setup.py esp32s2
  ex) python setup.py esp32c3
  ```
 
-2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the build configuration file (e.g. `sdkconfig`, `sdkconfig.h`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
+2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
 
 > If you want to use the default build configuration, you can skip this step.
 
@@ -59,13 +58,23 @@ Install the toolchain defined in the chipset SDK you use according to the direct
      # python build.py {app_path} {option}
      $ cd ~/st-device-sdk-c-ref
      $ python build.py apps/esp32/switch_example menuconfig
+	 or
+     # python build.py {bsp_name} {app_name} {option}
+     $ python build.py esp32 switch_example menuconfig
+
+     # For other esp32 chipset series.
+     $ python build.py esp32c3 switch_example menuconfig
      ```
 
 3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in `output/{chip_name}/`.
 
    ```sh
    $ python build.py apps/esp32/switch_example          # python build.py {app_path}
+   or
+   $ python build.py esp32 switch_example               # python build.py {bsp_name} {app_name}
 
+   # For other esp32 chipset series.
+   $ python build.py esp32c3 switch_example
    ```
 
 ### Flash and Monitor
@@ -85,7 +94,7 @@ Flashing can be done according to the method outlined by the applicable chipset 
 
 You can flash the executables into a target device via `build.py` with additional options.
 
-> You do not need to run `python build.py esp32 st_switch` before running `python build.py esp32 st_switch flash`; this will automatically rebuild anything which needs it.
+> You do not need to run `python build.py esp32 switch_example` before running `python build.py esp32 switch_example flash`; this will automatically rebuild anything which needs it.
 
 Available Options:
 
@@ -93,12 +102,24 @@ Available Options:
   ```sh
   # python build.py {app_path} {options}
   $ python build.py apps/esp32/switch_example clean
+  or
+  # python build.py {bsp_name} {app_name} {options}
+  $ python build.py esp32 switch_example clean
+
+  # For other esp32 chipset series.
+  $ python build.py esp32c3 switch_example clean
   ```
 - **flash**: download executable binaries to the device
 - **monitor**: monitor the serial output of device. this option can be used with flash option.
   ```sh
   # python build.py {app_path} {options}
   $ python build.py apps/esp32/switch_example flash monitor
+  or
+  # python build.py {bsp_name} {app_name} {options}
+  $ python build.py esp32 switch_example flash monitor
+
+  # For other esp32 chipset series.
+  $ python build.py esp32c3 switch_example flash monitor
   ```
 
 ## License
