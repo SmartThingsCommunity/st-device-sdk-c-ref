@@ -17,12 +17,12 @@
  ****************************************************************************/
 
 
-#include "device_control.h"
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+
+#include "device_control.h"
 
 static int rgb_color_red = 255;
 static int rgb_color_green = 0;
