@@ -1,0 +1,6 @@
+[submodule "iot-core"]
+	path = iot-core
+	url = https://github.com/SmartThingsCommunity/st-device-sdk-c.git
+[submodule "bsp/esp32"]
+	path = bsp/esp32
+	url = https://github.com/espressif/esp-idf.git
