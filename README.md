@@ -122,6 +122,12 @@ Available Options:
   $ python build.py esp32c3 switch_example flash monitor
   ```
 
+## Commercialization
+
+For commercialization, refer to the following [link](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/main/doc/Commercialization_Guide).
+
+If you have any issue, or want to commercialize your IoT devices using this SDK, please contact stdk@samsung.com or open new issue.
+
 ## License
 
 This library is licensed under the [Apache License Ver2.0](LICENSE).
