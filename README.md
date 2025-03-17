@@ -46,9 +46,10 @@ Install the toolchain defined in the chipset SDK you use according to the direct
  --------------------------------------------------
  ex) python setup.py esp32
  ex) python setup.py esp32c3
+ ex) python setup.py esp32s3
  ```
 
-2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
+2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`,`sdkconfig.esp32s3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
 
 > If you want to use the default build configuration, you can skip this step.
 
@@ -64,6 +65,7 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 
      # For other esp32 chipset series.
      $ python build.py esp32c3 switch_example menuconfig
+     $ python build.py esp32s3 switch_example menuconfig
      ```
 
 3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in `output/{chip_name}/`.
@@ -75,6 +77,7 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 
    # For other esp32 chipset series.
    $ python build.py esp32c3 switch_example
+   $ python build.py esp32s3 switch_example
    ```
 
 ### Flash and Monitor
@@ -108,6 +111,7 @@ Available Options:
 
   # For other esp32 chipset series.
   $ python build.py esp32c3 switch_example clean
+  $ python build.py esp32s3 switch_example clean
   ```
 - **flash**: download executable binaries to the device
 - **monitor**: monitor the serial output of device. this option can be used with flash option.
@@ -120,6 +124,7 @@ Available Options:
 
   # For other esp32 chipset series.
   $ python build.py esp32c3 switch_example flash monitor
+  $ python build.py esp32s3 switch_example flash monitor
   ```
 
 ## Commercialization
