@@ -28,7 +28,11 @@ The Direct Connected Devices SDK builds on the environments of each chipset vend
 Install the toolchain defined in the chipset SDK you use according to the directions below. If no development environment is described for your chipset, it is assumed to only be applicable for 64-bit Ubuntu-based environments.
 
 #### For ESP32:
-1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html#step-1-install-prerequisites) for your build system OS.
+
+> **_NOTE:_**  
+> ESP32 examples are tested under ESP-IDF SDK v5.0.  
+
 2. Set up the ESP32 toolchain with `setup.py`
 
 ### Build
