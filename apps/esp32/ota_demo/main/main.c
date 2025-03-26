@@ -151,6 +151,9 @@ static void cap_update_cmd_cb(struct caps_firmwareUpdate_data *caps_data)
 {
 	ota_nvs_flash_init();
 
+    caps_data->set_state_value(caps_data, "updateInProgress");
+    caps_data->attr_state_send(caps_data);
+
 	xTaskCreate(&ota_update_task, "ota_update_task", 8096, NULL, 5, &ota_task_handle);
 }
 
