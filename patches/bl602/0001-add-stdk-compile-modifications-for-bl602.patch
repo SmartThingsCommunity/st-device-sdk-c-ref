@@ -1,0 +1,421 @@
+From 8514f58a870b6137cd0a268ce9c3000b21857b54 Mon Sep 17 00:00:00 2001
+From: zihan19-song <zihan19.song@samsung.com>
+Date: Thu, 3 Apr 2025 22:26:27 +0800
+Subject: [PATCH] add stdk compile modifications for bl602
+
+---
+ .../platform/soc/bl602/bl602/bfl_main.c       |   6 +-
+ .../config/FreeRTOSConfig.h                   |   2 +-
+ .../soc/bl602/freertos_riscv_ram/freertos     |   1 +
+ .../soc/bl602/freertos_riscv_ram/tasks.c      |   6 +-
+ make_scripts_riscv/component_wrapper.mk       |  41 +++-
+ make_scripts_riscv/project.mk                 |  13 +-
+ .../bl602/partition/partition_cfg_2M.toml     | 188 +++++++++---------
+ 7 files changed, 151 insertions(+), 106 deletions(-)
+ create mode 120000 components/platform/soc/bl602/freertos_riscv_ram/freertos
+
+diff --git a/components/platform/soc/bl602/bl602/bfl_main.c b/components/platform/soc/bl602/bl602/bfl_main.c
+index fed0d95ca..c9a6bd972 100755
+--- a/components/platform/soc/bl602/bl602/bfl_main.c
++++ b/components/platform/soc/bl602/bl602/bfl_main.c
+@@ -190,8 +190,9 @@ static int get_dts_addr(const char *name, uint32_t *start, uint32_t *off)
+ 
+ static void app_main_entry(void *pvParameters)
+ {
+-    extern int main();
+-    main();
++    extern int app_main();
++    printf("[app_main_entry] enter\r\n");
++    app_main();
+     vTaskDelete(NULL);
+ }
+ 
+@@ -243,7 +244,6 @@ static void aos_loop_proc(void *pvParameters)
+         aos_poll_read_fd(fd_console, aos_cli_event_cb_read_get(), (void*)0x12345678);
+     }
+ #endif
+-
+     xTaskCreate(app_main_entry,
+             (char*)"main",
+             SYS_APP_TASK_STACK_SIZE / sizeof(StackType_t),
+diff --git a/components/platform/soc/bl602/freertos_riscv_ram/config/FreeRTOSConfig.h b/components/platform/soc/bl602/freertos_riscv_ram/config/FreeRTOSConfig.h
+index 9b019366c..1f5069db5 100644
+--- a/components/platform/soc/bl602/freertos_riscv_ram/config/FreeRTOSConfig.h
++++ b/components/platform/soc/bl602/freertos_riscv_ram/config/FreeRTOSConfig.h
+@@ -94,7 +94,7 @@
+ #define configUSE_TICK_HOOK				0
+ #ifndef configUSE_TICKLESS_IDLE
+ //Maybe Compile flags is passed by command line
+-#define configUSE_TICKLESS_IDLE			1
++#define configUSE_TICKLESS_IDLE			0
+ #endif
+ #define configCPU_CLOCK_HZ				( 10 * 1000 * 1000 ) /*QEMU*/
+ #define configTICK_RATE_HZ				( ( TickType_t ) 1000 )
+diff --git a/components/platform/soc/bl602/freertos_riscv_ram/freertos b/components/platform/soc/bl602/freertos_riscv_ram/freertos
+new file mode 120000
+index 000000000..30fa1ceaf
+--- /dev/null
++++ b/components/platform/soc/bl602/freertos_riscv_ram/freertos
+@@ -0,0 +1 @@
++config
+\ No newline at end of file
+diff --git a/components/platform/soc/bl602/freertos_riscv_ram/tasks.c b/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
+index cb603fb9f..514dbdd27 100644
+--- a/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
++++ b/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
+@@ -794,7 +794,7 @@ StackType_t *xTaskGetStackBase(TaskHandle_t xTask)
+ 				/* Allocate space for the stack used by the task being created.
+ 				The base of the stack memory stored in the TCB so the task can
+ 				be deleted later if required. */
+-				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
++				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+ 
+ 				if( pxNewTCB->pxStack == NULL )
+ 				{
+@@ -809,7 +809,7 @@ StackType_t *xTaskGetStackBase(TaskHandle_t xTask)
+ 		StackType_t *pxStack;
+ 
+ 			/* Allocate space for the stack used by the task being created. */
+-			pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
++			pxStack = pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
+ 
+ 			if( pxStack != NULL )
+ 			{
+@@ -845,7 +845,7 @@ StackType_t *xTaskGetStackBase(TaskHandle_t xTask)
+ 			}
+ 			#endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
+ 
+-			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
++			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth), pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+ 			prvAddNewTaskToReadyList( pxNewTCB );
+ 			xReturn = pdPASS;
+ 		}
+diff --git a/make_scripts_riscv/component_wrapper.mk b/make_scripts_riscv/component_wrapper.mk
+index 961257c61..1760cc878 100644
+--- a/make_scripts_riscv/component_wrapper.mk
++++ b/make_scripts_riscv/component_wrapper.mk
+@@ -169,6 +169,10 @@ COMPONENT_OBJS := $(foreach obj,$(COMPONENT_OBJS),$(if $(filter $(abspath $(obj)
+ # Remove duplicates
+ COMPONENT_OBJS := $(call uniq,$(COMPONENT_OBJS))
+ 
++# Object files with embedded binaries to add to the component library
++# Correspond to the files named in COMPONENT_EMBED_FILES & COMPONENT_EMBED_TXTFILES
++COMPONENT_EMBED_OBJS ?= $(addsuffix .bin.o,$(notdir $(COMPONENT_EMBED_FILES))) $(addsuffix .txt.o,$(notdir $(COMPONENT_EMBED_TXTFILES)))
++
+ # If we're called to compile something, we'll get passed the COMPONENT_INCLUDES
+ # variable with all the include dirs from all the components in random order. This
+ # means we can accidentally grab a header from another component before grabbing our own.
+@@ -236,7 +240,7 @@ build: $(COMPONENT_LIBRARY)
+ 
+ # Build the archive. We remove the archive first, otherwise ar will get confused if we update
+ # an archive when multiple filenames have the same name (src1/test.o and src2/test.o)
+-$(COMPONENT_LIBRARY): $(COMPONENT_OBJS)
++$(COMPONENT_LIBRARY): $(COMPONENT_OBJS) $(COMPONENT_EMBED_OBJS)
+ 	$(summary) AR $(patsubst $(PWD)/%,%,$(CURDIR))/$@
+ 	rm -f $@
+ 	$(AR) cru $@ $^
+@@ -244,7 +248,7 @@ endif
+ 
+ # If COMPONENT_OWNCLEANTARGET is not set, define a phony clean target
+ ifndef COMPONENT_OWNCLEANTARGET
+-CLEAN_FILES := $(COMPONENT_LIBRARY) $(COMPONENT_OBJS) $(COMPONENT_OBJS:.o=.d) $(COMPONENT_OBJEXCLUDE) $(COMPONENT_OBJEXCLUDE:.o=.d) $(COMPONENT_EXTRA_CLEAN) component_project_vars.mk
++CLEAN_FILES := $(COMPONENT_LIBRARY) $(COMPONENT_OBJS) $(COMPONENT_OBJS:.o=.d) $(COMPONENT_OBJEXCLUDE) $(COMPONENT_OBJEXCLUDE:.o=.d) $(COMPONENT_EMBED_OBJS) $(COMPONENT_EXTRA_CLEAN) component_project_vars.mk
+ .PHONY: clean
+ clean:
+ 	$(summary) RM $(CLEAN_FILES)
+@@ -311,6 +315,39 @@ endef
+ # Generate all the compile target patterns
+ $(foreach srcdir,$(COMPONENT_SRCDIRS), $(eval $(call GenerateCompileTargets,$(srcdir),$(call stripLeadingParentDirs,$(srcdir)))))
+ 
++## Support for embedding binary files into the ELF as symbols
++
++OBJCOPY_EMBED_ARGS := --input-target binary --output-target elf32-littleriscv --binary-architecture riscv --rename-section .data=.rodata.embedded
++
++define GenerateEmbedTarget
++
++# copy the input file into the build dir (using a subdirectory
++# in case the file already exists elsewhere in the build dir)
++embed_bin/$$(notdir $(1)): $(call resolvepath,$(1),$(COMPONENT_PATH)) | embed_bin
++	cp $$< $$@
++
++embed_txt/$$(notdir $(1)): $(call resolvepath,$(1),$(COMPONENT_PATH)) | embed_txt
++	cp $$< $$@
++	printf '\0' >> $$@  # null-terminate text files
++
++# messing about with the embed_X subdirectory then using 'cd' for objcopy is because the
++# full path passed to OBJCOPY makes it into the name of the symbols in the .o file
++$$(notdir $(1)).$(2).o: embed_$(2)/$$(notdir $(1))
++	$(summary) EMBED $$(patsubst $$(PWD)/%,%,$$(CURDIR))/$$@
++	cd embed_$(2); $(OBJCOPY) $(OBJCOPY_EMBED_ARGS) $$(notdir $$<) ../$$@
++
++CLEAN_FILES += embed_$(2)/$$(notdir $(1))
++endef
++
++embed_txt embed_bin:
++	mkdir -p $@
++
++# generate targets to embed binary & text files
++$(foreach binfile,$(COMPONENT_EMBED_FILES), $(eval $(call GenerateEmbedTarget,$(binfile),bin)))
++
++$(foreach txtfile,$(COMPONENT_EMBED_TXTFILES), $(eval $(call GenerateEmbedTarget,$(txtfile),txt)))
++
++
+ else   # COMPONENT_CONFIG_ONLY is set
+ 
+ build:
+diff --git a/make_scripts_riscv/project.mk b/make_scripts_riscv/project.mk
+index 0d54cded0..268952a79 100644
+--- a/make_scripts_riscv/project.mk
++++ b/make_scripts_riscv/project.mk
+@@ -104,7 +104,6 @@ EXTRA_COMPONENT_DIRS ?=
+ COMPONENT_DIRS := $(PROJECT_PATH)/components $(EXTRA_COMPONENT_DIRS) $(BL60X_SDK_PATH)/components $(BL60X_SDK_PATH)/customer_components $(PROJECT_PATH)/$(PROJECT_NAME) $(PROJECT_COMPONENT)
+ endif
+ export COMPONENT_DIRS
+-
+ # The project Makefile can define a list of components, but if it does not do this we just take all available components
+ # in the component dirs. A component is COMPONENT_DIRS directory, or immediate subdirectory,
+ # which contains a bouffalo.mk file.
+@@ -118,6 +117,7 @@ ifeq ("$(wildcard ${BL60X_SDK_PATH}/components.mk)","")
+ rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+ COMPONENTS_RAL_PATH :=  $(dir $(foreach cd,$(COMPONENT_DIRS),                       \
+ 						$(call rwildcard,$(cd)/,bouffalo.mk) 						\
++						$(call rwildcard,$(cd)/,component.mk)						\
+ 				))
+ COMPONENTS := $(sort $(foreach comp,$(COMPONENTS_RAL_PATH),$(lastword $(subst /, ,$(comp)))))
+ COMPONENTS_REAL_PATH := $(patsubst %/,%,$(COMPONENTS_RAL_PATH))
+@@ -141,7 +141,6 @@ COMPONENTS := $(filter $(INCLUDE_COMPONENTS), $(COMPONENTS))
+ COMPONENTS_REAL_PATH := $(filter $(INCLUDE_COMPONENTS_REAL_PATH), $(COMPONENTS_REAL_PATH))
+ endif
+ export COMPONENTS
+-
+ # Resolve all of COMPONENTS into absolute paths in COMPONENT_PATHS.
+ #
+ # If a component name exists in multiple COMPONENT_DIRS, we take the first match.
+@@ -276,6 +275,7 @@ COMMON_WARNING_FLAGS = -Wall -Werror=all \
+ 	-Wno-error=unused-but-set-variable \
+ 	-Wno-error=unused-variable \
+ 	-Wno-error=deprecated-declarations \
++	-Wno-error=format \
+ 	-Wextra \
+ 	-Wno-unused-parameter -Wno-sign-compare
+ 
+@@ -522,7 +522,10 @@ $(BUILD_DIR_BASE):
+ #
+ # Is recursively expanded by the GenerateComponentTargets macro
+ define ComponentMake
+-+$(MAKE) -C $(BUILD_DIR_BASE)/$(2) -f $(BL60X_SDK_PATH)/make_scripts_riscv/component_wrapper.mk COMPONENT_MAKEFILE=$(1)/bouffalo.mk COMPONENT_NAME=$(2)
+++$(MAKE) -C $(BUILD_DIR_BASE)/$(2) \
++    -f $(BL60X_SDK_PATH)/make_scripts_riscv/component_wrapper.mk \
++    COMPONENT_MAKEFILE=$(if $(filter src,$(2)),$(1)/component.mk,$(1)/bouffalo.mk) \
++    COMPONENT_NAME=$(2)
+ endef
+ 
+ # Generate top-level component-specific targets for each component
+@@ -555,7 +558,11 @@ $(BUILD_DIR_BASE)/$(2)/lib$(2).a: component-$(2)-build
+ # If any component_project_vars.mk file is out of date, the make
+ # process will call this target to rebuild it and then restart.
+ #
++ifeq ($(2),src)
++$(BUILD_DIR_BASE)/$(2)/component_project_vars.mk: $(1)/component.mk $(COMMON_MAKEFILES) $(SDKCONFIG_MAKEFILE) | $(BUILD_DIR_BASE)/$(2)
++else
+ $(BUILD_DIR_BASE)/$(2)/component_project_vars.mk: $(1)/bouffalo.mk $(COMMON_MAKEFILES) $(SDKCONFIG_MAKEFILE) | $(BUILD_DIR_BASE)/$(2)
++endif
+ 	$(call ComponentMake,$(1),$(2)) component_project_vars.mk
+ endef
+ 
+diff --git a/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml b/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml
+index e8638dc09..95110f107 100644
+--- a/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml
++++ b/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml
+@@ -1,94 +1,94 @@
+-[pt_table]
+-#partition table is 4K in size
+-address0 = 0xE000
+-address1 = 0xF000
+-
+-[[pt_entry]]
+-type = 0
+-name = "FW"
+-device = 0
+-address0 = 0x10000
+-size0 = 0xD8000
+-address1 = 0xE8000
+-size1 = 0x88000
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-[[pt_entry]]
+-type = 2
+-name = "mfg"
+-device = 0
+-address0 = 0x170000
+-size0 = 0x32000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-[[pt_entry]]
+-type = 3
+-name = "media"
+-device = 0
+-address0 = 0x1A2000
+-size0 = 0x47000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-[[pt_entry]]
+-type = 4
+-name = "PSM"
+-device = 0
+-address0 = 0x1E9000
+-size0 = 0x8000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-[[pt_entry]]
+-type = 5
+-name = "KEY"
+-device = 0
+-address0 = 0x1F1000
+-size0 = 0x2000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-[[pt_entry]]
+-type = 6
+-name = "DATA"
+-device = 0
+-address0 = 0x1F3000
+-size0 = 0x5000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-
+-[[pt_entry]]
+-type = 7
+-name = "factory"
+-device = 0
+-address0 = 0x1F8000
+-size0 = 0x7000
+-address1 = 0
+-size1 = 0
+-# compressed image must set len,normal image can left it to 0
+-len = 0
+-
+-#if user want to put RF calibration data on flash, uncomment following pt entry
+-#[[pt_entry]]
+-#type = 8
+-#name = "rf_para"
+-#device = 0
+-#address0 = 0x1FF000
+-#size0 = 0x1000
+-#address1 = 0
+-#size1 = 0
+-## compressed image must set len,normal image can left it to 0
+-#len = 0
++[pt_table]
++#partition table is 4K in size
++address0 = 0xE000
++address1 = 0xF000
++
++[[pt_entry]]
++type = 0
++name = "FW"
++device = 0
++address0 = 0x10000
++size0 = 0xF8000
++address1 = 0x108000
++size1 = 0x68000
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++[[pt_entry]]
++type = 2
++name = "mfg"
++device = 0
++address0 = 0x170000
++size0 = 0x32000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++[[pt_entry]]
++type = 3
++name = "media"
++device = 0
++address0 = 0x1A2000
++size0 = 0x47000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++[[pt_entry]]
++type = 4
++name = "PSM"
++device = 0
++address0 = 0x1E9000
++size0 = 0x8000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++[[pt_entry]]
++type = 5
++name = "KEY"
++device = 0
++address0 = 0x1F1000
++size0 = 0x2000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++[[pt_entry]]
++type = 6
++name = "DATA"
++device = 0
++address0 = 0x1F3000
++size0 = 0x5000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++
++[[pt_entry]]
++type = 7
++name = "factory"
++device = 0
++address0 = 0x1F8000
++size0 = 0x7000
++address1 = 0
++size1 = 0
++# compressed image must set len,normal image can left it to 0
++len = 0
++
++#if user want to put RF calibration data on flash, uncomment following pt entry
++#[[pt_entry]]
++#type = 8
++#name = "rf_para"
++#device = 0
++#address0 = 0x1FF000
++#size0 = 0x1000
++#address1 = 0
++#size1 = 0
++## compressed image must set len,normal image can left it to 0
++#len = 0
+-- 
+2.25.1
+
