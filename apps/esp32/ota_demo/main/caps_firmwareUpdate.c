@@ -23,6 +23,52 @@
 #include "st_dev.h"
 #include "caps_firmwareUpdate.h"
 
+static  bool caps_firmwareUpdate_get_updateAvailable_value(caps_firmwareUpdate_data_t *caps_data)
+{
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return false;
+    }
+    return (*caps_data).updateAvailable_value;
+}
+
+static void caps_firmwareUpdate_set_updateAvailable_value(caps_firmwareUpdate_data_t *caps_data, bool updateAvailable)
+{
+    if (!caps_data) {
+        printf("caps_data is NULL\n");
+        return;
+    }
+    if ((*caps_data).updateAvailable_value) {
+        (*caps_data).updateAvailable_value = false;
+    }
+    (*caps_data).updateAvailable_value = updateAvailable;
+}
+
+static void caps_firmwareUpdate_attr_updateAvailable_send(caps_firmwareUpdate_data_t *caps_data)
+{
+    int sequence_no = -1;
+
+    if (!caps_data || !caps_data->handle) {
+        printf("fail to get handle\n");
+        return;
+    }
+    if (!(*caps_data).updateAvailable_value) {
+        printf("warning:updateAvailable value is false\n");
+    }
+
+    ST_CAP_SEND_ATTR_BOOLEAN(caps_data->handle,
+            (char *)caps_helper_firmwareUpdate.attr_updateAvailable.name,
+            (*caps_data).updateAvailable_value,
+            NULL,
+            NULL,
+            sequence_no);
+
+    if (sequence_no < 0)
+        printf("fail to send state value\n");
+    else
+        printf("Sequence number return : %d\n", sequence_no);
+}
+
 static int caps_firmwareUpdate_attr_lastUpdateStatus_str2idx(const char *value)
 {
     int index;
@@ -368,6 +414,8 @@ static void caps_firmwareUpdate_init_cb(IOT_CAP_HANDLE *handle, void *usr_data)
     caps_firmwareUpdate_attr_lastUpdateTime_send(caps_data);
     caps_firmwareUpdate_attr_availableVersion_send(caps_data);
     caps_firmwareUpdate_attr_lastUpdateStatusReason_send(caps_data);
+    caps_firmwareUpdate_set_updateAvailable_value(caps_data, false);
+    caps_firmwareUpdate_attr_updateAvailable_send(caps_data);
 }
 
 caps_firmwareUpdate_data_t *caps_firmwareUpdate_initialize(IOT_CTX *ctx, const char *component, void *init_usr_cb, void *usr_data)
@@ -386,6 +434,9 @@ caps_firmwareUpdate_data_t *caps_firmwareUpdate_initialize(IOT_CTX *ctx, const c
     caps_data->init_usr_cb = init_usr_cb;
     caps_data->usr_data = usr_data;
 
+    caps_data->get_updateAvailable_value = caps_firmwareUpdate_get_updateAvailable_value;
+    caps_data->set_updateAvailable_value = caps_firmwareUpdate_set_updateAvailable_value;
+    caps_data->attr_updateAvailable_send = caps_firmwareUpdate_attr_updateAvailable_send;
     caps_data->get_lastUpdateStatus_value = caps_firmwareUpdate_get_lastUpdateStatus_value;
     caps_data->set_lastUpdateStatus_value = caps_firmwareUpdate_set_lastUpdateStatus_value;
     caps_data->attr_lastUpdateStatus_str2idx = caps_firmwareUpdate_attr_lastUpdateStatus_str2idx;

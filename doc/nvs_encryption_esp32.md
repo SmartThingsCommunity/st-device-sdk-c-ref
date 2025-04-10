@@ -4,7 +4,7 @@ NVS encryption for ESP32 helps to achieve secure storage on the device flash mem
 
 The keys required for NVS encryption are stored in yet another partition, which is protected using Flash Encryption. Therefore, enabling Flash Encryption becomes a prerequisite for NVS encryption.
 
-This guide uses `st-device-sdk-c-ref` repo and is setup for ESP32, which clones firmware `esp-idf` v4.3.1
+This guide uses `st-device-sdk-c-ref` repo and is setup for ESP32, which clones firmware `esp-idf` v5.0
 
 ## Export environment variables
 
@@ -168,7 +168,7 @@ The following changes are to be additionally incorporated in `flash_encryption/m
 - Flash Partition table:
 
   ```sh
-  $ idf.py partition_table partition_table-flash
+  $ idf.py partition-table partition-table-flash
   ```
 
 - Flash custom nvs partition:
@@ -230,7 +230,7 @@ $ idf.py menuconfig
   Default usage mode is Development (recommended during test and development phase). However this can be changed under the `Enable usage mode` option.
 - Update the partition table offset:
 
-  Enabling flash encryption increases bootloader size. So the offset of partition table must be increased from `0x8000` to `0x9000`.\
+  Enabling flash encryption increases bootloader size. So the offset of partition table must be increased from `0x9000` to `0xA000`.\
   Under `Partition Table`, update this size in `Offset of partition table` option.
 
 ### Setup
@@ -281,7 +281,7 @@ $ idf.py menuconfig
 - Flash Partition table:
 
   ```sh
-  $ idf.py partition_table partition_table-flash
+  $ idf.py partition-table partition-table-flash
   ```
 
 - Flash Encrypted custom nvs partition:
@@ -297,6 +297,20 @@ $ idf.py menuconfig
   ```sh
   $ esptool.py -p /dev/ttyUSB0 --before default_reset --after no_reset write_flash --encrypt 0x120000 keys/encryption_keys.bin
   ```
+  > Note :
+  > If this is your first time using encryption, run the command given below to generate the ESP32 flash encryption key before flashing the NVS key partition.
+  > ```sh
+  > $ idf.py flash monitor
+  > ```
+  > ### Output
+  > ```sh
+  >     <...snip...>
+  > I (168) flash_encrypt: Generating new flash encryption key...
+  > I (187) flash_encrypt: Read & write protecting new key...
+  >     <...snip...>
+  > I (13229) flash_encrypt: Flash encryption completed
+  > I (13229) boot: Resetting with flash encryption enabled...
+  > ```
 
 > **Note :**
 >
@@ -373,5 +387,5 @@ For flash encryption in Development mode, encryption can be disabled by burning 
 
 ## References
 
-- [ESP NVS Encryption](https://docs.espressif.com/projects/esp-idf/en/v4.3/esp32/api-reference/storage/nvs_flash.html#nvs-encryption)
+- [ESP NVS Encryption](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/nvs_flash.html#nvs-encryption)
 - [ESP Flash Encryption](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html)

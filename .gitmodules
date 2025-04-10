@@ -4,3 +4,6 @@
 [submodule "bsp/esp32"]
 	path = bsp/esp32
 	url = https://github.com/espressif/esp-idf.git
+[submodule "bsp/bl602"]
+	path = bsp/bl602
+	url = https://github.com/bouffalolab/bl_iot_sdk.git
