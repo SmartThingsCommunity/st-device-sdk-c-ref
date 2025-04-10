@@ -701,6 +701,7 @@ void ota_check_for_update(void *user_data)
 
     char *read_data = NULL;
     unsigned int read_data_len = 0;
+	bool updateAvailable_value = false;
 
     ota_err_t ret = _read_version_info_from_server(&read_data, &read_data_len);
     if (ret == OTA_OK) {
@@ -718,8 +719,12 @@ void ota_check_for_update(void *user_data)
         }
 
         if (available_version) {
+			updateAvailable_value = true;
             caps_data->set_availableVersion_value(caps_data, available_version);
             caps_data->attr_availableVersion_send(caps_data);
+
+			caps_data->set_updateAvailable_value(caps_data, updateAvailable_value);
+			caps_data->attr_updateAvailable_send(caps_data);
 
             free(available_version);
         }
