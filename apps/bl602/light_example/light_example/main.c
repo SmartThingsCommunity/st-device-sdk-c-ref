@@ -15,23 +15,25 @@
  * language governing permissions and limitations under the License.
  *
  ****************************************************************************/
-
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "bl_sys.h"
+#include "hosal_adc.h"
 
 #include "st_dev.h"
 #include "device_control.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
-#include "iot_uart_cli.h"
-#include "iot_cli_cmd.h"
-#include "ota_util.h"
 
 #include "caps_switch.h"
-#include "caps_firmwareUpdate.h"
+#include "caps_switchLevel.h"
+#include "caps_colorTemperature.h"
+#include "caps_activityLightingMode.h"
+#include "caps_dustSensor.h"
 
 // onboarding_config_start is null-terminated string
 extern const uint8_t onboarding_config_start[]    asm("_binary_onboarding_config_json_start");
@@ -51,9 +53,10 @@ IOT_CTX* iot_ctx = NULL;
 static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
 
 static caps_switch_data_t *cap_switch_data;
-static caps_firmwareUpdate_data_t *cap_ota_data;
-
-TaskHandle_t ota_task_handle = NULL;
+static caps_switchLevel_data_t *cap_switchLevel_data;
+static caps_colorTemperature_data_t *cap_colorTemp_data;
+static caps_activityLightingMode_data_t *cap_lightMode_data;
+static caps_dustSensor_data_t *cap_dustSensor_data;
 
 int monitor_enable = false;
 int monitor_period_ms = 30000;
@@ -81,80 +84,44 @@ static void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
     change_switch_state(switch_state);
 }
 
-static char *get_current_firmware_version(void)
+static void cap_switchLevel_cmd_cb(struct caps_switchLevel_data *caps_data)
 {
-    char *current_version = NULL;
-
-    unsigned char *device_info = (unsigned char *) device_info_start;
-    unsigned int device_info_len = device_info_end - device_info_start;
-
-    ota_err_t err = ota_api_get_firmware_version_load(device_info, device_info_len, &current_version);
-    if (err != OTA_OK) {
-        printf("ota_api_get_firmware_version_load is failed : %d\n", err);
-    }
-
-    return current_version;
+    int switch_level = caps_data->get_level_value(caps_data);
+    change_switch_level(switch_level);
 }
 
-#define OTA_UPDATE_MAX_RETRY_COUNT 100
-
-static void ota_update_task(void * pvParameter)
+static void cap_colorTemp_cmd_cb(struct caps_colorTemperature_data *caps_data)
 {
-    printf("\n Starting OTA...\n");
-
-    static int count = 0;
-
-    while (1) {
-
-        ota_err_t ret = ota_update_device();
-        if (ret != OTA_OK) {
-            printf("Firmware Upgrades Failed (%d) \n", ret);
-            vTaskDelay(600 * 1000 / portTICK_PERIOD_MS);
-            count++;
-        } else {
-            break;
-        }
-
-        if (count > OTA_UPDATE_MAX_RETRY_COUNT)
-            break;
-    }
-
-    printf("Prepare to restart system!");
-    ota_restart_device();
+    update_color_info(cap_colorTemp_data->get_colorTemperature_value(cap_colorTemp_data));
+    change_switch_state(get_switch_state());
 }
 
-void ota_polling_task(void *arg)
+static void cap_lightMode_cmd_cb(struct caps_activityLightingMode_data *caps_data)
 {
-    while (1) {
+    const char* lightMode = cap_lightMode_data->get_lightingMode_value(cap_lightMode_data);
 
-        vTaskDelay(30 * 1000 / portTICK_PERIOD_MS);
-
-        if (g_iot_status != IOT_STATUS_CONNECTING || g_iot_stat_lv != IOT_STAT_LV_DONE) {
-            continue;
-        }
-
-        if (ota_task_handle != NULL) {
-            printf("Device is updating.. \n");
-            continue;
-        }
-
-        ota_check_for_update((void *)arg);
-
-	/* Set polling period */
-	unsigned int polling_day = ota_get_polling_period_day();
-	unsigned int task_delay_sec = polling_day * 24 * 3600;
-	vTaskDelay(task_delay_sec * 1000 / portTICK_PERIOD_MS);
+    int colorTemp = 0;
+    if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_reading)) {
+        colorTemp = 4000;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_writing)) {
+        colorTemp = 5000;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_computer)) {
+        colorTemp = 6000;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_day)) {
+        colorTemp = 5500;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_night)) {
+        colorTemp = 6500;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_sleepPreparation)) {
+        colorTemp = 3000;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_cozy)) {
+        colorTemp = 2000;
+    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_soft)) {
+        colorTemp = 2500;
     }
-}
-
-static void cap_update_cmd_cb(struct caps_firmwareUpdate_data *caps_data)
-{
-	ota_nvs_flash_init();
-
-    caps_data->set_state_value(caps_data, "updateInProgress");
-    caps_data->attr_state_send(caps_data);
-
-	xTaskCreate(&ota_update_task, "ota_update_task", 8096, NULL, 5, &ota_task_handle);
+    cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp);
+    update_color_info(cap_colorTemp_data->get_colorTemperature_value(cap_colorTemp_data));
+    change_switch_state(get_switch_state());
+    cap_colorTemp_data->attr_colorTemperature_send(cap_colorTemp_data);
 }
 
 static void capability_init()
@@ -169,15 +136,40 @@ static void capability_init()
         cap_switch_data->set_switch_value(cap_switch_data, switch_init_value);
     }
 
-    cap_ota_data = caps_firmwareUpdate_initialize(iot_ctx, "main", NULL, NULL);
-    if (cap_ota_data) {
+    cap_switchLevel_data = caps_switchLevel_initialize(iot_ctx, "main", NULL, NULL);
+    if (cap_switchLevel_data) {
+        int switch_init_level = 50;
 
-        char *firmware_version = get_current_firmware_version();
+        cap_switchLevel_data->cmd_setLevel_usr_cb = cap_switchLevel_cmd_cb;
 
-        cap_ota_data->set_currentVersion_value(cap_ota_data, firmware_version);
-        cap_ota_data->cmd_updateFirmware_usr_cb = cap_update_cmd_cb;
+        cap_switchLevel_data->set_level_value(cap_switchLevel_data, switch_init_level);
+        cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.unit_percent);
+    }
 
-        free(firmware_version);
+    cap_colorTemp_data = caps_colorTemperature_initialize(iot_ctx, "main", NULL, NULL);
+    if (cap_colorTemp_data) {
+        int colorTemp_init_value = 2000;
+
+        cap_colorTemp_data->cmd_setColorTemperature_usr_cb = cap_colorTemp_cmd_cb;
+
+        cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp_init_value);
+    }
+
+    cap_lightMode_data = caps_activityLightingMode_initialize(iot_ctx, "main", NULL, NULL);
+    if (cap_lightMode_data) {
+        const char *init_lightMode = caps_helper_activityLightingMode.attr_lightingMode.value_cozy;
+        cap_lightMode_data->set_lightingMode_value(cap_lightMode_data, init_lightMode);
+
+        cap_lightMode_data->cmd_setLightingMode_usr_cb = cap_lightMode_cmd_cb;
+    }
+
+    cap_dustSensor_data = caps_dustSensor_initialize(iot_ctx, "monitor", NULL, NULL);
+    if (cap_dustSensor_data) {
+        cap_dustSensor_data->set_dustLevel_value(cap_dustSensor_data, 0);
+        cap_dustSensor_data->set_fineDustLevel_value(cap_dustSensor_data, 0);
+
+        cap_dustSensor_data->set_dustLevel_unit(cap_dustSensor_data, caps_helper_dustSensor.attr_dustLevel.unit_ug_per_m3);
+        cap_dustSensor_data->set_fineDustLevel_unit(cap_dustSensor_data, caps_helper_dustSensor.attr_fineDustLevel.unit_ug_per_m3);
     }
 }
 
@@ -254,7 +246,23 @@ static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
     } else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT) {
         printf("[rate limit] Remaining time:%d, sequence number:%d\n",
                noti_data->raw.rate_limit.remainingTime, noti_data->raw.rate_limit.sequenceNumber);
-    }
+    } else if(noti_data->type == IOT_NOTI_TYPE_PREFERENCE_UPDATED) {
+		for (int i = 0; i < noti_data->raw.preferences.preferences_num; i++) {
+			printf("[preference update] name : %s value : ", noti_data->raw.preferences.preferences_data[i].preference_name);
+			if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_NULL)
+				printf("NULL\n");
+			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_STRING)
+				printf("%s\n", noti_data->raw.preferences.preferences_data[i].preference_data.string);
+			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_NUMBER)
+				printf("%f\n", noti_data->raw.preferences.preferences_data[i].preference_data.number);
+			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_INTEGER)
+				printf("%d\n", noti_data->raw.preferences.preferences_data[i].preference_data.integer);
+			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_BOOLEAN)
+				printf("%s\n", noti_data->raw.preferences.preferences_data[i].preference_data.boolean ? "true" : "false");
+			else
+				printf("Unknown type\n");
+		}
+	}
 }
 
 void button_event(IOT_CAP_HANDLE *handle, int type, int count)
@@ -306,6 +314,13 @@ static void app_main_task(void *arg)
     int button_event_type;
     int button_event_count;
 
+    int dustLevel_value = 0;
+    int fineDustLevel_value = 0;
+    TimeOut_t monitor_timeout;
+    TickType_t monitor_period_tick = pdMS_TO_TICKS(monitor_period_ms);
+
+    vTaskSetTimeOutState(&monitor_timeout);
+
     for (;;) {
         if (get_button_event(&button_event_type, &button_event_count)) {
             button_event(handle, button_event_type, button_event_count);
@@ -314,7 +329,39 @@ static void app_main_task(void *arg)
             change_led_mode(noti_led_mode);
         }
 
+        if (monitor_enable && (xTaskCheckForTimeOut(&monitor_timeout, &monitor_period_tick) != pdFALSE)) {
+            vTaskSetTimeOutState(&monitor_timeout);
+            monitor_period_tick = pdMS_TO_TICKS(monitor_period_ms);
+            /* emulate sensor value for example */
+            dustLevel_value = (dustLevel_value + 1) % 300;
+            fineDustLevel_value = dustLevel_value;
+
+            cap_dustSensor_data->set_dustLevel_value(cap_dustSensor_data, dustLevel_value);
+            cap_dustSensor_data->attr_dustLevel_send(cap_dustSensor_data);
+
+            cap_dustSensor_data->set_fineDustLevel_value(cap_dustSensor_data, fineDustLevel_value);
+            cap_dustSensor_data->attr_fineDustLevel_send(cap_dustSensor_data);
+        }
+
         vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
+
+static hosal_adc_dev_t adc0;
+
+static void adc_tsen_init()
+{
+    int ret = -1;
+
+    adc0.port = 0;
+    adc0.config.sampling_freq = 300;
+    adc0.config.pin = 4;
+    adc0.config.mode = 0;
+
+    ret = hosal_adc_init(&adc0);
+    if (ret) {
+        printf("adc init error!\r\n");
+        return;
     }
 }
 
@@ -347,6 +394,8 @@ void app_main(void)
 
     int iot_err;
 
+    bl_sys_init();
+    adc_tsen_init();
     // create a iot context
     iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
     if (iot_ctx != NULL) {
@@ -361,11 +410,7 @@ void app_main(void)
     capability_init();
 
     iot_gpio_init();
-    register_iot_cli_cmd();
-    uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);
-
-    xTaskCreate(ota_polling_task, "ota_polling_task", 8096, (void *)cap_ota_data, 5, NULL);
 
     // connect to server
     connection_start();

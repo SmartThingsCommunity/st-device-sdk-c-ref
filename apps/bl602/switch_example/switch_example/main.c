@@ -16,22 +16,21 @@
  *
  ****************************************************************************/
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "bl_sys.h"
+#include "hosal_adc.h"
 
 #include "st_dev.h"
 #include "device_control.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include "iot_uart_cli.h"
-#include "iot_cli_cmd.h"
-#include "ota_util.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #include "caps_switch.h"
-#include "caps_firmwareUpdate.h"
+
 
 // onboarding_config_start is null-terminated string
 extern const uint8_t onboarding_config_start[]    asm("_binary_onboarding_config_json_start");
@@ -51,12 +50,6 @@ IOT_CTX* iot_ctx = NULL;
 static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
 
 static caps_switch_data_t *cap_switch_data;
-static caps_firmwareUpdate_data_t *cap_ota_data;
-
-TaskHandle_t ota_task_handle = NULL;
-
-int monitor_enable = false;
-int monitor_period_ms = 30000;
 
 static int get_switch_state(void)
 {
@@ -81,82 +74,6 @@ static void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
     change_switch_state(switch_state);
 }
 
-static char *get_current_firmware_version(void)
-{
-    char *current_version = NULL;
-
-    unsigned char *device_info = (unsigned char *) device_info_start;
-    unsigned int device_info_len = device_info_end - device_info_start;
-
-    ota_err_t err = ota_api_get_firmware_version_load(device_info, device_info_len, &current_version);
-    if (err != OTA_OK) {
-        printf("ota_api_get_firmware_version_load is failed : %d\n", err);
-    }
-
-    return current_version;
-}
-
-#define OTA_UPDATE_MAX_RETRY_COUNT 100
-
-static void ota_update_task(void * pvParameter)
-{
-    printf("\n Starting OTA...\n");
-
-    static int count = 0;
-
-    while (1) {
-
-        ota_err_t ret = ota_update_device();
-        if (ret != OTA_OK) {
-            printf("Firmware Upgrades Failed (%d) \n", ret);
-            vTaskDelay(600 * 1000 / portTICK_PERIOD_MS);
-            count++;
-        } else {
-            break;
-        }
-
-        if (count > OTA_UPDATE_MAX_RETRY_COUNT)
-            break;
-    }
-
-    printf("Prepare to restart system!");
-    ota_restart_device();
-}
-
-void ota_polling_task(void *arg)
-{
-    while (1) {
-
-        vTaskDelay(30 * 1000 / portTICK_PERIOD_MS);
-
-        if (g_iot_status != IOT_STATUS_CONNECTING || g_iot_stat_lv != IOT_STAT_LV_DONE) {
-            continue;
-        }
-
-        if (ota_task_handle != NULL) {
-            printf("Device is updating.. \n");
-            continue;
-        }
-
-        ota_check_for_update((void *)arg);
-
-	/* Set polling period */
-	unsigned int polling_day = ota_get_polling_period_day();
-	unsigned int task_delay_sec = polling_day * 24 * 3600;
-	vTaskDelay(task_delay_sec * 1000 / portTICK_PERIOD_MS);
-    }
-}
-
-static void cap_update_cmd_cb(struct caps_firmwareUpdate_data *caps_data)
-{
-	ota_nvs_flash_init();
-
-    caps_data->set_state_value(caps_data, "updateInProgress");
-    caps_data->attr_state_send(caps_data);
-
-	xTaskCreate(&ota_update_task, "ota_update_task", 8096, NULL, 5, &ota_task_handle);
-}
-
 static void capability_init()
 {
     cap_switch_data = caps_switch_initialize(iot_ctx, "main", NULL, NULL);
@@ -167,17 +84,6 @@ static void capability_init()
         cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
 
         cap_switch_data->set_switch_value(cap_switch_data, switch_init_value);
-    }
-
-    cap_ota_data = caps_firmwareUpdate_initialize(iot_ctx, "main", NULL, NULL);
-    if (cap_ota_data) {
-
-        char *firmware_version = get_current_firmware_version();
-
-        cap_ota_data->set_currentVersion_value(cap_ota_data, firmware_version);
-        cap_ota_data->cmd_updateFirmware_usr_cb = cap_update_cmd_cb;
-
-        free(firmware_version);
     }
 }
 
@@ -279,13 +185,10 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
                     }
                 }
                 break;
-            case 2:
-                monitor_enable = !monitor_enable;
-                printf("change monitor mode to %d\n", monitor_enable);
-                break;
             case 5:
                 /* clean-up provisioning & registered data with reboot option*/
                 st_conn_cleanup(iot_ctx, true);
+
                 break;
             default:
                 led_blink(get_switch_state(), 100, count);
@@ -318,6 +221,24 @@ static void app_main_task(void *arg)
     }
 }
 
+static hosal_adc_dev_t adc0;
+
+static void adc_tsen_init()
+{
+    int ret = -1;
+
+    adc0.port = 0;
+    adc0.config.sampling_freq = 300;
+    adc0.config.pin = 4;
+    adc0.config.mode = 0;
+
+    ret = hosal_adc_init(&adc0);
+    if (ret) {
+        printf("adc init error!\r\n");
+        return;
+    }
+}
+
 void app_main(void)
 {
     /**
@@ -339,7 +260,7 @@ void app_main(void)
       // process on-boarding procedure. There is nothing more to do on the app side than call the API.
       4. st_conn_start(); (called in function 'connection_start')
      */
-
+    printf("[APP_FLAG] enter main\r\n");
     unsigned char *onboarding_config = (unsigned char *) onboarding_config_start;
     unsigned int onboarding_config_len = onboarding_config_end - onboarding_config_start;
     unsigned char *device_info = (unsigned char *) device_info_start;
@@ -348,8 +269,12 @@ void app_main(void)
     int iot_err;
 
     // create a iot context
+    bl_sys_init();
+    adc_tsen_init();
+
     iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
     if (iot_ctx != NULL) {
+        printf("[APP_FLAG] iot ctx is not null\r\n");
         iot_err = st_conn_set_noti_cb(iot_ctx, iot_noti_cb, NULL);
         if (iot_err)
             printf("fail to set notification callback function\n");
@@ -361,11 +286,10 @@ void app_main(void)
     capability_init();
 
     iot_gpio_init();
-    register_iot_cli_cmd();
-    uart_cli_main();
+    //register_iot_cli_cmd();
+    //uart_cli_main();
+    printf("[APP_FLAG] launch app_main_task\r\n");
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);
-
-    xTaskCreate(ota_polling_task, "ota_polling_task", 8096, (void *)cap_ota_data, 5, NULL);
 
     // connect to server
     connection_start();

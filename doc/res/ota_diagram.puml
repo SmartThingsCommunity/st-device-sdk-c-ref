@@ -1,0 +1,55 @@
+@startuml
+actor "Mobile app" as mobile
+database "SmartThings Platform" as cloud
+participant "STDK device" as device
+database "OTA server" as ota
+
+device->device: boot
+device->cloud: send attributes
+note left
+  currentVersion
+end note
+...
+device -> ota: request version info
+device <-- ota: response version info
+device->device: check possible update
+device->cloud: send attributes
+note left
+  availableVersion
+end note
+alt new firmware available
+  device->cloud: send attributes
+  note left
+    updateAvailable: true
+  end note
+end
+...
+mobile->mobile: enter device card
+alt new firmware available
+  mobile->mobile: check "New firmware is available." message on device plugin
+  mobile->mobile: enter Information menu in device plugin
+  
+  mobile->mobile: "Update firmware" button is activated.
+  mobile->mobile: Press "Update firmware" button
+  mobile->cloud: "updateFirmware" command
+  cloud->device: "updateFirmware" command
+
+  device->cloud: send attributes
+  note left
+    state : updateInProgress
+  end note
+
+  device->ota: request firmware file
+  device<--ota: firmware file chunk
+  device->device: validate and flash firmware
+  device->device: reboot with new firmware
+
+  device->cloud: send attributes
+  note left
+    state : normalOperation
+    currentVersion
+    availaableVersion
+    updateAvailable: false
+  end note
+end
+@enduml
