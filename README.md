@@ -28,7 +28,11 @@ The Direct Connected Devices SDK builds on the environments of each chipset vend
 Install the toolchain defined in the chipset SDK you use according to the directions below. If no development environment is described for your chipset, it is assumed to only be applicable for 64-bit Ubuntu-based environments.
 
 #### For ESP32:
-1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html#step-1-install-prerequisites) for your build system OS.
+1. Install [Prerequisites](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html#step-1-install-prerequisites) for your build system OS.
+
+> **_NOTE:_**  
+> ESP32 examples are tested under ESP-IDF SDK v5.0.  
+
 2. Set up the ESP32 toolchain with `setup.py`
 
 ### Build
@@ -46,9 +50,11 @@ Install the toolchain defined in the chipset SDK you use according to the direct
  --------------------------------------------------
  ex) python setup.py esp32
  ex) python setup.py esp32c3
+ ex) python setup.py esp32s3
+ ex) python setup.py bl602
  ```
 
-2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
+2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`,`sdkconfig.esp32s3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
 
 > If you want to use the default build configuration, you can skip this step.
 
@@ -64,17 +70,23 @@ Install the toolchain defined in the chipset SDK you use according to the direct
 
      # For other esp32 chipset series.
      $ python build.py esp32c3 switch_example menuconfig
+     $ python build.py esp32s3 switch_example menuconfig
      ```
 
 3. Run `build.py` in the SDK's root directory. This builds the sample executables and places them in `output/{chip_name}/`.
 
    ```sh
    $ python build.py apps/esp32/switch_example          # python build.py {app_path}
+  
    or
    $ python build.py esp32 switch_example               # python build.py {bsp_name} {app_name}
 
    # For other esp32 chipset series.
    $ python build.py esp32c3 switch_example
+   $ python build.py esp32s3 switch_example
+   
+   # For other bl602 chipset series.
+    $ python build.py apps/bl602/switch_example         
    ```
 
 ### Flash and Monitor
@@ -85,6 +97,7 @@ The serial port of your device must to be matched to the computer environment fo
 |Chipset|Buad Rate for Flashing|Baud Rate for Monitoring|Data Bit|Parity|Stop Bits|
 |-------|----------------------|------------------------|--------|------|---|
 |ESP32|115200|74880|8|None|1|
+|BL602|2000000|2000000|8|None|1|
 
 #### Flashing
 
@@ -108,19 +121,39 @@ Available Options:
 
   # For other esp32 chipset series.
   $ python build.py esp32c3 switch_example clean
+  $ python build.py esp32s3 switch_example clean
+  
+  # For bl602 chipset series.
+  $ python build.py apps/bl602/switch_example clean
   ```
 - **flash**: download executable binaries to the device
+
+  # python build.py {app_path} {flash} {port}
+  
+  # For bl602 chipset series.
+  $ python build.py apps/bl602/switch_example flash /dev/ttyACM0
 - **monitor**: monitor the serial output of device. this option can be used with flash option.
   ```sh
   # python build.py {app_path} {options}
   $ python build.py apps/esp32/switch_example flash monitor
   or
+  
+# For bl602 chipset series.
+$ python build.py apps/bl602/switch_example monitor /dev/ttyACM0
+
   # python build.py {bsp_name} {app_name} {options}
   $ python build.py esp32 switch_example flash monitor
 
   # For other esp32 chipset series.
   $ python build.py esp32c3 switch_example flash monitor
+  $ python build.py esp32s3 switch_example flash monitor
   ```
+
+## Commercialization
+
+For commercialization, refer to the following [link](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/main/doc/Commercialization_Guide).
+
+If you have any issue, or want to commercialize your IoT devices using this SDK, please contact stdk@samsung.com or open new issue.
 
 ## License
 

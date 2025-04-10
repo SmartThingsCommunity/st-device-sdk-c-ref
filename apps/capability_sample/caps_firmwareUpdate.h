@@ -22,6 +22,20 @@
 extern "C" {
 #endif
 
+#define ST_CAP_SEND_ATTR_BOOLEAN(cap_handle, attribute, value_number, unit, data, output_seq_num)\
+{\
+	IOT_EVENT *attr = NULL;\
+	iot_cap_val_t value;\
+\
+	value.type = IOT_CAP_VAL_TYPE_BOOLEAN;\
+	value.boolean = value_number;\
+	attr = st_cap_create_attr(cap_handle, attribute, &value, unit, data);\
+	if (attr != NULL){\
+		output_seq_num = st_cap_send_attr(&attr, 1);\
+		st_cap_free_attr(attr);\
+	}\
+}
+
 typedef struct caps_firmwareUpdate_data {
     IOT_CAP_HANDLE* handle;
     void *usr_data;
@@ -33,6 +47,13 @@ typedef struct caps_firmwareUpdate_data {
     char *lastUpdateTime_value;
     char *availableVersion_value;
     char *lastUpdateStatusReason_value;
+
+    bool updateAvailable_value;
+
+    bool (*get_updateAvailable_value)(struct caps_firmwareUpdate_data *caps_data);
+    void (*set_updateAvailable_value)(struct caps_firmwareUpdate_data *caps_data, bool updateAvailable);
+    void (*attr_updateAvailable_send)(struct caps_firmwareUpdate_data *caps_data);
+
 
     const char *(*get_lastUpdateStatus_value)(struct caps_firmwareUpdate_data *caps_data);
     void (*set_lastUpdateStatus_value)(struct caps_firmwareUpdate_data *caps_data, const char *value);
