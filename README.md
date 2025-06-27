@@ -52,6 +52,7 @@ Install the toolchain defined in the chipset SDK you use according to the direct
  ex) python setup.py esp32c3
  ex) python setup.py esp32s3
  ex) python setup.py bl602
+ ex) python setup.py bk7236
  ```
 
 2. Check the build configuration of a sample device application (`apps` folder). If you want to use specific build options, you can directly modify the each chipset build configuration file (e.g. `sdkconfig.esp32`, `sdkconfig.esp32c3`,`sdkconfig.esp32s3`) at the root directory of a sample device application. On the Espressif chipset, you can additionally use the `menuconfig` option for configuration.
@@ -85,7 +86,10 @@ Install the toolchain defined in the chipset SDK you use according to the direct
    $ python build.py esp32s3 switch_example
    
    # For other bl602 chipset series.
-    $ python build.py apps/bl602/switch_example         
+    $ python build.py apps/bl602/switch_example
+
+   # For bk7236 chipset.
+    $ python build.py apps/bl602/switch_example            
    ```
 
 ### Flash and Monitor
@@ -97,6 +101,7 @@ The serial port of your device must to be matched to the computer environment fo
 |-------|----------------------|------------------------|--------|------|---|
 |ESP32|115200|74880|8|None|1|
 |BL602|2000000|2000000|8|None|1|
+|BK7236|115200|115200|8|None|1|
 
 #### Flashing
 
@@ -135,6 +140,7 @@ Available Options:
   $ python build.py esp32c3 switch_example flash monitor
   $ python build.py esp32s3 switch_example flash monitor
   ```
+
 ##### bl602 Example :
 
 - **clean**: clean previous build outputs
@@ -148,6 +154,31 @@ Available Options:
 - **monitor**: monitor the serial output of device.
   ```sh 
   $ python build.py apps/bl602/switch_example monitor /dev/ttyACM0
+  ```
+
+##### BK7236 Example:
+
+  Available Options:
+
+- **clean**: clean previous build outputs
+  ```sh
+  # python build.py {app_path} {options}
+  $ python build.py apps/bk7236/switch_example clean
+  ```
+- **flash**: download executable binaries to the device
+  ```sh
+  # python build.py {app_path} {flash} {port}
+  $ python build.py apps/bk7236/switch_example flash /dev/ttyACM0
+  ```
+- **erase flash**: download executable binaries to the device
+  ```sh
+  # python build.py {app_path} {flash} {port}
+  $ python build.py apps/bk7236/switch_example erase_flash /dev/ttyACM0
+  ```
+- **monitor**: monitor the serial output of device. this option can be used with flash option.
+  ```sh
+  # python build.py {app_path} {monitor} {port}
+  $ python build.py apps/bk7236/switch_example monitor /dev/ttyACM0
   ```
 
 ## Commercialization

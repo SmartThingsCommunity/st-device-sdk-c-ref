@@ -7,3 +7,6 @@
 [submodule "bsp/bl602"]
 	path = bsp/bl602
 	url = https://github.com/bouffalolab/bl_iot_sdk.git
+[submodule "bsp/bk7236"]
+	path = bsp/bk7236
+	url = https://oauth2:y9nxxk6TzZ1Pdyy9-FDy@gitlab.bekencorp.com/armino/bk_idk.git

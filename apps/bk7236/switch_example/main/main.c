@@ -19,21 +19,15 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/socket.h>
 #include "st_dev.h"
 #include "device_control.h"
+#include "bk_private/bk_init.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include "iot_uart_cli.h"
-#include "iot_cli_cmd.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #include "caps_switch.h"
-#include "caps_switchLevel.h"
-#include "caps_colorTemperature.h"
-#include "caps_activityLightingMode.h"
-#include "caps_dustSensor.h"
 
 // onboarding_config_start is null-terminated string
 extern const uint8_t onboarding_config_start[]    asm("_binary_onboarding_config_json_start");
@@ -53,13 +47,6 @@ IOT_CTX* iot_ctx = NULL;
 static int noti_led_mode = LED_ANIMATION_MODE_IDLE;
 
 static caps_switch_data_t *cap_switch_data;
-static caps_switchLevel_data_t *cap_switchLevel_data;
-static caps_colorTemperature_data_t *cap_colorTemp_data;
-static caps_activityLightingMode_data_t *cap_lightMode_data;
-static caps_dustSensor_data_t *cap_dustSensor_data;
-
-int monitor_enable = false;
-int monitor_period_ms = 30000;
 
 static int get_switch_state(void)
 {
@@ -84,46 +71,6 @@ static void cap_switch_cmd_cb(struct caps_switch_data *caps_data)
     change_switch_state(switch_state);
 }
 
-static void cap_switchLevel_cmd_cb(struct caps_switchLevel_data *caps_data)
-{
-    int switch_level = caps_data->get_level_value(caps_data);
-    change_switch_level(switch_level);
-}
-
-static void cap_colorTemp_cmd_cb(struct caps_colorTemperature_data *caps_data)
-{
-    update_color_info(cap_colorTemp_data->get_colorTemperature_value(cap_colorTemp_data));
-    change_switch_state(get_switch_state());
-}
-
-static void cap_lightMode_cmd_cb(struct caps_activityLightingMode_data *caps_data)
-{
-    const char* lightMode = cap_lightMode_data->get_lightingMode_value(cap_lightMode_data);
-
-    int colorTemp = 0;
-    if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_reading)) {
-        colorTemp = 4000;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_writing)) {
-        colorTemp = 5000;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_computer)) {
-        colorTemp = 6000;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_day)) {
-        colorTemp = 5500;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_night)) {
-        colorTemp = 6500;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_sleepPreparation)) {
-        colorTemp = 3000;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_cozy)) {
-        colorTemp = 2000;
-    } else if (!strcmp(lightMode, caps_helper_activityLightingMode.attr_lightingMode.value_soft)) {
-        colorTemp = 2500;
-    }
-    cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp);
-    update_color_info(cap_colorTemp_data->get_colorTemperature_value(cap_colorTemp_data));
-    change_switch_state(get_switch_state());
-    cap_colorTemp_data->attr_colorTemperature_send(cap_colorTemp_data);
-}
-
 static void capability_init()
 {
     cap_switch_data = caps_switch_initialize(iot_ctx, "main", NULL, NULL);
@@ -134,42 +81,6 @@ static void capability_init()
         cap_switch_data->cmd_off_usr_cb = cap_switch_cmd_cb;
 
         cap_switch_data->set_switch_value(cap_switch_data, switch_init_value);
-    }
-
-    cap_switchLevel_data = caps_switchLevel_initialize(iot_ctx, "main", NULL, NULL);
-    if (cap_switchLevel_data) {
-        int switch_init_level = 50;
-
-        cap_switchLevel_data->cmd_setLevel_usr_cb = cap_switchLevel_cmd_cb;
-
-        cap_switchLevel_data->set_level_value(cap_switchLevel_data, switch_init_level);
-        cap_switchLevel_data->set_level_unit(cap_switchLevel_data, caps_helper_switchLevel.attr_level.unit_percent);
-    }
-
-    cap_colorTemp_data = caps_colorTemperature_initialize(iot_ctx, "main", NULL, NULL);
-    if (cap_colorTemp_data) {
-        int colorTemp_init_value = 2000;
-
-        cap_colorTemp_data->cmd_setColorTemperature_usr_cb = cap_colorTemp_cmd_cb;
-
-        cap_colorTemp_data->set_colorTemperature_value(cap_colorTemp_data, colorTemp_init_value);
-    }
-
-    cap_lightMode_data = caps_activityLightingMode_initialize(iot_ctx, "main", NULL, NULL);
-    if (cap_lightMode_data) {
-        const char *init_lightMode = caps_helper_activityLightingMode.attr_lightingMode.value_cozy;
-        cap_lightMode_data->set_lightingMode_value(cap_lightMode_data, init_lightMode);
-
-        cap_lightMode_data->cmd_setLightingMode_usr_cb = cap_lightMode_cmd_cb;
-    }
-
-    cap_dustSensor_data = caps_dustSensor_initialize(iot_ctx, "monitor", NULL, NULL);
-    if (cap_dustSensor_data) {
-        cap_dustSensor_data->set_dustLevel_value(cap_dustSensor_data, 0);
-        cap_dustSensor_data->set_fineDustLevel_value(cap_dustSensor_data, 0);
-
-        cap_dustSensor_data->set_dustLevel_unit(cap_dustSensor_data, caps_helper_dustSensor.attr_dustLevel.unit_ug_per_m3);
-        cap_dustSensor_data->set_fineDustLevel_unit(cap_dustSensor_data, caps_helper_dustSensor.attr_fineDustLevel.unit_ug_per_m3);
     }
 }
 
@@ -210,7 +121,7 @@ static void connection_start(void)
 {
     iot_pin_t *pin_num = NULL;
     int err;
-
+    printf("[%s][%d][Wifi debug]enter connection_start\r\n", __func__, __LINE__);
 #if defined(SET_PIN_NUMBER_CONFRIM)
     pin_num = (iot_pin_t *) malloc(sizeof(iot_pin_t));
     if (!pin_num)
@@ -246,23 +157,7 @@ static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
     } else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT) {
         printf("[rate limit] Remaining time:%d, sequence number:%d\n",
                noti_data->raw.rate_limit.remainingTime, noti_data->raw.rate_limit.sequenceNumber);
-    } else if(noti_data->type == IOT_NOTI_TYPE_PREFERENCE_UPDATED) {
-		for (int i = 0; i < noti_data->raw.preferences.preferences_num; i++) {
-			printf("[preference update] name : %s value : ", noti_data->raw.preferences.preferences_data[i].preference_name);
-			if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_NULL)
-				printf("NULL\n");
-			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_STRING)
-				printf("%s\n", noti_data->raw.preferences.preferences_data[i].preference_data.string);
-			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_NUMBER)
-				printf("%f\n", noti_data->raw.preferences.preferences_data[i].preference_data.number);
-			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_INTEGER)
-				printf("%d\n", noti_data->raw.preferences.preferences_data[i].preference_data.integer);
-			else if (noti_data->raw.preferences.preferences_data[i].preference_data.type == IOT_CAP_VAL_TYPE_BOOLEAN)
-				printf("%s\n", noti_data->raw.preferences.preferences_data[i].preference_data.boolean ? "true" : "false");
-			else
-				printf("Unknown type\n");
-		}
-	}
+    }
 }
 
 void button_event(IOT_CAP_HANDLE *handle, int type, int count)
@@ -287,13 +182,10 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
                     }
                 }
                 break;
-            case 2:
-                monitor_enable = !monitor_enable;
-                printf("change monitor mode to %d\n", monitor_enable);
-                break;
             case 5:
                 /* clean-up provisioning & registered data with reboot option*/
                 st_conn_cleanup(iot_ctx, true);
+
                 break;
             default:
                 led_blink(get_switch_state(), 100, count);
@@ -303,7 +195,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
         printf("Button long press, iot_status: %d\n", g_iot_status);
         led_blink(get_switch_state(), 100, 3);
         st_conn_cleanup(iot_ctx, false);
-        xTaskCreate(connection_start_task, "connection_task", 1024*3, NULL, 10, NULL);
+        xTaskCreate(connection_start_task, "connection_task", 2048, NULL, 10, NULL);
     }
 }
 
@@ -313,14 +205,7 @@ static void app_main_task(void *arg)
 
     int button_event_type;
     int button_event_count;
-
-    int dustLevel_value = 0;
-    int fineDustLevel_value = 0;
-    TimeOut_t monitor_timeout;
-    TickType_t monitor_period_tick = pdMS_TO_TICKS(monitor_period_ms);
-
-    vTaskSetTimeOutState(&monitor_timeout);
-
+    printf("[%s][%d][Task Debug]enter app_main_task\r\n", __func__, __LINE__);
     for (;;) {
         if (get_button_event(&button_event_type, &button_event_count)) {
             button_event(handle, button_event_type, button_event_count);
@@ -329,25 +214,11 @@ static void app_main_task(void *arg)
             change_led_mode(noti_led_mode);
         }
 
-        if (monitor_enable && (xTaskCheckForTimeOut(&monitor_timeout, &monitor_period_tick) != pdFALSE)) {
-            vTaskSetTimeOutState(&monitor_timeout);
-            monitor_period_tick = pdMS_TO_TICKS(monitor_period_ms);
-            /* emulate sensor value for example */
-            dustLevel_value = (dustLevel_value + 1) % 300;
-            fineDustLevel_value = dustLevel_value;
-
-            cap_dustSensor_data->set_dustLevel_value(cap_dustSensor_data, dustLevel_value);
-            cap_dustSensor_data->attr_dustLevel_send(cap_dustSensor_data);
-
-            cap_dustSensor_data->set_fineDustLevel_value(cap_dustSensor_data, fineDustLevel_value);
-            cap_dustSensor_data->attr_fineDustLevel_send(cap_dustSensor_data);
-        }
-
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
-void app_main(void)
+int main(void)
 {
     /**
       SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
@@ -375,7 +246,7 @@ void app_main(void)
     unsigned int device_info_len = device_info_end - device_info_start;
 
     int iot_err;
-
+    bk_init();
     // create a iot context
     iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
     if (iot_ctx != NULL) {
@@ -390,10 +261,8 @@ void app_main(void)
     capability_init();
 
     iot_gpio_init();
-    register_iot_cli_cmd();
-    uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);
-
     // connect to server
     connection_start();
+    return 0;
 }

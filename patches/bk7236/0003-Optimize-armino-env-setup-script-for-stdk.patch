@@ -1,0 +1,28 @@
+From 95551e0cc3888b9dd21dfdd2be055036280f58c3 Mon Sep 17 00:00:00 2001
+From: zihan19-song <zihan19.song@samsung.com>
+Date: Mon, 12 May 2025 13:47:33 +0800
+Subject: [PATCH 3/4] Optimize armino env setup script for stdk
+
+---
+ tools/env_tools/setup/armino_env_setup.sh | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/tools/env_tools/setup/armino_env_setup.sh b/tools/env_tools/setup/armino_env_setup.sh
+index de0659d5..b19d7f70 100755
+--- a/tools/env_tools/setup/armino_env_setup.sh
++++ b/tools/env_tools/setup/armino_env_setup.sh
+@@ -133,11 +133,6 @@ function centos7_python_env_patch(){
+ function install_python_env(){
+     python_install_options="$(get_pip_options)"
+     pip3 install pycryptodome click future click_option_group cryptography jinja2 PyYAML cbor2 intelhex $python_install_options
+-    pip3 install Sphinx sphinx-rtd-theme breathe blockdiag \
+-         sphinxcontrib-blockdiag sphinxcontrib-seqdiag sphinxcontrib-actdiag \
+-         sphinxcontrib-nwdiag Pillow $python_install_options
+-
+-    pip3 install "cryptography>=40" $python_install_options
+ 
+     # ensure /usr/bin/python is python3
+     if [ -f /usr/bin/python ];then
+-- 
+2.25.1
+

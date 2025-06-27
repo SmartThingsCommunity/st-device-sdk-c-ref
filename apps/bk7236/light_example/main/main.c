@@ -19,15 +19,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/socket.h>
 #include "st_dev.h"
 #include "device_control.h"
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include "iot_uart_cli.h"
-#include "iot_cli_cmd.h"
+#include "bk_private/bk_init.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #include "caps_switch.h"
 #include "caps_switchLevel.h"
@@ -303,7 +300,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
         printf("Button long press, iot_status: %d\n", g_iot_status);
         led_blink(get_switch_state(), 100, 3);
         st_conn_cleanup(iot_ctx, false);
-        xTaskCreate(connection_start_task, "connection_task", 1024*3, NULL, 10, NULL);
+        xTaskCreate(connection_start_task, "connection_task", 2048, NULL, 10, NULL);
     }
 }
 
@@ -347,7 +344,7 @@ static void app_main_task(void *arg)
     }
 }
 
-void app_main(void)
+int main(void)
 {
     /**
       SmartThings Device SDK(STDK) aims to make it easier to develop IoT devices by providing
@@ -375,7 +372,8 @@ void app_main(void)
     unsigned int device_info_len = device_info_end - device_info_start;
 
     int iot_err;
-
+    
+    bk_init();
     // create a iot context
     iot_ctx = st_conn_init(onboarding_config, onboarding_config_len, device_info, device_info_len);
     if (iot_ctx != NULL) {
@@ -390,8 +388,6 @@ void app_main(void)
     capability_init();
 
     iot_gpio_init();
-    register_iot_cli_cmd();
-    uart_cli_main();
     xTaskCreate(app_main_task, "app_main_task", 4096, NULL, 10, NULL);
 
     // connect to server
