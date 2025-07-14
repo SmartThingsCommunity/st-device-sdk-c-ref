@@ -1,6 +1,6 @@
-From 8514f58a870b6137cd0a268ce9c3000b21857b54 Mon Sep 17 00:00:00 2001
+From 3bbada43cfed50adcebb4a82c6b99778e01b52eb Mon Sep 17 00:00:00 2001
 From: zihan19-song <zihan19.song@samsung.com>
-Date: Thu, 3 Apr 2025 22:26:27 +0800
+Date: Fri, 4 Jul 2025 16:13:16 +0800
 Subject: [PATCH] add stdk compile modifications for bl602
 
 ---
@@ -60,7 +60,7 @@ index 000000000..30fa1ceaf
 +config
 \ No newline at end of file
 diff --git a/components/platform/soc/bl602/freertos_riscv_ram/tasks.c b/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
-index cb603fb9f..514dbdd27 100644
+index cb603fb9f..b295385c4 100644
 --- a/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
 +++ b/components/platform/soc/bl602/freertos_riscv_ram/tasks.c
 @@ -794,7 +794,7 @@ StackType_t *xTaskGetStackBase(TaskHandle_t xTask)
@@ -68,7 +68,7 @@ index cb603fb9f..514dbdd27 100644
  				The base of the stack memory stored in the TCB so the task can
  				be deleted later if required. */
 -				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
-+				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
++				pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1408 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
  
  				if( pxNewTCB->pxStack == NULL )
  				{
@@ -77,7 +77,7 @@ index cb603fb9f..514dbdd27 100644
  
  			/* Allocate space for the stack used by the task being created. */
 -			pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
-+			pxStack = pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
++			pxStack = pvPortMalloc( ( ( ( size_t ) (usStackDepth > 3072 ? usStackDepth-1408 : usStackDepth) ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
  
  			if( pxStack != NULL )
  			{
@@ -86,7 +86,7 @@ index cb603fb9f..514dbdd27 100644
  			#endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
  
 -			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
-+			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) (usStackDepth > 3072 ? usStackDepth-1024 : usStackDepth), pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
++			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) (usStackDepth > 3072 ? usStackDepth-1408 : usStackDepth), pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
  			prvAddNewTaskToReadyList( pxNewTCB );
  			xReturn = pdPASS;
  		}
