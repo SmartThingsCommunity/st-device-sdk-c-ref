@@ -38,6 +38,7 @@ def setup_paths(bsp_name, project_title):
         "build_output_path": stdk_path / "apps" / bsp_name / project_title / "build_out",
         "flash_tool": stdk_path / "bsp" / bsp_name / "tools/flash_tool/bflb_iot_tool-ubuntu",
         "partition_table": stdk_path / "bsp" / bsp_name / "tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml",
+        "device_tree": stdk_path / "bsp" / bsp_name / "tools/flash_tool/chips/bl602/device_tree/bl_factory_params_IoTKitA_40M.dts",
         "app_firmware": stdk_path / "apps" / bsp_name / project_title / "build_out" / f"{project_title}.bin",
         "monitor_script": stdk_path / "tools" / bsp_name / "monitor.py",
         "baudrate": "2000000"
@@ -51,8 +52,7 @@ def build_project(paths):
         "CONFIG_BLE_TP_SERVER=1",
         "CONFIG_BLECONTROLLER_LIB=all",
         f"-j{os.cpu_count() or 4}",
-        "PTS_GAP_SLAVER_CONFIG_INDICATE_CHARC=1",
-        "CONFIG_BT_STACK_PTS=1"
+        "PTS_GAP_SLAVER_CONFIG_INDICATE_CHARC=1"
     ]
     subprocess.run(make_cmd, check=True)
 
@@ -68,7 +68,7 @@ def execute_command(command, paths, port=None):
             f"--baudrate={paths['baudrate']}",
             f"--port={port or '/dev/ttyACM0'}",
             f"--pt={paths['partition_table']}",
-            "--dts=",
+            f"--dts={paths['device_tree']}",
             f"--firmware={paths['app_firmware']}",
             "--erase"
         ], check=True),
@@ -78,7 +78,7 @@ def execute_command(command, paths, port=None):
             f"--baudrate={paths['baudrate']}",
             f"--port={port or '/dev/ttyACM0'}",
             f"--pt={paths['partition_table']}",
-            "--dts=",
+            f"--dts={paths['device_tree']}",
             f"--firmware={paths['app_firmware']}"
         ], check=True) if (paths["build_output_path"].exists() or build_project(paths)) else None,
         "monitor": lambda: subprocess.run([
