@@ -77,12 +77,9 @@ void change_switch_state(int switch_state)
         hosal_gpio_output_set(&led_gp_g, COLOR_LED_OFF);
         hosal_gpio_output_set(&led_gp_r, COLOR_LED_OFF);
     } else {
-        //hosal_gpio_output_set(&led_gp_b, (rgb_color_blue > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
-        //hosal_gpio_output_set(&led_gp_g, (rgb_color_green > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
-        //hosal_gpio_output_set(&led_gp_r, (rgb_color_red > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
-        hosal_gpio_output_set(&led_gp_b, COLOR_LED_ON);
-        hosal_gpio_output_set(&led_gp_g, COLOR_LED_ON);
-        hosal_gpio_output_set(&led_gp_r, COLOR_LED_ON);
+        hosal_gpio_output_set(&led_gp_b, (rgb_color_blue > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
+        hosal_gpio_output_set(&led_gp_g, (rgb_color_green > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
+        hosal_gpio_output_set(&led_gp_r, (rgb_color_red > 127) ? COLOR_LED_ON : COLOR_LED_OFF);
     }
 }
 

@@ -40,8 +40,7 @@ extern const uint8_t onboarding_config_end[]    asm("_binary_onboarding_config_j
 extern const uint8_t device_info_start[]    asm("_binary_device_info_json_start");
 extern const uint8_t device_info_end[]        asm("_binary_device_info_json_end");
 
-static iot_status_t g_iot_status = IOT_STATUS_IDLE;
-static iot_stat_lv_t g_iot_stat_lv;
+static st_device_status g_device_status = ST_DEVICE_STATUS_INIT;
 
 IOT_CTX* iot_ctx = NULL;
 
@@ -170,25 +169,28 @@ static void capability_init()
     }
 }
 
-static void iot_status_cb(iot_status_t status,
-                          iot_stat_lv_t stat_lv, void *usr_data)
+static void iot_status_cb(st_device_status device_status, void *usr_data)
 {
-    g_iot_status = status;
-    g_iot_stat_lv = stat_lv;
-
-    printf("status: %d, stat: %d\n", g_iot_status, g_iot_stat_lv);
-
-    switch(status)
-    {
-        case IOT_STATUS_NEED_INTERACT:
-            noti_led_mode = LED_ANIMATION_MODE_FAST;
+    printf("Device status %d\n", device_status);
+    g_device_status = device_status;
+    switch (device_status) {
+        case ST_DEVICE_STATUS_INIT:
             break;
-        case IOT_STATUS_IDLE:
-        case IOT_STATUS_CONNECTING:
+        case ST_DEVICE_STATUS_ONBOARDING_READY:
             noti_led_mode = LED_ANIMATION_MODE_IDLE;
             change_switch_state(get_switch_state());
             break;
-        default:
+        case ST_DEVICE_STATUS_ONBOARDING_START:
+            break;
+        case ST_DEVICE_STATUS_ONBOARDING_NEED_CONFIRM:
+            noti_led_mode = LED_ANIMATION_MODE_FAST;
+            break;
+        case ST_DEVICE_STATUS_ONBOARDING_ONBOARDED:
+            break;
+        case ST_DEVICE_STATUS_CLOUD_DISCONNECTED:
+        case ST_DEVICE_STATUS_CLOUD_CONNECTED:
+            noti_led_mode = LED_ANIMATION_MODE_IDLE;
+            change_switch_state(get_switch_state());
             break;
     }
 }
@@ -219,7 +221,7 @@ static void connection_start(void)
 #endif
 
     // process on-boarding procedure. There is nothing more to do on the app side than call the API.
-    err = st_conn_start(iot_ctx, (st_status_cb)&iot_status_cb, IOT_STATUS_ALL, NULL, pin_num);
+    err = st_conn_start(iot_ctx, (st_status_cb)&iot_status_cb, NULL, pin_num);
     if (err) {
         printf("fail to start connection. err:%d\n", err);
     }
@@ -268,7 +270,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
         printf("Button short press, count: %d\n", count);
         switch(count) {
             case 1:
-                if (g_iot_status == IOT_STATUS_NEED_INTERACT) {
+                if (g_device_status == ST_DEVICE_STATUS_ONBOARDING_NEED_CONFIRM) {
                     st_conn_ownership_confirm(iot_ctx, true);
                     noti_led_mode = LED_ANIMATION_MODE_IDLE;
                     change_switch_state(get_switch_state());
@@ -297,7 +299,7 @@ void button_event(IOT_CAP_HANDLE *handle, int type, int count)
                 break;
         }
     } else if (type == BUTTON_LONG_PRESS) {
-        printf("Button long press, iot_status: %d\n", g_iot_status);
+        printf("Button long press\n");
         led_blink(get_switch_state(), 100, 3);
         st_conn_cleanup(iot_ctx, false);
         xTaskCreate(connection_start_task, "connection_task", 2048, NULL, 10, NULL);
@@ -392,4 +394,6 @@ int main(void)
 
     // connect to server
     connection_start();
+
+    return 0;
 }
