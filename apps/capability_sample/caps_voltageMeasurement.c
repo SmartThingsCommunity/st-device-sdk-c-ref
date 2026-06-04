@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "st_dev.h"
 #include "caps_voltageMeasurement.h"
@@ -27,7 +28,7 @@ static double caps_voltageMeasurement_get_voltage_value(caps_voltageMeasurement_
 {
     if (!caps_data) {
         printf("caps_data is NULL\n");
-        return caps_helper_voltageMeasurement.attr_voltage.min - 1;
+        return NAN;
     }
     return caps_data->voltage_value;
 }

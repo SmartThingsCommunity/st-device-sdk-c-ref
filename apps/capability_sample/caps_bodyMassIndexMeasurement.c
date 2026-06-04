@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "st_dev.h"
 #include "caps_bodyMassIndexMeasurement.h"
@@ -27,7 +28,7 @@ static double caps_bodyMassIndexMeasurement_get_bmiMeasurement_value(caps_bodyMa
 {
     if (!caps_data) {
         printf("caps_data is NULL\n");
-        return caps_helper_bodyMassIndexMeasurement.attr_bmiMeasurement.min - 1;
+        return NAN;
     }
     return caps_data->bmiMeasurement_value;
 }

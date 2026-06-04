@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "st_dev.h"
 #include "caps_powerMeter.h"
@@ -27,7 +28,7 @@ static double caps_powerMeter_get_power_value(caps_powerMeter_data_t *caps_data)
 {
     if (!caps_data) {
         printf("caps_data is NULL\n");
-        return caps_helper_powerMeter.attr_power.min - 1;
+        return NAN;
     }
     return caps_data->power_value;
 }
