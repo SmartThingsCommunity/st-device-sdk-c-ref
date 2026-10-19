@@ -246,8 +246,9 @@ static void iot_noti_cb(iot_noti_data_t *noti_data, void *noti_usr_data)
     if (noti_data->type == IOT_NOTI_TYPE_DEV_DELETED) {
         printf("[device deleted]\n");
     } else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT) {
-        printf("[rate limit] Remaining time:%d, sequence number:%d\n",
-               noti_data->raw.rate_limit.remainingTime, noti_data->raw.rate_limit.sequenceNumber);
+        printf("[rate limit] Remaining time:%d\n", noti_data->raw.rate_limit.remainingTime);
+    } else if (noti_data->type == IOT_NOTI_TYPE_RATE_LIMIT_RELEASED) {
+        printf("[rate limit] Released\n");
     } else if(noti_data->type == IOT_NOTI_TYPE_PREFERENCE_UPDATED) {
 		for (int i = 0; i < noti_data->raw.preferences.preferences_num; i++) {
 			printf("[preference update] name : %s value : ", noti_data->raw.preferences.preferences_data[i].preference_name);
