@@ -1,19 +1,83 @@
-From 3bbada43cfed50adcebb4a82c6b99778e01b52eb Mon Sep 17 00:00:00 2001
+From 9b62e95ef1c4873b6a8785b428bcc1ea2f05da56 Mon Sep 17 00:00:00 2001
 From: zihan19-song <zihan19.song@samsung.com>
-Date: Fri, 4 Jul 2025 16:13:16 +0800
+Date: Mon, 14 Sep 2026 21:11:45 +0800
 Subject: [PATCH] add stdk compile modifications for bl602
 
 ---
+ components/libc/newlibc/syscalls.c            |   9 +-
+ components/network/lwip/lwip-port/arch/cc.h   |   7 +
+ .../network/lwip/lwip-port/config/lwipopts.h  |   9 +-
  .../platform/soc/bl602/bl602/bfl_main.c       |   6 +-
  .../config/FreeRTOSConfig.h                   |   2 +-
  .../soc/bl602/freertos_riscv_ram/freertos     |   1 +
  .../soc/bl602/freertos_riscv_ram/tasks.c      |   6 +-
  make_scripts_riscv/component_wrapper.mk       |  41 +++-
  make_scripts_riscv/project.mk                 |  13 +-
+ tools/flash_tool/bflb_iot_tool-ubuntu         | Bin
  .../bl602/partition/partition_cfg_2M.toml     | 188 +++++++++---------
- 7 files changed, 151 insertions(+), 106 deletions(-)
+ 11 files changed, 172 insertions(+), 110 deletions(-)
  create mode 120000 components/platform/soc/bl602/freertos_riscv_ram/freertos
+ mode change 100644 => 100755 tools/flash_tool/bflb_iot_tool-ubuntu
 
+diff --git a/components/libc/newlibc/syscalls.c b/components/libc/newlibc/syscalls.c
+index 09684f96b..e0d51ea62 100644
+--- a/components/libc/newlibc/syscalls.c
++++ b/components/libc/newlibc/syscalls.c
+@@ -254,9 +254,12 @@ int _execve_r(struct _reent *ptr, const char * name, char *const *argv, char *co
+ 
+ int _fcntl_r(struct _reent *ptr, int fd, int cmd, int arg)
+ {
+-    /* return "not supported" */
+-    ptr->_errno = ENOSYS;
+-    return -1;
++    /* Delegate to lwip_fcntl for socket file descriptors.
++     * The default newlib _fcntl_r returns ENOSYS, which breaks non-blocking
++     * connect (fcntl F_SETFL O_NONBLOCK) used by STDK port_net_mbedtls.c.
++     * lwip_fcntl internally calls set_errno() which sets errno correctly. */
++    extern int lwip_fcntl(int s, int cmd, int val);
++    return lwip_fcntl(fd, cmd, arg);
+ }
+ 
+ int _fork_r(struct _reent *ptr)
+diff --git a/components/network/lwip/lwip-port/arch/cc.h b/components/network/lwip/lwip-port/arch/cc.h
+index c3cf8dcf2..8f21f57eb 100644
+--- a/components/network/lwip/lwip-port/arch/cc.h
++++ b/components/network/lwip/lwip-port/arch/cc.h
+@@ -34,7 +34,14 @@
+ 
+ #include "cpu.h"
+ 
++/* Include newlib's <fcntl.h> to ensure O_NONBLOCK and other fcntl flags
++ * use the same values as application code. Without this, lwip/sockets.h
++ * would define O_NONBLOCK=1, while newlib defines O_NONBLOCK=0x4000,
++ * causing fcntl(F_SETFL, O_NONBLOCK) to fail. */
++#include <fcntl.h>
++
+ typedef int sys_prot_t;
++
+ #if 0
+ typedef unsigned   char    u8_t;
+ typedef signed     char    s8_t;
+diff --git a/components/network/lwip/lwip-port/config/lwipopts.h b/components/network/lwip/lwip-port/config/lwipopts.h
+index 8e01e4468..9888d792b 100644
+--- a/components/network/lwip/lwip-port/config/lwipopts.h
++++ b/components/network/lwip/lwip-port/config/lwipopts.h
+@@ -240,7 +240,14 @@ a lot of data that needs to be copied, this should be set high. */
+ 
+ /* ---------- Statistics options ---------- */
+ #define LWIP_STATS 1
+-#define LWIP_PROVIDE_ERRNO 1
++
++/* Use newlib's <errno.h> instead of lwip's own errno definitions.
++ * This ensures O_NONBLOCK and errno values are consistent between
++ * lwip (sockets.c) and application code (port_net_mbedtls.c).
++ * Without this, lwip defines O_NONBLOCK=1 while newlib defines O_NONBLOCK=0x4000,
++ * causing fcntl(F_SETFL, O_NONBLOCK) to fail in STDK's _connect_with_timeout(). */
++#define LWIP_ERRNO_STDINCLUDE 1
++
+ 
+ /* ---------- link callback options ---------- */
+ /* LWIP_NETIF_LINK_CALLBACK==1: Support a callback function from an interface
 diff --git a/components/platform/soc/bl602/bl602/bfl_main.c b/components/platform/soc/bl602/bl602/bfl_main.c
 index fed0d95ca..c9a6bd972 100755
 --- a/components/platform/soc/bl602/bl602/bfl_main.c
@@ -223,6 +287,9 @@ index 0d54cded0..268952a79 100644
  	$(call ComponentMake,$(1),$(2)) component_project_vars.mk
  endef
  
+diff --git a/tools/flash_tool/bflb_iot_tool-ubuntu b/tools/flash_tool/bflb_iot_tool-ubuntu
+old mode 100644
+new mode 100755
 diff --git a/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml b/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml
 index e8638dc09..95110f107 100644
 --- a/tools/flash_tool/chips/bl602/partition/partition_cfg_2M.toml

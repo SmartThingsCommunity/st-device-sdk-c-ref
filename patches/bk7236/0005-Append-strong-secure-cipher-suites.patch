@@ -1,0 +1,35 @@
+From 78111811b82c58a535d001bd2077b73b5d58404f Mon Sep 17 00:00:00 2001
+From: zihan19-song <zihan19.song@samsung.com>
+Date: Tue, 23 Jun 2026 19:47:55 +0800
+Subject: [PATCH] Append strong secure cipher suites
+
+---
+ components/mbedtls/mbedtls-port/inc/tls_config.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/components/mbedtls/mbedtls-port/inc/tls_config.h b/components/mbedtls/mbedtls-port/inc/tls_config.h
+index 6538054b0..e079e62f7 100755
+--- a/components/mbedtls/mbedtls-port/inc/tls_config.h
++++ b/components/mbedtls/mbedtls-port/inc/tls_config.h
+@@ -3467,6 +3467,7 @@ extern void tls_mbedtls_mem_free(void *ptr);
+ #define MBEDTLS_ECP_DP_CURVE25519_ENABLED
+ #define MBEDTLS_ECP_NIST_OPTIM
+ #define MBEDTLS_ECDH_LEGACY_CONTEXT
++#define MBEDTLS_GCM_C
+ #define MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
+ #define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+ #define MBEDTLS_ERROR_STRERROR_DUMMY
+@@ -3519,6 +3520,10 @@ extern void tls_mbedtls_mem_free(void *ptr);
+ #define MBEDTLS_SSL_TLS_C
+ #define MBEDTLS_X509_USE_C
+ #define MBEDTLS_X509_CRT_PARSE_C
++/* Custom ciphersuite list: only GCM (AEAD) suites */
++#define MBEDTLS_SSL_CIPHERSUITES \
++    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, \
++    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+ #define MBEDTLS_SSL_OUT_CONTENT_LEN             8192
+ #define MBEDTLS_SSL_DTLS_MAX_BUFFERING             16384
+ #if defined(MBEDTLS_USER_CONFIG_FILE)
+-- 
+2.25.1
+

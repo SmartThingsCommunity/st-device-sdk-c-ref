@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "st_dev.h"
 #include "caps_energyMeter.h"
@@ -27,7 +28,7 @@ static double caps_energyMeter_get_energy_value(caps_energyMeter_data_t *caps_da
 {
     if (!caps_data) {
         printf("caps_data is NULL\n");
-        return caps_helper_energyMeter.attr_energy.min - 1;
+        return NAN;
     }
     return caps_data->energy_value;
 }

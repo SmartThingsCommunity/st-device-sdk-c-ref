@@ -183,9 +183,11 @@ Available Options:
 
 ## Commercialization
 
-For commercialization, refer to the following [link](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/main/doc/Commercialization_Guide).
+For commercialization, refer to the following [link](https://github.com/SmartThingsCommunity/st-device-sdk-c/blob/main/doc/Commercialization_Guide.md).
 
-If you have any issue, or want to commercialize your IoT devices using this SDK, please contact stdk@samsung.com or open new issue.
+If you have any issue, or want to commercialize your IoT devices using this SDK, please use the following contact point.
+- Commercializatioin : partners@smartthings.com
+- Technical inquiry : open new issue on Github
 
 ## License
 

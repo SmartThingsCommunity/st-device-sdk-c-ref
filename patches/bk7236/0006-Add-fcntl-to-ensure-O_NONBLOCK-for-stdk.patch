@@ -1,0 +1,18 @@
+diff --git a/components/lwip_intf_v2_1/lwip-2.1.2/port/arch/cc.h b/components/lwip_intf_v2_1/lwip-2.1.2/port/arch/cc.h
+index 2fdb2e777..09c49c7dd 100755
+--- a/components/lwip_intf_v2_1/lwip-2.1.2/port/arch/cc.h
++++ b/components/lwip_intf_v2_1/lwip-2.1.2/port/arch/cc.h
+@@ -41,6 +41,13 @@ extern "C"{
+ #include <common/bk_typedef.h>
+ #include "bk_uart.h"
+ 
++/* Include posix fcntl.h to ensure O_NONBLOCK and other fcntl flags
++ * use the same values as application code (e.g. STDK's port_net_mbedtls.c).
++ * Without this, lwip/sockets.h would define O_NONBLOCK=1, while the posix
++ * fcntl.h defines O_NONBLOCK=0x0400, causing fcntl(F_SETFL, O_NONBLOCK)
++ * to fail in _connect_with_timeout(). */
++#include <fcntl.h>
++
+ #define LWIP_NO_STDINT_H 1
+ /*
+  *   Typedefs for the types used by lwip -

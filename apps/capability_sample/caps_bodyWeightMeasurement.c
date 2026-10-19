@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "st_dev.h"
 #include "caps_bodyWeightMeasurement.h"
@@ -27,7 +28,7 @@ static double caps_bodyWeightMeasurement_get_bodyWeightMeasurement_value(caps_bo
 {
     if (!caps_data) {
         printf("caps_data is NULL\n");
-        return caps_helper_bodyWeightMeasurement.attr_bodyWeightMeasurement.min - 1;
+        return NAN;
     }
     return caps_data->bodyWeightMeasurement_value;
 }
